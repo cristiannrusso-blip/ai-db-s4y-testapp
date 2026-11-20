@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --blue: #2a8ac4;
+      --orange: #f29a1c;
+      --text-muted: #444444;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative; height: 77px; background: #fff; border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45); display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-end; padding: 0 18px 0 130px; z-index: 5;
+    }
+    .aia-header img.aia-logo { position: absolute; left: 12px; top: 2px; height: 100px; width: auto; }
+    .aia-header .fig { font-weight: 700; font-size: 19px; color: #d2b66f; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.15; }
+    .aia-header .aia { font-weight: 700; font-size: 26px; letter-spacing: -.5px; color: #1d5fa6; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.1; }
+
+    /* ========== LAYOUT / SIDEBAR ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+    .sidebar { width: 251px; flex-shrink: 0; background: #d1d5df; border-radius: 8px 8px 10px 10px; padding: 23px 0 42px; overflow: hidden; }
+    .side-section, .sidebar li[style*="uppercase"] {
+      display: flex !important; align-items: center; gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important; padding: 3px 6px 3px 4px !important; margin: 0 !important;
+      font-family: var(--font); font-size: 20px !important; font-weight: 700; letter-spacing: .3px !important;
+      text-transform: none !important; color: #000 !important; text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon, .sidebar li[style*="uppercase"]::before {
+      content: ""; width: 21px; height: 28px; border-radius: 3px; background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5); flex-shrink: 0;
+    }
+    .sidebar-nav, .sub-nav { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 15px; height: 22.5px; font-size: 14.5px; color: #0d0d0d; text-decoration: none; white-space: nowrap; }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+    .sidebar-nav li a::before { content: ""; width: 20px; height: 20px; background: url("icon075.gif") center / contain no-repeat; flex-shrink: 0; }
+    .sidebar-nav li.cat:not(.open) > a::before { background: url("icon074.gif") center / contain no-repeat; }
+    .sidebar-nav li a.globe::before { content: ""; width: 20px; height: 20px; margin: 0 1px; border: none; border-radius: 0; background: url("icon073.gif") center / contain no-repeat; box-shadow: none; }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TOPBAR / MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; background: #d1d5df; border-radius: 8px; height: 50px; padding: 0 12px 0 13px; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email { font-weight: 700; font-size: 19px; letter-spacing: -.3px; color: #000; text-shadow: 1px 1px 2px rgba(0,0,0,.35); }
+    .role-badge::after { content: " -"; }
+    .btn-logout { width: 28px; height: 28px; padding: 0; border: 0; background: url("icon_system_logout.png") center / contain no-repeat; font-size: 0; cursor: pointer; }
+    .dashboard-body { background: #fff; border-radius: 0 0 8px 8px; margin: 11px 0 0 3px; padding: 7px 6px 18px; }
+    .banca-dati-header { margin: 0 0 12px; border-bottom: 2px solid #f0a03a; }
+    .banca-dati-header h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.3px; color: var(--orange); text-shadow: 1px 1px 2px rgba(0,0,0,.35); line-height: 1.2; }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .elenco-title { background: var(--teal); color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.2px; padding: 3px 13px 4px; }
+
+    /* ========== ELENCO REFERTI ========== */
+    .table-container { background: #d1d5df; padding: 15px 13px 20px; overflow-x: auto; }
+    .filtro-table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 14px; }
+    .filtro-table td { border: 1px solid #c4c4c4; padding: 3px 6px; height: 36px; font-size: 13.5px; color: #333; }
+    .filtro-table td.lbl { background: #e8eeee; white-space: nowrap; }
+    .filtro-table input { width: 100%; height: 27px; border: 1px solid #666; padding: 0 5px; font-family: var(--font); font-size: 15px; background: #fff; }
+    .btn-filtra { display: block; margin: 0 auto; padding: 3px 7px; background: linear-gradient(#fdfdfd, #eef2f5); color: var(--blue); border: 1px solid #c6d2dc; border-radius: 4px; font-family: var(--font); font-weight: 700; font-size: 14px; cursor: pointer; }
+    .yellow-bar { background: #fff3a8; border: 1px solid #efd060; padding: 2px 5px; font-size: 12px; font-weight: 700; color: #222; }
+    .yellow-bar.center { text-align: center; padding: 3px 5px; margin-bottom: 12px; }
+    .yellow-bar b.blue { color: #1d3fd0; }
+    .ref-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; color: #333; }
+    .ref-table thead th { background: #e8eeee; border: 1px solid #aab0bc; color: #000; font-weight: 700; padding: 6px 22px 7px 7px; text-align: center; position: relative; cursor: pointer; user-select: none; white-space: nowrap; }
+    .ref-table thead th .si { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; font-size: 7px; line-height: 7px; color: #444; }
+    .ref-table thead th.on .si { color: #d97706; }
+    .ref-table tbody td { border: 1px solid #b6bbc6; padding: 5px 7px; vertical-align: top; line-height: 1.2; background: #fff; }
+    .ref-table tbody td.mid { vertical-align: middle; text-align: center; }
+    .ref-table tbody td.vuoto { text-align: center; color: #555; height: 34px; vertical-align: middle; }
+    .acts { display: inline-flex; gap: 3px; align-items: center; justify-content: center; }
+    .ibtn { display: inline-flex; align-items: center; justify-content: center; min-width: 33px; height: 31px; padding: 2px 4px; background: linear-gradient(#fdfdfd, #eceff2); border: 1px solid #c2cad2; border-radius: 4px; cursor: pointer; }
+    .ibtn:hover { background: #fff; }
+    .ibtn img { width: 22px; height: 22px; display: block; }
+
+    /* ========== REFERTO: SCHEDA ========== */
+    .ref-box { background: #d1d5df; padding: 12px 16px 14px; }
+    .dg-table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 14px; }
+    .dg-table td { border: 1px solid #c8c8c8; padding: 2px 5px; height: 35px; font-size: 13.5px; }
+    .dg-table td.lbl { background: #e6eeee; color: #222; width: 100px; vertical-align: top; padding-top: 5px; text-transform: uppercase; }
+    .dg-table td.head { background: #e6eeee; color: #222; height: 26px; font-size: 13.5px; }
+    .dg-table input { height: 22px; background: #d4d4d4; border: 1px solid #9a9a9a; padding: 0 4px; font-family: var(--font); font-size: 13.5px; color: #222; text-transform: uppercase; }
+    .loading-box { background: #fff; border: 1px solid #cfcfcf; padding: 8px 0 8px; text-align: center; font-size: 13px; font-weight: 700; color: #333; }
+    .loading-box img { width: 56px; height: 56px; display: block; margin: 0 auto 4px; }
+    .tabs-card { background: #fff; border: 1px solid #dcdcdc; border-radius: 6px; padding: 4px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+    .orange-bar { display: flex; align-items: flex-end; gap: 3px; min-height: 43px; padding: 6px 5px 0; background: linear-gradient(#fcbd56, #f5a22a); border: 1px solid #e59a2e; border-radius: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,.45); overflow-x: auto; }
+    .wtab-btn { background: #f3f8fb; border: 0; color: var(--blue); font-family: var(--font); font-weight: 700; font-size: 14.5px; padding: 9px 15px; border-radius: 4px 4px 0 0; cursor: pointer; white-space: nowrap; }
+    .wtab-btn:hover { background: #fff; }
+    .wtab-btn.active { background: #fff; color: var(--orange); }
+    .wpane-wrap { background: #ececec; padding: 22px 24px 24px; }
+    .wpane { display: none; }
+    .sec-box { border: 1px solid #cfcfcf; background: linear-gradient(#f7f7f7, #ececec); margin-bottom: 18px; padding: 0 0 4px; }
+    .sec-box > .yellow-bar { margin: 3px 4px; }
+    .sec-head { background: #e4eeee; color: #000; font-size: 17px; font-weight: 700; padding: 6px 6px 7px; border-bottom: 1px solid #d3dede; }
+    .opt-card { margin: 3px 4px; padding: 7px 10px 8px; background: linear-gradient(#fff, #f4f4f4); border: 1px solid #d6d6d6; cursor: pointer; }
+    .opt-card:hover { border-color: #f0b030; }
+    .opt-title { font-size: 17px; color: var(--blue); line-height: 1.15; }
+    .opt-desc { font-size: 11.5px; font-weight: 700; color: #111; margin-top: 1px; }
+    .opt-card.sel { border-color: #f0b030; background: linear-gradient(#fffdf6, #fff7e6); }
+    .opt-card.sel .opt-title { color: var(--orange); }
+    .sec-box textarea { display: block; width: calc(100% - 8px); margin: 4px; height: 82px; border: 2px solid #000; padding: 4px; font-family: var(--font); font-size: 12px; resize: vertical; background: #fff; }
+    .ref-footer { display: flex; align-items: stretch; justify-content: space-between; background: #fff; border: 1px solid #d3d6dd; padding: 3px; margin-top: 12px; gap: 0; }
+    .fgroup { display: flex; gap: 4px; align-items: center; padding: 0 8px; min-width: 96px; }
+    .fgroup.mid { flex: 1; justify-content: space-around; border-left: 1px solid #d6d6d6; border-right: 1px solid #d6d6d6; padding: 0; }
+    .fgroup.mid .sub { display: flex; gap: 4px; flex: 1; justify-content: center; border-right: 1px solid #d6d6d6; align-self: stretch; align-items: center; }
+    .fgroup.mid .sub:last-child { border-right: 0; }
+    .fgroup.end { justify-content: flex-end; }
+    .fbtn { width: 70px; height: 47px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: linear-gradient(#fdfdfd, #ebeef1); border: 1px solid #cdd3da; border-radius: 3px; cursor: pointer; padding: 2px; }
+    .fbtn img { width: 27px; height: 27px; display: block; }
+    .fbtn span { font-size: 10.5px; font-weight: 700; color: var(--blue); line-height: 1; }
+    .fbtn:hover { background: #fff; }
+
+    /* controlli dentro le schede */
+    .wpane select, .wpane input[type=text], .wpane textarea, .popup-body select, .popup-body input[type=text] { font-family: var(--font); font-size: 11.5px; border: 1px solid #222; background: #fff; color: #000; }
+    .wpane select, .popup-body select { height: 21px; padding: 0 1px; }
+    .wpane input[type=text] { height: 21px; padding: 0 3px; }
+    .wpane textarea { padding: 3px; }
+    .wpane input:disabled, .wpane select:disabled, .wpane textarea:disabled { background: #e6e6e6; color: #333; border-color: #8f8f8f; opacity: 1; }
+    .ro .opt-card { pointer-events: none; }
+    .ro .opt-card:not(.sel) { opacity: .75; }
+    .ro .edit-only { display: none !important; }
+    .tiny-btn { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px 3px 5px; background: linear-gradient(#fdfdfd, #eceff2); border: 1px solid #c8d0d8; border-radius: 3px; color: var(--blue); font-family: var(--font); font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+    .tiny-btn img { width: 15px; height: 15px; }
+    .tiny-btn.n { text-transform: none; font-size: 11px; }
+    .tiny-btn:hover { background: #fff; }
+    .gray-bar { background: #cfcfcf; padding: 3px 4px; display: flex; justify-content: flex-end; gap: 3px; min-height: 26px; }
+
+    /* Liste gara */
+    .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+    .team-head { background: #e4eeee; font-size: 17px; font-weight: 700; padding: 6px 6px 7px; border: 1px solid #d3dede; display: flex; justify-content: space-between; align-items: center; }
+    .team-head .big { font-size: 22px; }
+    .team-btns { display: flex; justify-content: space-between; padding: 3px 4px 6px; background: #f4f4f4; border: 1px solid #d3d3d3; border-top: 0; }
+    .lst-title { margin: 8px 3px 3px; }
+    .slot { display: flex; flex-direction: column; gap: 2px; padding: 2px 3px 2px 3px; border-left: 3px solid #d90000; background: #fff; border-bottom: 1px solid #d9d9d9; margin: 0 3px; }
+    .slot.ok { border-left-color: #1db000; }
+    .slot .l1, .slot .l2 { display: flex; gap: 3px; }
+    .slot .l1 select.num { width: 40px; }
+    .slot .l1 select.pers { flex: 1; min-width: 0; }
+    .slot .l1 select.cap { width: 54px; }
+    .slot .l1 select.rdir { width: 116px; }
+    .slot .l2 select { width: 120px; }
+    .slot .l2 input { width: 120px; }
+
+    /* Durata / Reti / Sostituzioni / Disciplina */
+    .big-row { display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 8px; border: 1px solid #d3d3d3; background: #fff; }
+    .big-row .a { flex: 1; background: #e4eeee; font-size: 17px; font-weight: 700; padding: 8px 6px; }
+    .big-row .b { width: 126px; text-align: center; font-size: 17px; font-weight: 700; padding: 8px 6px; }
+    .right-btns { display: flex; justify-content: flex-end; gap: 2px; margin: 2px 0; }
+    .dur-row { display: grid; grid-template-columns: 26px 1fr 112px 57px 57px; border-left: 3px solid #d90000; background: #fff; border-bottom: 1px solid #d9d9d9; margin: 0 3px; align-items: stretch; }
+    .dur-row.ok { border-left-color: #1db000; }
+    .dur-row > div { padding: 4px 4px; }
+    .dur-row .dx { text-align: center; padding: 4px 1px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .dur-row .dx img { width: 16px; height: 16px; cursor: pointer; }
+    .dur-row .dm select { width: 100%; display: block; margin-bottom: 1px; }
+    .dur-row .dm textarea { width: 100%; height: 25px; display: block; resize: vertical; }
+    .dur-row .dmin { font-size: 11px; color: #333; display: flex; align-items: flex-start; gap: 3px; padding-top: 6px; }
+    .dur-row .dmin input { width: 40px; text-align: right; }
+    .dur-row .dt { font-size: 14px; font-weight: 700; text-align: center; border-left: 1px solid #ddd; padding-top: 6px; }
+    .grip { cursor: grab; color: #777; font-size: 13px; user-select: none; }
+    .dur-row.dragging { opacity: .45; }
+    .dur-row.over { box-shadow: 0 -3px 0 #2563eb; }
+    .rete-row { display: grid; grid-template-columns: 26px 160px 160px 1fr; gap: 6px; align-items: center; border-left: 3px solid #d90000; background: #fff; border-bottom: 1px solid #d9d9d9; margin: 0 3px; padding: 4px 4px 4px 2px; }
+    .rete-row.ok { border-left-color: #1db000; }
+    .rete-row img.del { width: 16px; height: 16px; cursor: pointer; }
+    .rete-row select { width: 100%; }
+    .rete-row label { font-size: 11px; display: flex; align-items: center; gap: 3px; justify-self: end; margin-right: 3px; }
+    .rig-row { display: grid; grid-template-columns: 34px 1fr; gap: 6px; padding: 4px 6px; background: #fff; border-bottom: 1px solid #d9d9d9; margin: 0 3px; font-size: 12px; align-items: center; }
+    .acc { border: 1px solid #d0d0d0; background: linear-gradient(#fff, #f3f3f3); margin-bottom: 4px; }
+    .acc-h { padding: 7px 10px; font-size: 11.5px; font-weight: 700; color: var(--blue); text-transform: uppercase; cursor: pointer; display: flex; gap: 8px; align-items: center; }
+    .acc-h::before { content: "\25B8"; color: var(--orange); font-size: 10px; }
+    .acc.open { border-color: #f0b030; }
+    .acc.open .acc-h { color: var(--orange); }
+    .acc.open .acc-h::before { content: "\25BE"; }
+    .acc-b { display: none; padding: 6px 14px 14px; }
+    .acc.open .acc-b { display: block; }
+    .prov { border-left: 3px solid #d90000; background: #fff; margin: 0 3px; border-bottom: 1px solid #d9d9d9; padding: 3px 4px 4px 2px; display: grid; grid-template-columns: 24px 1fr; gap: 4px; }
+    .prov.ok { border-left-color: #1db000; }
+    .prov img.del { width: 16px; height: 16px; cursor: pointer; margin: 3px 2px; }
+    .prov .pr1 { display: flex; gap: 3px; margin-bottom: 2px; }
+    .prov .pr1 select { flex: 1; min-width: 0; }
+    .prov .pr1 select.t, .prov .pr1 select.m { flex: 0 0 82px; }
+    .prov select.mot, .prov textarea { width: 100%; display: block; margin-bottom: 2px; }
+    .prov textarea { height: 44px; resize: vertical; }
+    .sost-row { display: grid; grid-template-columns: 24px 82px 82px 1fr 1fr; gap: 4px; background: #fff; border-left: 3px solid #d90000; border-bottom: 1px solid #d9d9d9; margin: 0 3px; padding: 2px 4px 4px 2px; align-items: end; }
+    .sost-row.ok { border-left-color: #1db000; }
+    .sost-row small { display: block; font-size: 9.5px; font-weight: 700; color: #444; text-transform: uppercase; }
+    .sost-row select { width: 100%; }
+    .sost-row img.del { width: 16px; height: 16px; cursor: pointer; margin-bottom: 3px; }
+    .off-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 12px; margin: 4px 0 8px; }
+    .off-table th, .off-table td { border: 1px solid #c8c8c8; padding: 3px 5px; text-align: left; }
+    .off-table th { background: #fff; font-weight: 700; font-size: 11.5px; }
+    .red-bar { background: #c0281d; color: #fff; font-size: 11.5px; font-weight: 700; padding: 5px 6px; margin: 8px 4px; border: 1px solid #8f1a12; }
+    .rap-btn { display: inline-flex; align-items: center; gap: 6px; padding: 2px 14px; background: linear-gradient(#fdfdfd, #eceff2); border: 1px solid #c8d0d8; border-radius: 3px; color: var(--blue); font-family: var(--font); font-size: 11px; font-weight: 700; cursor: pointer; }
+    .dot { width: 15px; height: 15px; border-radius: 50%; display: inline-block; }
+    .dot.g { background: url("light_green.png") center / contain no-repeat; }
+    .dot.y { background: radial-gradient(circle at 38% 30%, #ffe9a0, #f5a30b 55%, #a8660a); border: 1px solid #9a6a10; }
+    .dot.r { background: radial-gradient(circle at 38% 30%, #ffb3ab, #e0231a 55%, #8f0f09); border: 1px solid #8f0f09; }
+    .all-row { display: grid; grid-template-columns: 26px 150px 190px 1fr 220px; gap: 4px; align-items: start; background: #fff; border-bottom: 1px solid #d9d9d9; margin: 0 3px; padding: 4px; }
+    .all-row textarea { width: 100%; height: 40px; resize: vertical; }
+    .all-row select { width: 100%; }
+    .all-row img.del { width: 16px; height: 16px; cursor: pointer; margin-top: 3px; }
+
+    /* ========== POPUP ========== */
+    .modal-overlay { display: none; position: fixed; inset: 0; align-items: center; justify-content: center; padding: 16px; background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px), rgba(42, 80, 99, .72); }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card { position: relative; width: 100%; max-width: 884px; background: #f4f4f4; border: 1px solid #cfcfcf; border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.5); overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 32px); padding: 3px 3px 0; }
+    .designation-header-bar { background: linear-gradient(#fbb548, #f39c1f); border: 1px solid #e58f14; border-radius: 4px; color: #fff; padding: 7px 16px 7px 18px; font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .designation-header-bar button { background: none; border: none; color: #fff; font-size: 22px; font-weight: 700; cursor: pointer; line-height: 1; padding: 0; }
+    .designation-body-content { padding: 16px 18px 12px; overflow-y: auto; background: linear-gradient(#fdfdfd, #f2f2f2); font-size: 14px; line-height: 21px; color: #000; }
+    .designation-footer-bar { padding: 12px 24px 12px; background: #f4f4f4; border-top: 1px solid #dcdcdc; display: flex; justify-content: flex-end; gap: 8px; }
+    .btn-secondary, .btn-success { font-family: var(--font); font-size: 15px; font-weight: 700; border-radius: 4px; cursor: pointer; padding: 7px 16px; }
+    .btn-secondary { background: #fff; color: var(--blue); border: 1px solid #d3dbe3; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .btn-secondary:hover { background: #f1f7fb; }
+    .btn-success { background: #3f9a2a; color: #fff; border: 1px solid #2f7a1d; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+    .designation-modal-card.resizable::after { content: ""; position: absolute; right: 4px; bottom: 4px; width: 12px; height: 12px; background: linear-gradient(135deg, transparent 0 45%, #8a8a8a 45% 55%, transparent 55% 70%, #8a8a8a 70% 80%, transparent 80%); pointer-events: none; }
+    .m-narrow { max-width: 480px; }
+    .m-mid { max-width: 680px; }
+    .popup-body .pt { background: #e4eeee; font-size: 17px; font-weight: 700; padding: 5px 6px; border: 1px solid #d3dede; margin-bottom: 0; }
+    .popup-body table { width: 100%; border-collapse: collapse; background: #fff; font-size: 11.5px; }
+    .popup-body td, .popup-body th { border: 1px solid #c8c8c8; padding: 2px 5px; height: 23px; text-align: left; vertical-align: middle; }
+    .popup-body th { background: #fff; font-weight: 700; width: 130px; }
+    .popup-body input[type=text] { width: 160px; height: 18px; }
+    .popup-body select { width: 160px; }
+    .popup-body .area { background: #c9c9c9; border: 1px solid #8f8f8f; min-height: 110px; padding: 6px; font-size: 11px; white-space: pre-wrap; text-transform: uppercase; }
+
+    /* ========== TOAST / FOOTER ========== */
+    .toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px); background: #244658; color: #fff; font-size: 15px; padding: 10px 20px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 5000; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .aia-footer { position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: calc(100% - 16px); max-width: 1250px; background: #333; border-radius: 9px 9px 0 0; box-shadow: 0 -1px 5px rgba(0,0,0,.5); padding: 7px 12px 6px; display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 10; }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge { display: flex; align-items: center; gap: 4px; background: #f4f4f4; color: #666; font-family: Arial, Helvetica, sans-serif; font-size: 22px; padding: 2px 8px 2px 4px; }
+    .aia-footer .chrome-badge i { width: 28px; height: 28px; border-radius: 50%; background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0); position: relative; display: inline-block; }
+    .aia-footer .chrome-badge i::after { content: ""; position: absolute; inset: 7px; background: #4285f4; border: 2px solid #fff; border-radius: 50%; }
+
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .cols2 { grid-template-columns: 1fr; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li></ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav"><li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav"><li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li></ul>
+          </li>
+        </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header"><h3>Gestione Referti</h3></div>
+
+          <!-- ============ ELENCO ============ -->
+          <div id="view-elenco" class="box-wrap">
+            <div class="elenco-title">Referti Da Compilare</div>
+            <div class="table-container">
+              <table class="filtro-table">
+                <tr>
+                  <td class="lbl" style="width:78px;"><b>FILTRO</b></td>
+                  <td class="lbl" style="width:90px;">Da Data:</td>
+                  <td style="width:230px;"><input type="text" id="filtro-da" maxlength="10" placeholder="gg/mm/aaaa"></td>
+                  <td class="lbl" style="width:70px; text-align:right;">A Data:</td>
+                  <td style="width:230px;"><input type="text" id="filtro-a" maxlength="10" placeholder="gg/mm/aaaa"></td>
+                  <td style="width:90px;"><button type="button" class="btn-filtra" onclick="applicaFiltro()">FILTRA</button></td>
+                </tr>
+              </table>
+              <div class="yellow-bar center">ATTENZIONE: L'elenco visualizza solo le gare ACCETTATE.</div>
+              <table class="ref-table">
+                <thead>
+                  <tr id="ref-head">
+                    <th data-col="data" style="width:12%;">Data<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="att" style="width:8%;">Att.<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="cat" style="width:12%;">Categoria<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="gara">Gara<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="num" style="width:12%;">Numero<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="azioni" style="width:14%;">Azioni<span class="si"><i>▲</i><i>▼</i></span></th>
+                  </tr>
+                </thead>
+                <tbody id="table-referti-body">
+                  <tr><td colspan="6" class="vuoto">Caricamento gare accettate...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ============ REFERTO ARBITRO ============ -->
+          <div id="view-wizard" class="box-wrap" style="display:none;">
+            <div class="elenco-title" id="wizard-sub-bar">Inserimento Referto</div>
+            <div class="ref-box">
+              <table class="dg-table">
+                <tr><td class="head" colspan="6">DATI GARA</td></tr>
+                <tr>
+                  <td class="lbl">Categoria</td>
+                  <td colspan="3"><input type="text" id="w-cat" disabled style="width:375px;"></td>
+                  <td class="lbl" style="width:90px;">Girone</td>
+                  <td><input type="text" id="w-gir" disabled style="width:66px;"></td>
+                </tr>
+                <tr>
+                  <td class="lbl">Sq. Casa</td>
+                  <td style="width:230px;"><input type="text" id="w-casa" disabled style="width:186px;"></td>
+                  <td class="lbl" style="width:90px;">Sq. Fuori</td>
+                  <td style="width:200px;"><input type="text" id="w-fuori" disabled style="width:188px;"></td>
+                  <td class="lbl">Data/Ora</td>
+                  <td><input type="text" id="w-data" disabled style="width:124px;"> <input type="text" id="w-ora" disabled style="width:62px;"></td>
+                </tr>
+                <tr>
+                  <td class="lbl">Localita</td>
+                  <td colspan="2"><input type="text" id="w-loc" disabled style="width:188px;"></td>
+                  <td class="lbl" style="text-align:left;">Impianto</td>
+                  <td colspan="2"><input type="text" id="w-impianto" disabled style="width:188px;"></td>
+                </tr>
+              </table>
+
+              <div id="wizard-loading" class="loading-box">
+                <img src="spinner.gif" alt="">
+                CARICAMENTO DATI IN CORSO, ATTENDERE PREGO...
+              </div>
+
+              <div id="wizard-main" style="display:none;">
+                <div class="tabs-card">
+                  <div class="orange-bar" id="wtabs-bar"></div>
+                  <div class="wpane-wrap" id="wizard-body">
+
+                    <!-- 1. SVOLGIMENTO -->
+                    <div id="wtab-svolgimento" class="wpane">
+                      <div class="sec-box">
+                        <div class="sec-head">Svolgimento della Gara</div>
+                        <div class="yellow-bar">Seleziona la voce che meglio descrive lo svolgimento della gara.</div>
+                        <div id="cards-svolgimento"></div>
+                      </div>
+                      <div class="sec-box">
+                        <div class="sec-head" style="font-size:12px;">Note sullo Svolgimento della Gara</div>
+                        <div class="yellow-bar">[<b class="blue" id="cnt-note-svolgimento">2000</b> Caratteri Rimanenti] Non è possibile andare a capo.</div>
+                        <textarea id="note-svolgimento" maxlength="2000" placeholder="Descrivi eventuali situazioni relative allo Svolgimento della Gara..."></textarea>
+                      </div>
+                    </div>
+
+                    <!-- 2. SICUREZZA -->
+                    <div id="wtab-sicurezza" class="wpane">
+                      <div class="sec-box">
+                        <div class="sec-head">Misure d'Ordine</div>
+                        <div class="yellow-bar">Seleziona la voce che meglio descrive le Misure d'Ordine adottate per la Gara.</div>
+                        <div id="cards-ordine"></div>
+                      </div>
+                      <div class="sec-box">
+                        <div class="sec-head">Ambulanza</div>
+                        <div class="yellow-bar">Seleziona la voce che meglio descrive la Presenza di Ambulanze durante la Gara.</div>
+                        <div id="cards-ambulanza"></div>
+                      </div>
+                      <div class="sec-box">
+                        <div class="sec-head" style="font-size:12px;">Note sulle Misure d'Ordine e l'Ambulanza</div>
+                        <div class="yellow-bar">[<b class="blue" id="cnt-note-sicurezza">2000</b> Caratteri Rimanenti] Non è possibile andare a capo.</div>
+                        <textarea id="note-sicurezza" maxlength="2000" placeholder="Descrivi eventuali situazioni relative alle Misure d'Ordine..."></textarea>
+                      </div>
+                    </div>
+
+                    <!-- 3. LISTE GARA -->
+                    <div id="wtab-liste" class="wpane"><div id="liste-ui"></div></div>
+
+                    <!-- 4. DURATA -->
+                    <div id="wtab-durata" class="wpane"><div id="durata-ui"></div></div>
+
+                    <!-- 5. RETI -->
+                    <div id="wtab-reti" class="wpane"><div id="reti-ui"></div></div>
+
+                    <!-- 6. DISCIPLINA -->
+                    <div id="wtab-disciplina" class="wpane"><div id="disciplina-ui"></div></div>
+
+                    <!-- 7. SOSTITUZIONI -->
+                    <div id="wtab-sostituzioni" class="wpane"><div id="sostituzioni-ui"></div></div>
+
+                    <!-- 8. NOTE -->
+                    <div id="wtab-note" class="wpane">
+                      <div class="sec-box">
+                        <div class="sec-head" style="font-size:12px;">Note sul Pubblico ed eventuali Incidenti</div>
+                        <div class="yellow-bar">[<b class="blue" id="cnt-note-pubblico">4000</b> Caratteri Rimanenti] Non è possibile andare a capo.</div>
+                        <textarea id="note-pubblico" maxlength="4000" style="height:110px;" placeholder="Descrivi eventuali situazioni o incidenti che hanno coinvolto il Pubblico..."></textarea>
+                      </div>
+                      <div class="sec-box">
+                        <div class="sec-head" style="font-size:12px;">Note Varie ed Eventuali</div>
+                        <div class="yellow-bar">[<b class="blue" id="cnt-note-varie">4000</b> Caratteri Rimanenti] Non è possibile andare a capo.</div>
+                        <textarea id="note-varie" maxlength="4000" style="height:110px;" placeholder="Per quanto non specificato altrove (eventuali osservazioni sul terreno di gioco, spogliatoi, ecc.)..."></textarea>
+                      </div>
+                    </div>
+
+                    <!-- 9. ALLEGATI -->
+                    <div id="wtab-allegati" class="wpane"><div id="allegati-ui"></div></div>
+
+                  </div>
+                </div>
+                <div class="ref-footer" id="wizard-footer"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ============ RAPPORTO ASSISTENTE ============ -->
+          <div id="view-assistente" class="box-wrap" style="display:none;">
+            <div class="elenco-title" id="asst-sub-title">Rapporto Assistente dell'arbitro</div>
+            <div class="ref-box">
+              <div id="asst-banner" class="yellow-bar center" style="display:none; background:#c8f0c8; border-color:#5fb85f;">Questo rapporto è già stato confermato dall'Arbitro ed è disponibile in sola consultazione.</div>
+              <div class="sec-box" style="background:#fff;">
+                <div class="sec-head">Ufficiali di Gara Designati</div>
+                <table class="off-table">
+                  <thead><tr><th>CodMec</th><th>Nome</th><th>Cognome</th><th>Sezione</th><th>Ruolo</th><th>Recapito</th></tr></thead>
+                  <tbody id="asst-table-ufficiali"></tbody>
+                </table>
+              </div>
+              <div class="sec-box">
+                <div class="sec-head">Segnalazione Assistente</div>
+                <div style="padding:4px;" class="wpane" id="asst-pane-wrap" style="display:block;">
+                  <select id="asst-segnalazione-tipo" style="width:100%; height:23px;">
+                    <option value="niente">NIENTE DA SEGNALARE</option>
+                    <option value="segnalazioni">SEGNALAZIONI EFFETTUATE</option>
+                  </select>
+                </div>
+              </div>
+              <div class="sec-box">
+                <div class="sec-head" style="font-size:12px;">Note Referto Ufficiali di Gara</div>
+                <div class="yellow-bar">[<b class="blue" id="cnt-asst-note">2000</b> Caratteri Rimanenti] Non è possibile andare a capo.</div>
+                <textarea id="asst-note-testo" maxlength="2000" placeholder="Indicare eventuali Fatti da Segnalare all'Arbitro..."></textarea>
+              </div>
+              <div class="ref-footer">
+                <div class="fgroup"><button type="button" class="fbtn" onclick="chiudiWizard()"><img src="icon_del.png" alt=""><span>Esci</span></button></div>
+                <div class="fgroup end"><button type="button" class="fbtn" id="btn-invia-assistente" onclick="inviaRefertoAssistente()"><img src="icon_posta_active.png" alt=""><span>Invia all'Arbitro</span></button></div>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: AGGIUNGI TESSERATO -->
+  <div id="modal-add-persona" class="modal-overlay" style="z-index:3500;">
+    <div class="designation-modal-card m-narrow resizable">
+      <div class="designation-header-bar"><span>Aggiungi Tesserato</span><button type="button" onclick="chiudiModal('modal-add-persona')">&times;</button></div>
+      <div class="designation-body-content popup-body" style="min-height:300px;">
+        <div class="pt" id="add-squadra-nome">-</div>
+        <table>
+          <tr><th>Matricola:</th><td><input type="text" id="add-matricola" maxlength="12"></td></tr>
+          <tr><th>Cognome *:</th><td><input type="text" id="add-cognome" maxlength="255"></td></tr>
+          <tr><th>Nome *:</th><td><input type="text" id="add-nome" maxlength="255"></td></tr>
+          <tr><th>Data di Nascita *:</th><td><input type="text" id="add-ddn" maxlength="10" placeholder="gg/mm/aaaa"> <label style="font-size:11px;"><input type="checkbox" id="add-ddn-fix" onchange="toggleDdnSconosciuta()"> Sconosciuta</label></td></tr>
+          <tr><th>Luogo di Nascita :</th><td><input type="text" id="add-luogo" maxlength="255"></td></tr>
+          <tr><th>Sesso * :</th><td><select id="add-sesso"><option value="MASCHILE">MASCHILE</option><option value="FEMMINILE">FEMMINILE</option></select></td></tr>
+          <tr><th>Cod. Fisc.:</th><td><input type="text" id="add-codfisc" maxlength="16"></td></tr>
+        </table>
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="confermaAddPersona()">Conferma</button>
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-add-persona')">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: RIMUOVI TESSERATO -->
+  <div id="modal-del-persona" class="modal-overlay" style="z-index:3500;">
+    <div class="designation-modal-card m-narrow resizable">
+      <div class="designation-header-bar"><span>Rimuovi Tesserato</span><button type="button" onclick="chiudiModal('modal-del-persona')">&times;</button></div>
+      <div class="designation-body-content popup-body" style="min-height:300px;">
+        <div class="pt" id="del-squadra-nome">-</div>
+        <table>
+          <tr><th style="width:70px;">Persone:</th><td><select id="del-persona" style="width:100%;"></select></td></tr>
+          <tr><th>Conferma:</th><td><label style="font-size:11px;"><input type="checkbox" id="del-confirm"> <b>CONFERMO</b> di voler STORICIZZARE la Persona Selezionata.</label></td></tr>
+          <tr><th>Note:</th><td style="font-size:11px; line-height:1.25;">Questa operazione serve a storicizzare le persone inserite in modo errato o le persone non più presenti in una squadra.<br>I dati saranno conservati comunque per sicurezza e per garantire la retro-compatibilità dei referti, ma non saranno più visibili durante le operazioni di compilazione.</td></tr>
+        </table>
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="confermaDelPersona()">Conferma</button>
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-del-persona')">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: CONFERMA INVIO AL GIUDICE SPORTIVO -->
+  <div id="modal-confirm-gs" class="modal-overlay" style="z-index:3600;">
+    <div class="designation-modal-card m-narrow">
+      <div class="designation-header-bar"><span>INVIO AL GIUDICE SPORTIVO</span><button type="button" onclick="chiudiModal('modal-confirm-gs')">&times;</button></div>
+      <div class="designation-body-content" id="confirm-gs-text"></div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-success" id="btn-conferma-gs" onclick="eseguiConsegna()">Conferma</button>
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-confirm-gs')">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: MESSAGGIO GENERICO -->
+  <div id="modal-msg" class="modal-overlay" style="z-index:3700;">
+    <div class="designation-modal-card m-narrow">
+      <div class="designation-header-bar"><span id="msg-title">Informazione</span><button type="button" onclick="chiudiModal('modal-msg')">&times;</button></div>
+      <div class="designation-body-content" id="msg-text" style="min-height:70px;"></div>
+      <div class="designation-footer-bar"><button type="button" class="btn-secondary" onclick="chiudiModal('modal-msg')">OK</button></div>
+    </div>
+  </div>
+
+  <!-- POPUP: ANTEPRIMA REFERTO ASSISTENTE -->
+  <div id="modal-assistente" class="modal-overlay" style="z-index:3500;">
+    <div class="designation-modal-card m-mid resizable">
+      <div class="designation-header-bar"><span id="modal-asst-title">Anteprima Referto</span><button type="button" onclick="chiudiModal('modal-assistente')">&times;</button></div>
+      <div class="designation-body-content popup-body" id="modal-assistente-body" style="min-height:330px;"></div>
+      <div class="designation-footer-bar" id="modal-asst-footer"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE01</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+<script type="module">
+  import { auth, db } from './firebase-config.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { collection, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // =====================================================================
+  //  COSTANTI
+  // =====================================================================
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const TABS = ['svolgimento', 'sicurezza', 'liste', 'durata', 'reti', 'disciplina', 'sostituzioni', 'note', 'allegati'];
+  const TAB_LABEL = { svolgimento: 'Svolgimento', sicurezza: 'Sicurezza', liste: 'Liste Gara', durata: 'Durata', reti: 'Reti', disciplina: 'Disciplina', sostituzioni: 'Sostituzioni', note: 'Note', allegati: 'Allegati' };
+
+  const SVOLG = [
+    { val: 'Disputata Regolarmente', d: 'La gara è iniziata, non ha avuto sospensioni e si è conclusa regolarmente.' },
+    { val: 'Disputata Con Sospensioni', d: 'La gara è iniziata, ci sono state una o più sospensioni significative ma si è conclusa regolarmente.' },
+    { val: 'Sospesa', d: 'La gara è iniziata, è stata sospesa per cause non imputabili a nessuno e non si è conclusa.' },
+    { val: 'Sospesa per Incidenti', d: 'La gara è iniziata, è stata sospesa per cause imputabili a soggetti precisi e non si è conclusa.' },
+    { val: 'Pro Forma', d: 'La gara è iniziata, è stata sospesa e si è conclusa pro-forma.' },
+    { val: 'Non Disputata', d: 'La gara non ha mai avuto inizio.' }
+  ];
+  const SVOLG_LEGACY = { 'Disputata con Sospensioni': 'Disputata Con Sospensioni', 'Conclusa Pro-Forma': 'Pro Forma', 'Non iniziata': 'Non Disputata' };
+  const ORDINE = [
+    { val: 'adeguate_con', t: 'Adeguate con Forza Pubblica', d: "Le Misure d'Ordine erano adeguate al livello della Competizione. La Società Ospitante ha esibito la richiesta di Forza Pubblica." },
+    { val: 'adeguate_senza', t: 'Adeguate senza Forza Pubblica', d: "Le Misure d'Ordine erano adeguate al livello della Competizione. La Società Ospitante NON ha esibito la richiesta di Forza Pubblica." },
+    { val: 'non_adeguate_con', t: 'Inadeguate con Forza Pubblica', d: "Le Misure d'Ordine NON erano adeguate al livello della Competizione. La Società Ospitante ha esibito la richiesta di Forza Pubblica." },
+    { val: 'non_adeguate_senza', t: 'Inadeguate senza Forza Pubblica', d: "Le Misure d'Ordine NON erano adeguate al livello della Competizione. La Società Ospitante NON ha esibito la richiesta di Forza Pubblica." }
+  ];
+  const AMBUL = [
+    { val: 'presente', t: 'Presente', d: 'Una o più Ambulanze erano presenti e specificatamente in servizio per la Gara.' },
+    { val: 'non_presente', t: 'NON Presente', d: 'Nessuna Ambulanza specificatamente in servizio era presente durante la Gara.' }
+  ];
+  const DOC_TIPI = ["Carta d'Identità", 'Patente', 'Passaporto', 'Fotografia Autenticata', 'Tessera Federale / Lega / SGS', 'Conoscenza Personale', 'Altro Documento'];
+  const RUOLI_DIR = ['Dirigente Responsabile', 'Medico', 'Allenatore', 'Massaggiatore', "Addetto all'Arbitro", 'Assistente di Parte', 'Allenatore in Seconda', 'Preparatore dei Portieri', 'Preparatore Atletico', 'Dirigente (Altro)'];
+
+  const MOT_INIB = ["INIBIZIONE - Il Calciatore/Dirigente è stato Espulso prima del Calcio d'Inizio della Gara"];
+  const MOT_AMM_C = [
+    "COMPORTAMENTO ANTISPORTIVO - Commette in modo imprudente un Fallo",
+    "COMPORTAMENTO ANTISPORTIVO - Commette un Fallo per interrompere una promettente azione d'attacco avversaria",
+    "COMPORTAMENTO ANTISPORTIVO - Entra, rientra o esce intenzionalmente dal Terreno di Gioco senza la preventiva autorizzazione dell'Arbitro",
+    "COMPORTAMENTO ANTISPORTIVO - Gioca il pallone dopo aver ricevuto l'autorizzazione dell'Arbitro a lasciare il Terreno di Gioco",
+    "COMPORTAMENTO ANTISPORTIVO - Mostra una mancanza di rispetto nei riguardi dello spirito del Gioco",
+    "COMPORTAMENTO ANTISPORTIVO - Scambia il Ruolo con il Portiere con il gioco in svolgimento o senza l'autorizzazione dell'Arbitro",
+    "COMPORTAMENTO ANTISPORTIVO - Si appoggia sulle spalle di un compagno per saltare più in alto",
+    "COMPORTAMENTO ANTISPORTIVO - Si rifiuta di uscire dal Terreno di Gioco dopo aver ricevuto le cure mediche",
+    "COMPORTAMENTO ANTISPORTIVO - Tenta di ingannare l'Arbitro fingendo un infortunio o di aver subito un Fallo (Simulazione)",
+    "COMPORTAMENTO ANTISPORTIVO - Tocca intenzionalmente il pallone con la mano nel tentativo di segnare o di evitare la segnatura di una rete",
+    "COMPORTAMENTO ANTISPORTIVO - Tocca intenzionalmente il pallone con le mani per interferire con o interrompere una promettente azione d'attacco",
+    "COMPORTAMENTO ANTISPORTIVO - Traccia dei segni non autorizzati sul Terreno di Gioco",
+    "COMPORTAMENTO ANTISPORTIVO - Trattiene prolungatamente il Pallone tra gli arti inferiori con lo scopo di impedire agli avversari di giocarlo",
+    "COMPORTAMENTO ANTISPORTIVO - Trattiene un avversario per allontanarlo dal Pallone o di impedirgli di entrarne in possesso",
+    "COMPORTAMENTO ANTISPORTIVO - Usa deliberatamente un espediente per passare il Pallone al proprio Portiere",
+    "DOGSO - Commette un'infrazione nella propria area di rigore nel tentativo di giocare il pallone negando un'evidente opportunità di segnare una rete ad un avversario",
+    "PROTESTE - Protesta con parole o gesti nei confronti degli Ufficiali di Gara",
+    "RIPRESA DEL GIOCO - Ritarda la ripresa del Gioco",
+    "DISTANZA REGOLAMENTARE - Non rispetta la distanza prescritta durante l'esecuzione di una ripresa del Gioco",
+    "SEGNATURA DI UNA RETE - Compie gesti che sono provocatori o derisori",
+    "SEGNATURA DI UNA RETE - Si avvicina agli spettatori in un modo che causa problemi di sicurezza e/o per l'incolumità e/o si arrampica sulla recinzione",
+    "SEGNATURA DI UNA RETE - Si copre la propria testa o il proprio volto con una maschera (o un altro oggetto simile)",
+    "SEGNATURA DI UNA RETE - Si toglie la maglia o si copre la testa con la maglia",
+    "EQUIPAGGIAMENTO - Si rifiuta di attenersi alle disposizioni o indossa di nuovo un oggetto non autorizzato",
+    "LANCIO DI OGGETTI - Lancia un oggetto o il Pallone con imprudenza",
+    "CALCIO DI RIGORE - Commette un'infrazione durante l'esecuzione di un Calcio di Rigore",
+    "VAR - Entra nell'area di revisione dell'Arbitro",
+    "VAR - Ripete insistentemente il gesto della Revisione",
+    "INFRAZIONI RIPETUTE - Infrange ripetutamente le Regole del Gioco"
+  ];
+  const MOT_ESP_C = [
+    "DOPPIA AMMONIZIONE - Riceve una seconda Ammonizione nella medesima Gara",
+    "GRAVE FALLO DI GIOCO - Contrasta un avversario con uso di forza eccessiva mettendone a rischio l'incolumità fisica",
+    "DOGSO - Impedisce un'evidente opportunità di segnare una Rete ad un avversario commettendo un Fallo",
+    "DOGSO - Impedisce un'evidente opportunità di segnare una Rete avversaria toccando volontariamente il Pallone con le mani",
+    "CONDOTTA VIOLENTA - Compie falli, atti o gesti che arrechino o tendano ad arrecare un danno fisico, colpendo o tentando di colpire e/o lanciando oggetti contro chicchessia",
+    "CONDOTTA VIOLENTA - Morde o sputa a qualcuno",
+    "OFFESE - Usa un linguaggio o fa dei gesti offensivi, ingiuriosi o minacciosi",
+    "VAR - Entra nella Sala Operativa Video"
+  ];
+  // Motivi per i Dirigenti: nel portale non sono presenti nel file salvato, elenco di base da verificare
+  const MOT_AMM_D = [
+    "PROTESTE - Protesta con parole o gesti nei confronti degli Ufficiali di Gara",
+    "COMPORTAMENTO ANTISPORTIVO - Mostra una mancanza di rispetto nei riguardi dello spirito del Gioco",
+    "RIPRESA DEL GIOCO - Ritarda la ripresa del Gioco",
+    "INFRAZIONI RIPETUTE - Infrange ripetutamente le Regole del Gioco"
+  ];
+  const MOT_ESP_D = [
+    "DOPPIA AMMONIZIONE - Riceve una seconda Ammonizione nella medesima Gara",
+    "CONDOTTA VIOLENTA - Compie falli, atti o gesti che arrechino o tendano ad arrecare un danno fisico, colpendo o tentando di colpire e/o lanciando oggetti contro chicchessia",
+    "OFFESE - Usa un linguaggio o fa dei gesti offensivi, ingiuriosi o minacciosi",
+    "LANCIO DI OGGETTI - Lancia un oggetto o il Pallone con imprudenza"
+  ];
+  const DISC_PANELS = [
+    { key: 'inibizione', t: 'INIBIZIONE', tipo: 'inibizione', sogg: 'calciatore', desc: "Provvedimenti Disciplinari a carico di Calciatori Titolari o di Riserva PRIMA del Calcio d'Inizio della Gara", mot: MOT_INIB, tm: false },
+    { key: 'amm_c', t: 'AMMONIZIONE CALCIATORI', tipo: 'ammonizione', sogg: 'calciatore', desc: 'Provvedimenti Disciplinari a carico di Calciatori Titolari o di Riserva durante la Gara', mot: MOT_AMM_C, tm: true },
+    { key: 'esp_c', t: 'ESPULSIONE CALCIATORI', tipo: 'espulsione', sogg: 'calciatore', desc: 'Provvedimenti Disciplinari a carico di Calciatori Titolari o di Riserva durante la Gara', mot: MOT_ESP_C, tm: true },
+    { key: 'amm_d', t: 'AMMONIZIONE DIRIGENTI', tipo: 'ammonizione', sogg: 'dirigente', desc: 'Provvedimenti Disciplinari a carico di Dirigenti / Allenatori durante la Gara', mot: MOT_AMM_D, tm: true },
+    { key: 'esp_d', t: 'ESPULSIONE DIRIGENTI', tipo: 'espulsione', sogg: 'dirigente', desc: 'Provvedimenti Disciplinari a carico di Dirigenti / Allenatori durante la Gara', mot: MOT_ESP_D, tm: true },
+    { key: 'segn', t: 'SEGNALAZIONE DISCIPLINARE', tipo: 'segnalazione', sogg: 'tesserato', desc: 'Segnalazioni Disciplinari a carico di Tesserati identificati durante o dopo la Gara', mot: null, tm: false }
+  ];
+  const PER_ORDER = ['t1', 'int', 't2', 't3', 'ts1', 'ts2', 'rig'];
+  const PER_TITLE = { t1: '1 Tempo', int: 'Intervallo', t2: '2 Tempo', t3: '3 Tempo', ts1: '1 Tempo Supplementare', ts2: '2 Tempo Supplementare', rig: 'Tiri di Rigore' };
+  const EVENTI = ['Ritardo', 'Tempo di Gioco', 'Recupero Indicato', 'Recupero Aggiuntivo', 'Sospensione'];
+  const EVENTO_LEGACY = { 'Ritardo Inizio / Ripresa': 'Ritardo', 'Sospensione Temporanea': 'Sospensione', 'Recupero': 'Recupero Aggiuntivo' };
+
+  // =====================================================================
+  //  STATO
+  // =====================================================================
+  let currentUser = null, currentUserProfile = null;
+  let gareAcceptate = [], currentGara = null;
+  let myRoleInGara = 'AR', isCurrentReadOnly = false;
+  let utentiList = [], utentiLoaded = false;
+  let rosters = { casa: { nome: '', persone: [] }, fuori: { nome: '', persone: [] } };
+  let tabIdx = 0, discOpen = 'inibizione';
+  let draggedDurataId = null;
+  let sortState = { col: 'data', dir: -1 };
+  let assistenteCorrente = null;
+
+  // =====================================================================
+  //  UTILITA'
+  // =====================================================================
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const fmtDate = (d) => `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+  function parseDateIT(s) {
+    const m = String(s || '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return (d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1]) ? d : null;
+  }
+  // Filtro predefinito: dal giorno successivo dello stesso giorno del mese precedente, fino a oggi
+  function filtroPredefinito() {
+    const oggi = new Date();
+    const da = new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1);
+    const ultimo = new Date(da.getFullYear(), da.getMonth() + 1, 0).getDate();
+    da.setDate(Math.min(oggi.getDate(), ultimo));
+    da.setDate(da.getDate() + 1);
+    return { da, a: oggi };
+  }
+  function garaTimestamp(g) {
+    const s = (g.dataGara || '').trim();
+    let y = 0, m = 0, d = 0;
+    let mt = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (mt) { d = +mt[1]; m = +mt[2]; y = +mt[3]; }
+    else { mt = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (mt) { y = +mt[1]; m = +mt[2]; d = +mt[3]; } }
+    if (!y) return 0;
+    const p = (g.oraGara || '00:00').split(/[:.]/).map(n => parseInt(n, 10) || 0);
+    return new Date(y, m - 1, d, p[0] || 0, p[1] || 0).getTime();
+  }
+  function fmtGiornata(v) {
+    const s = String(v || '').trim();
+    if (!s) return '';
+    return s.replace(/\s*and\.?/i, ' A').replace(/\s*rit\.?/i, ' R').trim();
+  }
+  function nomeSenzaSezione(n) { return (n || '').replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim(); }
+  function sezioneDa(n) {
+    const m = (n || '').match(/\(([^)]*)\)/);
+    if (!m) return '';
+    return m[1].trim().replace(/^SEZ\.?\s*/i, '').toUpperCase();
+  }
+  function chiaveNome(s) {
+    return (s || '').replace(/\([^)]*\)/g, ' ').toUpperCase().replace(/[^A-ZÀ-Ü0-9\s']/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+  }
+  const telefonoDa = (u) => (u && (u.cellulare || u.telefono || u.cell || u.tel || u.phone)) || '';
+  function findUtente(nominativo) {
+    const key = chiaveNome(nominativo);
+    if (!key) return null;
+    return utentiList.find(x => chiaveNome(`${x.nome || ''} ${x.cognome || ''}`) === key) || null;
+  }
+  function minutiReg(cat) {
+    const c = String(cat || '').toUpperCase();
+    if (/U\s?17|UNDER\s?17|ALLIEVI/.test(c)) return 40;
+    if (/U\s?15|UNDER\s?15|GIOVANISSIMI/.test(c)) return 35;
+    return 45;
+  }
+  function addMin(t, m) {
+    const [h, mi] = String(t || '14:30').split(':').map(Number);
+    const tot = ((isNaN(h) ? 14 : h) * 60 + (isNaN(mi) ? 30 : mi) + (Number(m) || 0));
+    return `${pad2(Math.floor((tot % 1440) / 60))}:${pad2(tot % 60)}`;
+  }
+  function showToast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  window.chiudiModal = (id) => $(id).classList.remove('active');
+  function showMsg(titolo, html) { $('msg-title').textContent = titolo; $('msg-text').innerHTML = html; $('modal-msg').classList.add('active'); }
+  function showView(name) {
+    ['elenco', 'wizard', 'assistente'].forEach(v => $('view-' + v).style.display = (v === name) ? 'block' : 'none');
+    window.scrollTo(0, 0);
+  }
+
+  // =====================================================================
+  //  AUTENTICAZIONE
+  // =====================================================================
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.replace('index.html'); return; }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db, "utenti", user.uid));
+      if (snap.exists()) {
+        currentUserProfile = snap.data();
+        const ruolo = currentUserProfile.ruolo || 'utente';
+        $('user-codmecc').textContent = (currentUserProfile.codMecc || '').trim() || '-';
+        $('user-fullname').textContent = [currentUserProfile.nome, currentUserProfile.cognome].filter(Boolean).join(' ').toUpperCase() || '-';
+        if (ruolo === 'admin') {
+          $('admin-menu-container').innerHTML = `
+            <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+            <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+            <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+            <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+            <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+            <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>`;
+        }
+      } else { $('user-codmecc').textContent = '-'; $('user-fullname').textContent = '-'; }
+    } catch (e) { console.error("Errore profilo utente:", e); $('user-fullname').textContent = '-'; }
+
+    const f = filtroPredefinito();
+    $('filtro-da').value = fmtDate(f.da);
+    $('filtro-a').value = fmtDate(f.a);
+    try { await fetchRefertiGare(user); } finally { document.body.classList.remove('auth-loading'); }
+  });
+
+  async function loadUtenti() {
+    if (utentiLoaded) return;
+    utentiLoaded = true;
+    try {
+      const snap = await getDocs(collection(db, "utenti"));
+      utentiList = snap.docs.map(d => d.data());
+    } catch (e) { console.warn("Elenco utenti non leggibile.", e); }
+  }
+
+  // =====================================================================
+  //  ELENCO REFERTI
+  // =====================================================================
+  async function fetchRefertiGare(user) {
+    const tbody = $('table-referti-body');
+    try {
+      await loadUtenti();
+      const snap = await getDocs(collection(db, "gare_programmate"));
+      gareAcceptate = [];
+      const myFullName = `${currentUserProfile?.cognome || ''} ${currentUserProfile?.nome || ''}`.trim().toUpperCase();
+      const myNameRev = `${currentUserProfile?.nome || ''} ${currentUserProfile?.cognome || ''}`.trim().toUpperCase();
+      const myEmail = (user.email || '').toLowerCase();
+      const match = (val) => {
+        if (!val) return false;
+        const u = String(val).toUpperCase(), l = String(val).toLowerCase();
+        return (myFullName && u.includes(myFullName)) || (myNameRev && u.includes(myNameRev)) || (myEmail && l.includes(myEmail));
+      };
+      snap.forEach(d => {
+        const g = { id: d.id, ...d.data() };
+        const des = g.designazione;
+        if (des && des.pubblicata && des.accettata) {
+          const isAE = match(des.ae), isAA1 = match(des.aa1), isAA2 = match(des.aa2);
+          if (isAE || isAA1 || isAA2) {
+            g.mioRuolo = isAE ? 'AR' : (isAA1 ? 'AA1' : 'AA2');
+            gareAcceptate.push(g);
+          }
+        }
+      });
+      renderRefertiTable();
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = `<tr><td colspan="6" class="vuoto" style="color:#b00000;">Errore caricamento referti.</td></tr>`;
+    }
+  }
+
+  function statoRank(g) {
+    const r = g.referto || {};
+    if (r.consegnato) return 3;
+    if (r.aperto) return 2;
+    return 1;
+  }
+  function azioniHtml(g) {
+    const ref = g.referto || {};
+    const id = esc(g.id);
+    const btn = (icon, title, fn) => `<button type="button" class="ibtn" title="${esc(title)}" onclick="${fn}"><img src="${icon}" alt="${esc(title)}"></button>`;
+    if (g.mioRuolo === 'AR') {
+      if (ref.consegnato) return `<span class="acts">${btn('icon_info.png', 'Visualizza Referto (Sola Lettura)', `apriReferto('${id}', true)`)}${btn('icon_ext_pdf.png', 'Stampa PDF', `stampaReferto('${id}')`)}</span>`;
+      if (ref.aperto) return `<span class="acts">${btn('icon_mod.png', 'Modifica Referto', `apriReferto('${id}', false)`)}${btn('icon_ext_pdf.png', 'Stampa PDF', `stampaReferto('${id}')`)}${btn('icon_posta_active.png', 'Invia al Giudice Sportivo', `consegnaRefertoDiretto('${id}')`)}</span>`;
+      return `<span class="acts">${btn('icon_add.png', 'Crea Referto', `apriReferto('${id}', false)`)}</span>`;
+    }
+    const st = ((ref.assistentiStatus || {})[g.mioRuolo.toLowerCase()]) || 'rosso';
+    if (ref.consegnato) return `<span class="acts">${btn('icon_info.png', 'Visualizza Rapporto', `apriReferto('${id}', true)`)}${btn('icon_ext_pdf.png', 'Stampa PDF', `stampaReferto('${id}')`)}</span>`;
+    if (st === 'verde') return `<span class="acts">${btn('icon_info.png', 'Rapporto Confermato - Visualizza', `apriReferto('${id}', true)`)}</span>`;
+    const tip = st === 'giallo' ? "In attesa di conferma dell'Arbitro - Modifica Rapporto" : "Compila Rapporto da inviare all'Arbitro";
+    return `<span class="acts">${btn('icon_mod.png', tip, `apriReferto('${id}', false)`)}</span>`;
+  }
+  function renderRefertiTable() {
+    const tbody = $('table-referti-body');
+    const da = parseDateIT($('filtro-da').value), a = parseDateIT($('filtro-a').value);
+    const t0 = da ? da.getTime() : -Infinity;
+    const t1 = a ? a.getTime() + 86400000 - 1 : Infinity;
+    let list = gareAcceptate.filter(g => { const ts = garaTimestamp(g); return ts >= t0 && ts <= t1; });
+    const key = {
+      data: g => garaTimestamp(g), att: g => g.mioRuolo, cat: g => `${g.categoria || ''} ${g.girone || ''}`,
+      gara: g => `${g.squadraCasa || ''} ${g.squadraOspite || ''}`, num: g => parseInt(g.numeroGara, 10) || 0, azioni: g => statoRank(g)
+    }[sortState.col];
+    list.sort((x, y) => { const a1 = key(x), b1 = key(y); return (a1 > b1 ? 1 : a1 < b1 ? -1 : 0) * sortState.dir; });
+    document.querySelectorAll('#ref-head th').forEach(th => th.classList.toggle('on', th.dataset.col === sortState.col));
+    if (list.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="vuoto">Nessuna gara accettata trovata nel periodo selezionato.</td></tr>`; return; }
+    tbody.innerHTML = list.map(g => `
+      <tr>
+        <td>${esc(g.dataGara || '-')}<br>${esc(g.oraGara || '')}</td>
+        <td>${esc(g.mioRuolo)}</td>
+        <td>${esc((g.categoria || 'N/D').substring(0, 3).toUpperCase())} ${esc(g.girone || '')}<br>${esc(fmtGiornata(g.giornata))}</td>
+        <td style="text-transform:uppercase;">${esc(g.squadraCasa)}<br>${esc(g.squadraOspite)}</td>
+        <td>${esc(g.numeroGara || '-')}</td>
+        <td class="mid">${azioniHtml(g)}</td>
+      </tr>`).join('');
+  }
+  document.querySelectorAll('#ref-head th').forEach(th => th.addEventListener('click', () => {
+    const c = th.dataset.col;
+    sortState = { col: c, dir: sortState.col === c ? -sortState.dir : (c === 'data' ? -1 : 1) };
+    renderRefertiTable();
+  }));
+  window.applicaFiltro = () => {
+    if (!parseDateIT($('filtro-da').value) || !parseDateIT($('filtro-a').value)) { showMsg('Filtro', 'Inserisci le date nel formato <b>gg/mm/aaaa</b>.'); return; }
+    renderRefertiTable();
+  };
+
+  // =====================================================================
+  //  LISTE SQUADRA (SALVATE NELLA SQUADRA, RIUTILIZZABILI)
+  // =====================================================================
+  const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'squadra';
+  async function loadRosters(g) {
+    for (const sq of ['casa', 'fuori']) {
+      const nome = sq === 'casa' ? g.squadraCasa : g.squadraOspite;
+      rosters[sq] = { nome: nome || '', persone: [] };
+      try {
+        const snap = await getDoc(doc(db, 'squadre_rose', slug(nome)));
+        if (snap.exists()) rosters[sq].persone = snap.data().persone || [];
+      } catch (e) { console.warn('Lista squadra non leggibile:', nome, e); }
+    }
+  }
+  async function saveRoster(sq) {
+    await setDoc(doc(db, 'squadre_rose', slug(rosters[sq].nome)), {
+      nome: rosters[sq].nome, persone: rosters[sq].persone, aggiornatoIl: serverTimestamp()
+    }, { merge: true });
+  }
+  const nomePersona = (p) => `${p.cognome || ''} ${p.nome || ''}`.trim().toUpperCase();
+  const labelPersona = (p) => `${nomePersona(p)} (${p.ddn || '01/01/1900'} - ID ${p.matricola || String(p.id).slice(-7)})`;
+
+  function optPersone(sq, selId, fallback) {
+    const arr = rosters[sq].persone.filter(p => !p.storico || p.id === selId)
+      .sort((a, b) => nomePersona(a).localeCompare(nomePersona(b)));
+    let h = '<option value=""></option>';
+    let found = false;
+    arr.forEach(p => { if (p.id === selId) found = true; h += `<option value="${esc(p.id)}" ${p.id === selId ? 'selected' : ''}>${esc(labelPersona(p))}</option>`; });
+    if (selId && !found) h += `<option value="${esc(selId)}" selected>${esc(fallback || selId)}</option>`;
+    return h;
+  }
+
+  window.apriAddPersona = (sq) => {
+    window._sqPopup = sq;
+    $('add-squadra-nome').textContent = rosters[sq].nome;
+    ['add-matricola', 'add-cognome', 'add-nome', 'add-ddn', 'add-luogo', 'add-codfisc'].forEach(i => $(i).value = '');
+    $('add-ddn').disabled = false; $('add-ddn-fix').checked = false; $('add-sesso').value = 'MASCHILE';
+    $('modal-add-persona').classList.add('active');
+  };
+  window.toggleDdnSconosciuta = () => {
+    const fix = $('add-ddn-fix').checked;
+    $('add-ddn').disabled = fix; if (fix) $('add-ddn').value = '01/01/1900';
+  };
+  window.confermaAddPersona = async () => {
+    const sq = window._sqPopup;
+    const cognome = $('add-cognome').value.trim(), nome = $('add-nome').value.trim();
+    const sconosciuta = $('add-ddn-fix').checked;
+    const ddn = sconosciuta ? '01/01/1900' : $('add-ddn').value.trim();
+    if (!cognome || !nome) { showMsg('Aggiungi Tesserato', 'Cognome e Nome sono obbligatori.'); return; }
+    if (!sconosciuta && !parseDateIT(ddn)) { showMsg('Aggiungi Tesserato', 'Inserisci la Data di Nascita (gg/mm/aaaa) oppure spunta "Sconosciuta".'); return; }
+    const matricola = $('add-matricola').value.trim();
+    if (matricola && rosters[sq].persone.some(p => p.matricola === matricola && !p.storico)) { showMsg('Aggiungi Tesserato', 'Esiste già un tesserato con questa matricola.'); return; }
+    const p = {
+      id: 'P' + Date.now() + Math.floor(Math.random() * 1000), matricola, cognome: cognome.toUpperCase(), nome: nome.toUpperCase(),
+      ddn, luogo: $('add-luogo').value.trim().toUpperCase(), sesso: $('add-sesso').value, codFisc: $('add-codfisc').value.trim().toUpperCase(), storico: false
+    };
+    rosters[sq].persone.push(p);
+    try { await saveRoster(sq); } catch (e) { console.error(e); showMsg('Errore', 'Impossibile salvare la lista della squadra: ' + esc(e.message)); return; }
+    chiudiModal('modal-add-persona');
+    renderListeUI();
+    showToast('Tesserato aggiunto alla squadra ' + rosters[sq].nome);
+  };
+  window.apriDelPersona = (sq) => {
+    window._sqPopup = sq;
+    $('del-squadra-nome').textContent = rosters[sq].nome;
+    const arr = rosters[sq].persone.filter(p => !p.storico).sort((a, b) => nomePersona(a).localeCompare(nomePersona(b)));
+    $('del-persona').innerHTML = '<option value=""></option>' + arr.map(p => `<option value="${esc(p.id)}">${esc(labelPersona(p))}</option>`).join('');
+    $('del-confirm').checked = false;
+    $('modal-del-persona').classList.add('active');
+  };
+  window.confermaDelPersona = async () => {
+    const sq = window._sqPopup, id = $('del-persona').value;
+    if (!id) { showMsg('Rimuovi Tesserato', 'Seleziona la persona da storicizzare.'); return; }
+    if (!$('del-confirm').checked) { showMsg('Rimuovi Tesserato', 'Spunta la conferma per procedere.'); return; }
+    const p = rosters[sq].persone.find(x => x.id === id);
+    if (p) p.storico = true;
+    try { await saveRoster(sq); } catch (e) { console.error(e); showMsg('Errore', 'Impossibile salvare la lista della squadra: ' + esc(e.message)); return; }
+    chiudiModal('modal-del-persona');
+    renderListeUI();
+    showToast('Persona storicizzata');
+  };
+
+  // =====================================================================
+  //  NORMALIZZAZIONE REFERTO
+  // =====================================================================
+  function slotVuoto(tipo, numero) {
+    return { tipo, numero: String(numero || ''), personaId: '', nome: '', cap: '', ruolo: '', docTipo: "Carta d'Identità", docNumero: '' };
+  }
+  function normListe(arr) {
+    const a = Array.isArray(arr) ? arr : [];
+    if (a.length && a.every(x => x.tipo)) return a;
+    const out = [];
+    for (let i = 1; i <= 11; i++) out.push(slotVuoto('titolare', i));
+    for (let i = 12; i <= 20; i++) out.push(slotVuoto('riserva', i));
+    for (let i = 0; i < 5; i++) out.push(slotVuoto('dirigente', ''));
+    a.forEach((p, i) => { const s = out[i]; if (s && s.tipo !== 'dirigente') { s.numero = p.numero || s.numero; s.nome = p.nome || ''; } });
+    return out;
+  }
+  function durataDefault(g) {
+    const m = minutiReg(g.categoria);
+    return [
+      { id: 't1', periodo: 't1', tipo: 'Tempo di Gioco', minuti: m, note: 'AUTOMATICO - Aggiunto tempo di gara', isCore: true },
+      { id: 'int', periodo: 'int', tipo: 'Intervallo Tra Tempi di Gioco', minuti: 0, note: '', isCore: true },
+      { id: 't2', periodo: 't2', tipo: 'Tempo di Gioco', minuti: m, note: 'AUTOMATICO - Aggiunto tempo di gara', isCore: true }
+    ];
+  }
+  function normDurata(items, g) {
+    if (!Array.isArray(items) || !items.length) return durataDefault(g);
+    let corrente = 't1';
+    const out = items.map((it, i) => {
+      const x = { ...it };
+      if (['t1', 'int', 't2'].includes(x.id)) {
+        x.periodo = x.id; x.isCore = true; corrente = x.id;
+        x.tipo = x.id === 'int' ? 'Intervallo Tra Tempi di Gioco' : 'Tempo di Gioco';
+        if (x.note === undefined) x.note = x.id === 'int' ? '' : 'AUTOMATICO - Aggiunto tempo di gara';
+      } else {
+        if (!x.periodo) x.periodo = corrente;
+        x.tipo = EVENTO_LEGACY[x.tipo] || (EVENTI.includes(x.tipo) ? x.tipo : '');
+        if (!x.id) x.id = 'ev_' + i + '_' + Date.now();
+        x.note = x.note || '';
+      }
+      x.minuti = Number(x.minuti) || 0;
+      return x;
+    });
+    out.sort((a, b) => PER_ORDER.indexOf(a.periodo) - PER_ORDER.indexOf(b.periodo));
+    return out;
+  }
+  function ensureReferto(g) {
+    const r = g.referto || (g.referto = {});
+    r.svolgimento = SVOLG_LEGACY[r.svolgimento] || r.svolgimento || 'Disputata Regolarmente';
+    if (!SVOLG.some(s => s.val === r.svolgimento)) r.svolgimento = 'Disputata Regolarmente';
+    r.forzaPubblica = r.forzaPubblica || 'adeguate_con';
+    r.ambulanza = r.ambulanza || 'presente';
+    r.schedeSalvate = r.schedeSalvate || {};
+    r.listeCasa = normListe(r.listeCasa);
+    r.listeFuori = normListe(r.listeFuori);
+    r.durataItems = normDurata(r.durataItems, g);
+    r.reti = (r.reti || []).map(x => ({ ...x, tempo: String(x.tempo || '').replace('°', '') }));
+    r.rigori = r.rigori || { casa: [], fuori: [] };
+    r.disciplinaCasa = r.disciplinaCasa || [];
+    r.disciplinaFuori = r.disciplinaFuori || [];
+    r.sostituzioniCasa = r.sostituzioniCasa || [];
+    r.sostituzioniFuori = r.sostituzioniFuori || [];
+    r.allegati = r.allegati || [];
+    r.assistentiStatus = r.assistentiStatus || {};
+    r.assistentiDati = r.assistentiDati || {};
+    return r;
+  }
+  const REF = () => currentGara.referto;
+  const LISTA = (sq) => sq === 'casa' ? REF().listeCasa : REF().listeFuori;
+  const SQNOME = (sq) => sq === 'casa' ? currentGara.squadraCasa : currentGara.squadraOspite;
+
+  // =====================================================================
+  //  APERTURA / CHIUSURA REFERTO
+  // =====================================================================
+  window.chiudiWizard = () => {
+    showView('elenco');
+    renderRefertiTable();
+  };
+
+  window.apriReferto = async (id, readOnly) => {
+    const g = gareAcceptate.find(item => item.id === id);
+    if (!g) return;
+    currentGara = g;
+    myRoleInGara = g.mioRuolo;
+    const consegnato = g.referto?.consegnato === true;
+    isCurrentReadOnly = readOnly || consegnato;
+
+    if (myRoleInGara !== 'AR') { apriRapportoAssistente(g, consegnato); return; }
+
+    // ----- referto arbitro: dati gara + caricamento -----
+    $('wizard-sub-bar').textContent = isCurrentReadOnly ? 'Consultazione Referto (Sola Visualizzazione)' : 'Inserimento Referto';
+    $('w-cat').value = g.categoria || ''; $('w-gir').value = g.girone || '';
+    $('w-casa').value = g.squadraCasa || ''; $('w-fuori').value = g.squadraOspite || '';
+    $('w-data').value = g.dataGara || ''; $('w-ora').value = g.oraGara || '';
+    $('w-loc').value = g.localita || ''; $('w-impianto').value = g.impianto || '';
+    $('wizard-loading').style.display = 'block';
+    $('wizard-main').style.display = 'none';
+    showView('wizard');
+
+    const lavoro = (async () => {
+      if (!g.referto) {
+        ensureReferto(g);
+        g.referto.aperto = true; g.referto.consegnato = false;
+        await updateDoc(doc(db, "gare_programmate", id), { referto: JSON.parse(JSON.stringify(g.referto)) });
+      } else {
+        ensureReferto(g);
+        if (!g.referto.aperto && !isCurrentReadOnly) {
+          g.referto.aperto = true;
+          await updateDoc(doc(db, "gare_programmate", id), { "referto.aperto": true });
+        }
+      }
+      await loadRosters(g);
+    })();
+    try { await Promise.all([lavoro, sleep(1000)]); }
+    catch (e) { console.error(e); showView('elenco'); showMsg('Errore', "Impossibile aprire il referto: " + esc(e.message)); return; }
+
+    discOpen = 'inibizione';
+    tabIdx = 0;
+    $('note-svolgimento').value = REF().noteSvolgimento || '';
+    $('note-sicurezza').value = REF().noteSicurezza || '';
+    $('note-pubblico').value = REF().notePubblico || '';
+    $('note-varie').value = REF().noteVarie || '';
+    ['note-svolgimento', 'note-sicurezza', 'note-pubblico', 'note-varie'].forEach(i => aggiornaContatore(i));
+    renderCardsSvolg(); renderCardsOrdine(); renderCardsAmbul();
+    $('wizard-loading').style.display = 'none';
+    $('wizard-main').style.display = 'block';
+    showTab(0);
+  };
+
+  // ---------- contatori testo (niente a capo) ----------
+  function aggiornaContatore(id) {
+    const ta = $(id), cnt = $('cnt-' + id), max = +ta.getAttribute('maxlength') || 2000;
+    ta.value = ta.value.replace(/[\r\n]+/g, ' ');
+    cnt.textContent = Math.max(0, max - ta.value.length);
+  }
+  ['note-svolgimento', 'note-sicurezza', 'note-pubblico', 'note-varie', 'asst-note-testo'].forEach(id => {
+    const ta = $(id), cntId = id === 'asst-note-testo' ? 'cnt-asst-note' : 'cnt-' + id;
+    ta.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    ta.addEventListener('input', () => {
+      ta.value = ta.value.replace(/[\r\n]+/g, ' ');
+      $(cntId).textContent = Math.max(0, (+ta.getAttribute('maxlength')) - ta.value.length);
+    });
+  });
+
+  // ---------- carte opzione ----------
+  function cards(containerId, opts, current, fn) {
+    $(containerId).innerHTML = opts.map(o => `<div class="opt-card ${o.val === current ? 'sel' : ''}" onclick="${fn}('${o.val}')"><div class="opt-title">${esc(o.t || o.val)}</div><div class="opt-desc">${esc(o.d)}</div></div>`).join('');
+  }
+  function renderCardsSvolg() { cards('cards-svolgimento', SVOLG, REF().svolgimento, 'selSvolg'); }
+  function renderCardsOrdine() { cards('cards-ordine', ORDINE, REF().forzaPubblica, 'selOrdine'); }
+  function renderCardsAmbul() { cards('cards-ambulanza', AMBUL, REF().ambulanza, 'selAmbul'); }
+  window.selSvolg = (v) => { if (isCurrentReadOnly) return; REF().svolgimento = v; renderCardsSvolg(); };
+  window.selOrdine = (v) => { if (isCurrentReadOnly) return; REF().forzaPubblica = v; renderCardsOrdine(); };
+  window.selAmbul = (v) => { if (isCurrentReadOnly) return; REF().ambulanza = v; renderCardsAmbul(); };
+
+  // =====================================================================
+  //  SCHEDE, BARRA TAB E BARRA PULSANTI
+  // =====================================================================
+  function renderTabsBar() {
+    $('wtabs-bar').innerHTML = TABS.map((k, i) => {
+      const star = (!isCurrentReadOnly && REF().schedeSalvate[k]) ? ' *' : '';
+      return `<button type="button" class="wtab-btn ${i === tabIdx ? 'active' : ''}" onclick="goTab(${i})">${TAB_LABEL[k]}${star}</button>`;
+    }).join('');
+  }
+  function renderFooter() {
+    const fb = (icon, label, fn) => `<button type="button" class="fbtn" onclick="${fn}"><img src="${icon}" alt=""><span>${label}</span></button>`;
+    const first = tabIdx === 0, last = tabIdx === TABS.length - 1;
+    const left = first ? fb('icon_del.png', 'Esci', 'chiudiWizard()') : fb('icon_back.png', 'Precedente', 'goTab(tabIdx-1)');
+    const right = last ? fb('icon_del.png', 'Esci', 'chiudiWizard()') : fb('icon_forward.png', 'Successivo', 'goTab(tabIdx+1)');
+    const mid = isCurrentReadOnly
+      ? `<div class="fgroup mid"><div class="sub">${fb('icon_ext_pdf.png', 'Stampa', 'stampaReferto()')}</div></div>`
+      : `<div class="fgroup mid"><div class="sub">${fb('icon_save.png', 'Salva Scheda', 'salvaSchedaCorrente()')}${fb('icon_save.png', 'Salva Tutto', 'salvaTutto()')}</div><div class="sub">${fb('icon_posta_active.png', 'Invia al G.S.', 'chiediInvioGS()')}${fb('icon_ext_pdf.png', 'Stampa', 'stampaReferto()')}</div></div>`;
+    $('wizard-footer').innerHTML = `<div class="fgroup">${left}</div>${mid}<div class="fgroup end">${right}</div>`;
+  }
+  window.goTab = (i) => { if (i < 0 || i >= TABS.length) return; raccogliCampiTestuali(); showTab(i); };
+  function showTab(i) {
+    tabIdx = i;
+    TABS.forEach((k, j) => $('wtab-' + k).style.display = (j === i) ? 'block' : 'none');
+    const k = TABS[i];
+    if (k === 'liste') renderListeUI();
+    if (k === 'durata') renderDurataUI();
+    if (k === 'reti') renderRetiUI();
+    if (k === 'disciplina') renderDisciplinaUI();
+    if (k === 'sostituzioni') renderSostituzioniUI();
+    if (k === 'allegati') renderAllegatiUI();
+    renderTabsBar(); renderFooter();
+    applyReadOnly();
+  }
+  function applyReadOnly() {
+    const body = $('wizard-body');
+    body.classList.toggle('ro', isCurrentReadOnly);
+    if (isCurrentReadOnly) body.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+  }
+  const rerender = () => { showTabRender(); };
+  function showTabRender() { const k = TABS[tabIdx]; ({ liste: renderListeUI, durata: renderDurataUI, reti: renderRetiUI, disciplina: renderDisciplinaUI, sostituzioni: renderSostituzioniUI, allegati: renderAllegatiUI }[k] || (() => {}))(); applyReadOnly(); }
+
+  function raccogliCampiTestuali() {
+    if (!currentGara || !currentGara.referto || myRoleInGara !== 'AR' || isCurrentReadOnly) return;
+    const r = REF();
+    r.noteSvolgimento = $('note-svolgimento').value;
+    r.noteSicurezza = $('note-sicurezza').value;
+    r.notePubblico = $('note-pubblico').value;
+    r.noteVarie = $('note-varie').value;
+  }
+  async function salvaTuttoDB() {
+    if (!currentGara) return;
+    raccogliCampiTestuali();
+    const { fine } = calcTempiDurata();
+    REF().orarioFine = fine;
+    await updateDoc(doc(db, "gare_programmate", currentGara.id), { referto: JSON.parse(JSON.stringify(REF())) });
+  }
+  window.salvaSchedaCorrente = async () => {
+    try {
+      REF().schedeSalvate[TABS[tabIdx]] = true;
+      await salvaTuttoDB();
+      renderTabsBar();
+      showToast(`Scheda "${TAB_LABEL[TABS[tabIdx]]}" salvata con successo!`);
+    } catch (e) { console.error(e); showMsg('Errore', 'Salvataggio non riuscito: ' + esc(e.message)); }
+  };
+  window.salvaTutto = async () => {
+    try {
+      TABS.forEach(k => REF().schedeSalvate[k] = true);
+      await salvaTuttoDB();
+      renderTabsBar();
+      showMsg('Salvataggio', 'Salvataggio schede completato.');
+    } catch (e) { console.error(e); showMsg('Errore', 'Salvataggio non riuscito: ' + esc(e.message)); }
+  };
+
+  // =====================================================================
+  //  3. LISTE GARA
+  // =====================================================================
+  const idxOf = (sq, tipo) => LISTA(sq).map((s, i) => s.tipo === tipo ? i : -1).filter(i => i >= 0);
+  function slotCompleto(s) {
+    if (!s.personaId && !s.nome) return false;
+    if (s.tipo === 'dirigente' && !s.ruolo) return false;
+    return !!s.docTipo && (s.docTipo === 'Conoscenza Personale' || !!(s.docNumero || '').trim());
+  }
+  function slotHtml(sq, i) {
+    const s = LISTA(sq)[i];
+    const numOpts = '<option value=""></option>' + Array.from({ length: 99 }, (_, k) => `<option value="${k + 1}" ${String(k + 1) === String(s.numero) ? 'selected' : ''}>${k + 1}</option>`).join('');
+    const docOpts = DOC_TIPI.map(d => `<option ${d === s.docTipo ? 'selected' : ''}>${esc(d)}</option>`).join('');
+    let l1;
+    if (s.tipo === 'dirigente') {
+      const rl = RUOLI_DIR.filter(r => sq === 'casa' || r !== "Addetto all'Arbitro");
+      l1 = `<select class="rdir" onchange="setSlot('${sq}',${i},'ruolo',this)"><option value=""></option>${rl.map(r => `<option ${r === s.ruolo ? 'selected' : ''}>${esc(r)}</option>`).join('')}</select>
+            <select class="pers" onchange="setSlot('${sq}',${i},'personaId',this)">${optPersone(sq, s.personaId, s.nome)}</select>`;
+    } else {
+      l1 = `<select class="num" onchange="setSlot('${sq}',${i},'numero',this)">${numOpts}</select>
+            <select class="pers" onchange="setSlot('${sq}',${i},'personaId',this)">${optPersone(sq, s.personaId, s.nome)}</select>
+            <select class="cap" onchange="setSlot('${sq}',${i},'cap',this)"><option value=""></option><option ${s.cap === 'CAP.' ? 'selected' : ''}>CAP.</option><option ${s.cap === 'VICE-CAP.' ? 'selected' : ''}>VICE-CAP.</option></select>`;
+    }
+    return `<div class="slot ${slotCompleto(s) ? 'ok' : ''}" id="slot-${sq}-${i}">
+      <div class="l1">${l1}</div>
+      <div class="l2"><select onchange="setSlot('${sq}',${i},'docTipo',this)">${docOpts}</select>
+        <input type="text" maxlength="255" placeholder="Inserisci Numero Documento" value="${esc(s.docNumero)}" onchange="setSlot('${sq}',${i},'docNumero',this)"></div>
+    </div>`;
+  }
+  function listaBlocco(sq, tipo, titolo, lblAdd, lblDel) {
+    const righe = idxOf(sq, tipo).map(i => slotHtml(sq, i)).join('');
+    return `<div class="yellow-bar lst-title">${titolo}</div>${righe}
+      <div class="gray-bar edit-only">
+        <button type="button" class="tiny-btn n" onclick="rimuoviSlot('${sq}','${tipo}')"><img src="icon_del.png" alt="">${lblDel}</button>
+        <button type="button" class="tiny-btn n" onclick="aggiungiSlot('${sq}','${tipo}')"><img src="icon_add.png" alt="">${lblAdd}</button>
+      </div>`;
+  }
+  function renderListeUI() {
+    const col = (sq) => `<div>
+        <div class="team-head">${esc(SQNOME(sq))}</div>
+        <div class="team-btns edit-only">
+          <button type="button" class="tiny-btn" onclick="apriAddPersona('${sq}')"><img src="icon_add.png" alt="">Aggiungi Persona</button>
+          <button type="button" class="tiny-btn" onclick="apriDelPersona('${sq}')"><img src="icon_del.png" alt="">Rimuovi Persona</button>
+        </div>
+        ${listaBlocco(sq, 'titolare', 'Lista dei Calciatori Titolari.', 'Aggiungi Titolare', 'Rimuovi Titolare')}
+        ${listaBlocco(sq, 'riserva', 'Lista dei Calciatori di Riserva.', 'Aggiungi Sostituto', 'Rimuovi Sostituto')}
+        ${listaBlocco(sq, 'dirigente', 'Lista dei Dirigenti.', 'Aggiungi Dirigente', 'Rimuovi Dirigente')}
+      </div>`;
+    $('liste-ui').innerHTML = `<div class="sec-box" style="padding:6px;"><div class="cols2">${col('casa')}${col('fuori')}</div></div>`;
+    applyReadOnly();
+  }
+  window.setSlot = (sq, i, campo, el) => {
+    const s = LISTA(sq)[i];
+    let v = el.value;
+    if (campo === 'personaId') {
+      if (v && LISTA(sq).some((x, j) => j !== i && x.personaId === v)) {
+        showMsg('Liste Gara', 'Questa persona è già inserita nella lista della squadra.');
+        el.value = s.personaId || ''; return;
+      }
+      const p = rosters[sq].persone.find(x => x.id === v);
+      s.personaId = v; s.nome = p ? nomePersona(p) : '';
+    } else if (campo === 'numero' && v) {
+      if (LISTA(sq).some((x, j) => j !== i && x.tipo !== 'dirigente' && String(x.numero) === v)) {
+        showMsg('Liste Gara', 'Questo numero di maglia è già assegnato nella lista della squadra.');
+        el.value = s.numero || ''; return;
+      }
+      s.numero = v;
+    } else { s[campo] = v; }
+    const row = $(`slot-${sq}-${i}`);
+    if (row) row.classList.toggle('ok', slotCompleto(s));
+  };
+  window.aggiungiSlot = (sq, tipo) => {
+    const lim = { titolare: 11, riserva: 15, dirigente: 8 }[tipo];
+    const idx = idxOf(sq, tipo);
+    if (idx.length >= lim) { showMsg('Liste Gara', `Numero massimo di righe raggiunto (${lim}).`); return; }
+    let numero = '';
+    if (tipo !== 'dirigente') {
+      const usati = new Set(LISTA(sq).filter(x => x.tipo !== 'dirigente').map(x => String(x.numero)));
+      for (let n = 1; n <= 99; n++) if (!usati.has(String(n))) { numero = n; break; }
+    }
+    const ins = (idx.length ? idx[idx.length - 1] + 1 : LISTA(sq).length);
+    LISTA(sq).splice(ins, 0, slotVuoto(tipo, numero));
+    renderListeUI();
+  };
+  window.rimuoviSlot = (sq, tipo) => {
+    const idx = idxOf(sq, tipo);
+    if (idx.length <= (tipo === 'titolare' ? 1 : 0)) return;
+    LISTA(sq).splice(idx[idx.length - 1], 1);
+    renderListeUI();
+  };
+
+  // Calciatori della lista (titolari + riserve con persona selezionata)
+  function giocatori(sq) {
+    return LISTA(sq).filter(s => s.tipo !== 'dirigente' && (s.personaId || s.nome))
+      .map(s => ({ id: s.personaId || s.nome, label: `${s.numero ? s.numero + ' - ' : ''}${s.nome}${s.cap ? ' [' + s.cap.replace('.', '') + ']' : ''}`, tipo: s.tipo }))
+      .sort((a, b) => parseInt(a.label, 10) - parseInt(b.label, 10));
+  }
+  function dirigenti(sq) {
+    return LISTA(sq).filter(s => s.tipo === 'dirigente' && (s.personaId || s.nome))
+      .map(s => ({ id: s.personaId || s.nome, label: `${s.ruolo ? s.ruolo + ' - ' : ''}${s.nome}` }));
+  }
+  function optLista(arr, selId, fallback) {
+    let h = '<option value=""></option>'; let f = false;
+    arr.forEach(p => { if (p.id === selId) f = true; h += `<option value="${esc(p.id)}" ${p.id === selId ? 'selected' : ''}>${esc(p.label)}</option>`; });
+    if (selId && !f) h += `<option value="${esc(selId)}" selected>${esc(fallback || selId)}</option>`;
+    return h;
+  }
+
+  // =====================================================================
+  //  4. DURATA
+  // =====================================================================
+  function durataSezioni() {
+    const items = REF().durataItems;
+    const pers = PER_ORDER.filter(p => ['t1', 'int', 't2'].includes(p) || items.some(i => i.periodo === p));
+    return pers.map(p => ({ per: p, titolo: PER_TITLE[p], items: items.filter(i => i.periodo === p) }));
+  }
+  function calcTempiDurata() {
+    let cur = currentGara.oraGara || '14:30'; const map = {};
+    REF().durataItems.slice().sort((a, b) => PER_ORDER.indexOf(a.periodo) - PER_ORDER.indexOf(b.periodo)).forEach(it => {
+      const st = cur, en = addMin(st, it.minuti); map[it.id] = { st, en }; cur = en;
+    });
+    return { map, fine: cur };
+  }
+  const durOk = (it) => !!it.tipo && (it.periodo === 'int' ? Number(it.minuti) > 0 : Number(it.minuti) > 0);
+  function durRow(it, t) {
+    const core = it.isCore;
+    const sel = it.periodo === 'int'
+      ? `<select onchange="setDur('${it.id}','tipo',this.value)"><option>Intervallo Tra Tempi di Gioco</option></select>`
+      : `<select onchange="setDur('${it.id}','tipo',this.value)"><option value=""></option>${EVENTI.map(e => `<option ${e === it.tipo ? 'selected' : ''}>${e}</option>`).join('')}</select>`;
+    const x = it.periodo === 'int' ? '' : `<img src="icon_del.png" class="edit-only" title="Rimuovi" onclick="rimuoviDur('${it.id}')" alt="">${core ? '' : '<span class="grip edit-only" title="Trascina per spostare">☰</span>'}`;
+    return `<div class="dur-row ${durOk(it) ? 'ok' : ''}" id="dur-${it.id}" ${(!core && !isCurrentReadOnly) ? 'draggable="true"' : ''}
+        ondragstart="durDragStart(event,'${it.id}')" ondragover="durDragOver(event)" ondragleave="durDragLeave(event)" ondrop="durDrop(event,'${it.id}')" ondragend="durDragEnd(event)">
+      <div class="dx">${x}</div>
+      <div class="dm">${sel}<textarea maxlength="2000" placeholder="Inserisci note relative a questo periodo..." onchange="setDur('${it.id}','note',this.value)">${esc(it.note || '')}</textarea></div>
+      <div class="dmin"><input type="text" maxlength="2" value="${it.minuti}" onchange="setDur('${it.id}','minuti',this.value)"> min.</div>
+      <div class="dt" data-st="${it.id}">${t.st}</div><div class="dt" data-en="${it.id}">${t.en}</div></div>`;
+  }
+  function renderDurataUI() {
+    const { map, fine } = calcTempiDurata();
+    const m = REF().durataItems.find(i => i.periodo === 't1')?.minuti || minutiReg(currentGara.categoria);
+    const sez = durataSezioni().map(s => `
+      <div class="sec-box" style="padding-bottom:0;">
+        <div class="sec-head">${s.titolo}</div>
+        ${s.items.map(it => durRow(it, map[it.id])).join('')}
+        ${s.per === 'int' ? '' : `<div class="gray-bar edit-only"><button type="button" class="tiny-btn n" onclick="aggiungiDur('${s.per}')"><img src="icon_add.png" alt="">Aggiungi Evento</button></div>`}
+      </div>`).join('');
+    $('durata-ui').innerHTML = `
+      <div class="big-row"><div class="a">Orario di Inizio Ufficiale della Gara</div><div class="b">${esc(currentGara.oraGara || '14:30')}</div></div>
+      <div class="yellow-bar" style="margin-bottom:3px;">Normalmente per questa Categoria sono previsti 2 Tempi Regolamentari da ${m} minuti.</div>
+      <div class="right-btns edit-only">
+        <button type="button" class="tiny-btn n" onclick="rimuoviTempoGioco()"><img src="icon_del.png" alt="">Tempo di Gioco</button>
+        <button type="button" class="tiny-btn n" onclick="aggiungiTempoGioco()"><img src="icon_add.png" alt="">Tempo di Gioco</button>
+      </div>
+      ${sez}
+      <div class="right-btns edit-only">
+        <button type="button" class="tiny-btn n" onclick="toggleSezioneDur('rig',false)"><img src="icon_del.png" alt="">Tiri di Rigore</button>
+        <button type="button" class="tiny-btn n" onclick="toggleSezioneDur('rig',true)"><img src="icon_add.png" alt="">Tiri di Rigore</button>
+        <button type="button" class="tiny-btn n" onclick="toggleSezioneDur('sup',false)"><img src="icon_del.png" alt="">Supplementare</button>
+        <button type="button" class="tiny-btn n" onclick="toggleSezioneDur('sup',true)"><img src="icon_add.png" alt="">Supplementare</button>
+      </div>
+      <div class="big-row" style="margin-top:6px;"><div class="a">Orario di Fine della Gara</div><div class="b" id="durata-fine">${fine}</div></div>`;
+    applyReadOnly();
+  }
+  function aggiornaDurataDom() {
+    const { map, fine } = calcTempiDurata();
+    REF().durataItems.forEach(it => {
+      const a = document.querySelector(`[data-st="${it.id}"]`), b = document.querySelector(`[data-en="${it.id}"]`);
+      if (a && map[it.id]) { a.textContent = map[it.id].st; b.textContent = map[it.id].en; }
+      const row = $('dur-' + it.id); if (row) row.classList.toggle('ok', durOk(it));
+    });
+    const f = $('durata-fine'); if (f) f.textContent = fine;
+  }
+  window.setDur = (id, campo, v) => {
+    const it = REF().durataItems.find(x => x.id === id); if (!it) return;
+    if (campo === 'minuti') { v = Math.max(0, parseInt(v, 10) || 0); const inp = document.querySelector(`#dur-${id} .dmin input`); if (inp) inp.value = v; }
+    it[campo] = v; aggiornaDurataDom();
+  };
+  window.aggiungiDur = (per) => {
+    const items = REF().durataItems;
+    let ins = items.length;
+    for (let i = items.length - 1; i >= 0; i--) if (items[i].periodo === per) { ins = i + 1; break; }
+    items.splice(ins, 0, { id: 'ev_' + Date.now(), periodo: per, tipo: '', minuti: 0, note: '' });
+    renderDurataUI();
+  };
+  window.rimuoviDur = (id) => { REF().durataItems = REF().durataItems.filter(x => x.id !== id); renderDurataUI(); };
+  window.aggiungiTempoGioco = () => {
+    if (REF().durataItems.some(i => i.periodo === 't3')) { showMsg('Durata', 'È già presente un 3° Tempo.'); return; }
+    REF().durataItems.push({ id: 't3', periodo: 't3', tipo: 'Tempo di Gioco', minuti: minutiReg(currentGara.categoria), note: 'AUTOMATICO - Aggiunto tempo di gara', isCore: true });
+    normDurataOrdine(); renderDurataUI();
+  };
+  window.rimuoviTempoGioco = () => {
+    if (!REF().durataItems.some(i => i.periodo === 't3')) { showMsg('Durata', 'Non ci sono tempi di gioco aggiuntivi da rimuovere.'); return; }
+    REF().durataItems = REF().durataItems.filter(i => i.periodo !== 't3'); renderDurataUI();
+  };
+  window.toggleSezioneDur = (tipo, add) => {
+    const pers = tipo === 'rig' ? ['rig'] : ['ts1', 'ts2'];
+    if (add) {
+      pers.forEach(p => { if (!REF().durataItems.some(i => i.periodo === p)) REF().durataItems.push({ id: p, periodo: p, tipo: p === 'rig' ? '' : 'Tempo di Gioco', minuti: p === 'rig' ? 0 : 15, note: '', isCore: p !== 'rig' }); });
+      normDurataOrdine();
+    } else { REF().durataItems = REF().durataItems.filter(i => !pers.includes(i.periodo)); }
+    renderDurataUI();
+  };
+  function normDurataOrdine() { REF().durataItems.sort((a, b) => PER_ORDER.indexOf(a.periodo) - PER_ORDER.indexOf(b.periodo)); }
+  window.durDragStart = (e, id) => { draggedDurataId = id; e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; };
+  window.durDragOver = (e) => { if (draggedDurataId) { e.preventDefault(); e.currentTarget.classList.add('over'); } };
+  window.durDragLeave = (e) => e.currentTarget.classList.remove('over');
+  window.durDragEnd = (e) => { e.currentTarget.classList.remove('dragging'); draggedDurataId = null; };
+  window.durDrop = (e, targetId) => {
+    e.preventDefault(); e.currentTarget.classList.remove('over');
+    if (!draggedDurataId || draggedDurataId === targetId) return;
+    const arr = REF().durataItems;
+    const from = arr.findIndex(x => x.id === draggedDurataId), mv = arr[from];
+    if (!mv || mv.isCore) return;
+    arr.splice(from, 1);
+    const to = arr.findIndex(x => x.id === targetId);
+    const tgt = arr[to];
+    if (!tgt || tgt.periodo === 'int') { arr.splice(from, 0, mv); return; }
+    mv.periodo = tgt.periodo;
+    arr.splice(to + 1, 0, mv);
+    draggedDurataId = null;
+    renderDurataUI();
+  };
+
+  // =====================================================================
+  //  5. RETI
+  // =====================================================================
+  function tempiRete() {
+    const t = ['1 Tempo', '2 Tempo'];
+    if (REF().durataItems.some(i => i.periodo === 'ts1')) t.push('1 Tempo Supplementare', '2 Tempo Supplementare');
+    return t;
+  }
+  function conteggioReti() {
+    let c = 0, f = 0;
+    REF().reti.forEach(r => { if (r.squadra === 'casa') c++; else f++; });
+    return { c, f };
+  }
+  function reteRow(r, i) {
+    const tOpts = '<option value=""></option>' + tempiRete().map(t => `<option ${t === r.tempo ? 'selected' : ''}>${t}</option>`).join('');
+    const mOpts = '<option value=""></option>' + Array.from({ length: 120 }, (_, k) => `<option value="${k + 1}" ${String(k + 1) === String(r.minuto) ? 'selected' : ''}>${k + 1} min.</option>`).join('');
+    return `<div class="rete-row ${(r.tempo && r.minuto) ? 'ok' : ''}" id="rete-${i}">
+      <img src="icon_del.png" class="del edit-only" onclick="rimuoviRete(${i})" alt="Rimuovi">
+      <select onchange="setRete(${i},'tempo',this.value)">${tOpts}</select>
+      <select onchange="setRete(${i},'minuto',this.value)">${mOpts}</select>
+      <label><input type="checkbox" ${r.rigore ? 'checked' : ''} onchange="setRete(${i},'rigore',this.checked)"> Rigore</label></div>`;
+  }
+  function renderRetiUI() {
+    const cnt = conteggioReti();
+    const box = (sq) => {
+      const righe = REF().reti.map((r, i) => r.squadra === sq ? reteRow(r, i) : '').join('');
+      return `<div class="sec-box" style="padding-bottom:0;">
+        <div class="team-head"><span>${esc(SQNOME(sq))}</span><span class="big" id="gol-${sq}">${sq === 'casa' ? cnt.c : cnt.f}</span></div>
+        ${righe}
+        <div class="gray-bar edit-only"><button type="button" class="tiny-btn n" onclick="aggiungiRete('${sq}')"><img src="icon_add.png" alt="">Aggiungi Rete</button></div></div>`;
+    };
+    let rig = '';
+    if (REF().durataItems.some(i => i.periodo === 'rig')) {
+      const rbox = (sq) => `<div class="sec-box" style="padding-bottom:0;">
+        <div class="team-head"><span>${esc(SQNOME(sq))}</span><span style="font-size:12px;">Tiri di Rigore</span></div>
+        ${(REF().rigori[sq] || []).map((v, i) => `<div class="rig-row"><b>${i + 1}°</b><label><input type="checkbox" ${v ? 'checked' : ''} onchange="setRigore('${sq}',${i},this.checked)"> Realizzato</label></div>`).join('')}
+        <div class="gray-bar edit-only">
+          <button type="button" class="tiny-btn n" onclick="rimuoviRigore('${sq}')"><img src="icon_del.png" alt="">Rimuovi Rigore</button>
+          <button type="button" class="tiny-btn n" onclick="aggiungiRigore('${sq}')"><img src="icon_add.png" alt="">Aggiungi Rigore</button></div></div>`;
+      rig = `<div class="yellow-bar" style="margin:10px 0 6px;">I Tiri di Rigore servono a determinare la Squadra VINCENTE in situazione di parità.</div>${rbox('casa')}${rbox('fuori')}`;
+    }
+    $('reti-ui').innerHTML = box('casa') + box('fuori') + rig;
+    applyReadOnly();
+  }
+  window.aggiungiRete = (sq) => { REF().reti.push({ tempo: '', minuto: '', squadra: sq, rigore: false }); renderRetiUI(); };
+  window.rimuoviRete = (i) => { REF().reti.splice(i, 1); renderRetiUI(); };
+  window.setRete = (i, campo, v) => {
+    REF().reti[i][campo] = v;
+    const row = $('rete-' + i); if (row) row.classList.toggle('ok', !!(REF().reti[i].tempo && REF().reti[i].minuto));
+  };
+  window.aggiungiRigore = (sq) => { (REF().rigori[sq] = REF().rigori[sq] || []).push(false); renderRetiUI(); };
+  window.rimuoviRigore = (sq) => { (REF().rigori[sq] = REF().rigori[sq] || []).pop(); renderRetiUI(); };
+  window.setRigore = (sq, i, v) => { REF().rigori[sq][i] = v; };
+
+  // =====================================================================
+  //  6. DISCIPLINA
+  // =====================================================================
+  const listaDisc = (sq) => sq === 'casa' ? REF().disciplinaCasa : REF().disciplinaFuori;
+  const isPanel = (p, it) => (it.tipo === p.tipo) && ((it.soggetto || (it.tipo === 'segnalazione' ? 'tesserato' : 'calciatore')) === p.sogg);
+  function discOkItem(p, it) { return !!it.personaId && (!p.mot || !!it.motivo) && (!p.tm || (it.tempo && it.minuto)); }
+  function provHtml(p, sq, it, idx) {
+    let pers;
+    if (p.sogg === 'dirigente') pers = optLista(dirigenti(sq), it.personaId, it.tesserato);
+    else if (p.sogg === 'tesserato') pers = optLista([...giocatori(sq), ...dirigenti(sq)], it.personaId, it.tesserato);
+    else pers = optLista(giocatori(sq), it.personaId, it.tesserato);
+    const tm = p.tm ? `<select class="t" onchange="setProv('${sq}',${idx},'tempo',this.value)"><option value=""></option><option ${it.tempo === '1 Tempo' ? 'selected' : ''}>1 Tempo</option><option ${it.tempo === '2 Tempo' ? 'selected' : ''}>2 Tempo</option></select>
+        <select class="m" onchange="setProv('${sq}',${idx},'minuto',this.value)"><option value=""></option>${Array.from({ length: 120 }, (_, k) => `<option value="${k + 1}" ${String(k + 1) === String(it.minuto) ? 'selected' : ''}>${k + 1} min.</option>`).join('')}</select>` : '';
+    const mot = p.mot ? `<select class="mot" onchange="setProv('${sq}',${idx},'motivo',this.value)">${p.mot.length > 1 ? '<option value=""></option>' : ''}${p.mot.map(m => `<option ${m === it.motivo || p.mot.length === 1 ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select>` : '';
+    return `<div class="prov ${discOkItem(p, it) ? 'ok' : ''}" id="prov-${sq}-${idx}">
+      <img src="icon_del.png" class="del edit-only" onclick="rimuoviProv('${sq}',${idx})" alt="Rimuovi">
+      <div><div class="pr1">${tm}<select onchange="setProv('${sq}',${idx},'personaId',this)">${pers}</select></div>${mot}
+      <textarea maxlength="4000" placeholder="Descrivi i Fatti che hanno portato al Provvedimento..." onchange="setProv('${sq}',${idx},'note',this.value)">${esc(it.note || '')}</textarea></div></div>`;
+  }
+  function renderDisciplinaUI() {
+    $('disciplina-ui').innerHTML = DISC_PANELS.map(p => {
+      const col = (sq) => {
+        const righe = listaDisc(sq).map((it, idx) => isPanel(p, it) ? provHtml(p, sq, it, idx) : '').join('');
+        return `<div style="margin-bottom:10px;"><div class="team-head">${esc(SQNOME(sq))}</div>${righe}
+          <div class="gray-bar edit-only"><button type="button" class="tiny-btn n" onclick="aggiungiProv('${p.key}','${sq}')"><img src="icon_add.png" alt="">Aggiungi Provvedimento</button></div></div>`;
+      };
+      return `<div class="acc ${discOpen === p.key ? 'open' : ''}"><div class="acc-h" onclick="toggleAcc('${p.key}')">${p.t}</div>
+        <div class="acc-b"><div class="yellow-bar" style="margin-bottom:8px;">${esc(p.desc)}</div>${col('casa')}${col('fuori')}</div></div>`;
+    }).join('');
+    applyReadOnly();
+  }
+  window.toggleAcc = (k) => { discOpen = (discOpen === k) ? '' : k; renderDisciplinaUI(); };
+  window.aggiungiProv = (key, sq) => {
+    const p = DISC_PANELS.find(x => x.key === key);
+    const disponibili = p.sogg === 'dirigente' ? dirigenti(sq) : (p.sogg === 'tesserato' ? [...giocatori(sq), ...dirigenti(sq)] : giocatori(sq));
+    if (disponibili.length === 0) { showMsg('Disciplina', "Devi prima inserire i tesserati nella scheda <b>Liste Gara</b> per questa squadra."); return; }
+    listaDisc(sq).push({ tipo: p.tipo, soggetto: p.sogg, tempo: '', minuto: '', personaId: '', tesserato: '', motivo: p.mot && p.mot.length === 1 ? p.mot[0] : '', note: '' });
+    renderDisciplinaUI();
+  };
+  window.rimuoviProv = (sq, idx) => { listaDisc(sq).splice(idx, 1); renderDisciplinaUI(); };
+  window.setProv = (sq, idx, campo, v) => {
+    const it = listaDisc(sq)[idx];
+    if (campo === 'personaId') {
+      const el = v; v = el.value; it.personaId = v;
+      const o = el.options[el.selectedIndex]; it.tesserato = v ? o.text : '';
+    } else { it[campo] = v; }
+    const p = DISC_PANELS.find(x => isPanel(x, it));
+    const row = $(`prov-${sq}-${idx}`); if (row && p) row.classList.toggle('ok', discOkItem(p, it));
+  };
+
+  // =====================================================================
+  //  7. SOSTITUZIONI
+  // =====================================================================
+  const listaSost = (sq) => sq === 'casa' ? REF().sostituzioniCasa : REF().sostituzioniFuori;
+  const sostOk = (s) => !!(s.tempo && s.minuto && s.esceId && s.entraId);
+  function sostHtml(sq, s, i) {
+    const gg = giocatori(sq);
+    const tOpts = `<option value=""></option><option ${s.tempo === '1 Tempo' ? 'selected' : ''}>1 Tempo</option><option ${s.tempo === '2 Tempo' ? 'selected' : ''}>2 Tempo</option>`;
+    const mOpts = '<option value=""></option>' + Array.from({ length: 120 }, (_, k) => `<option value="${k + 1}" ${String(k + 1) === String(s.minuto) ? 'selected' : ''}>${k + 1} min.</option>`).join('');
+    return `<div class="sost-row ${sostOk(s) ? 'ok' : ''}" id="sost-${sq}-${i}">
+      <img src="icon_del.png" class="del edit-only" onclick="rimuoviSost('${sq}',${i})" alt="Rimuovi">
+      <div><small>Tempo</small><select onchange="setSost('${sq}',${i},'tempo',this)">${tOpts}</select></div>
+      <div><small>Minuto</small><select onchange="setSost('${sq}',${i},'minuto',this)">${mOpts}</select></div>
+      <div><small>Esce</small><select onchange="setSost('${sq}',${i},'esce',this)">${optLista(gg, s.esceId, s.esce)}</select></div>
+      <div><small>Entra</small><select onchange="setSost('${sq}',${i},'entra',this)">${optLista(gg, s.entraId, s.entra)}</select></div></div>`;
+  }
+  function renderSostituzioniUI() {
+    ['casa', 'fuori'].forEach(sq => { const l = listaSost(sq); if (l.length === 0 && !isCurrentReadOnly) for (let i = 0; i < 5; i++) l.push({ tempo: '', minuto: '', esce: '', esceId: '', entra: '', entraId: '' }); });
+    const col = (sq) => `<div class="sec-box" style="padding-bottom:0;"><div class="team-head">${esc(SQNOME(sq))}</div>
+      <div class="yellow-bar">Normalmente per questa Categoria sono previste al massimo 5 Sostituzioni.</div>
+      ${listaSost(sq).map((s, i) => sostHtml(sq, s, i)).join('')}
+      <div class="gray-bar edit-only"><button type="button" class="tiny-btn n" onclick="aggiungiSost('${sq}')"><img src="icon_add.png" alt="">Aggiungi Sostituzione</button></div></div>`;
+    $('sostituzioni-ui').innerHTML = col('casa') + col('fuori');
+    applyReadOnly();
+  }
+  window.aggiungiSost = (sq) => { listaSost(sq).push({ tempo: '', minuto: '', esce: '', esceId: '', entra: '', entraId: '' }); renderSostituzioniUI(); };
+  window.rimuoviSost = (sq, i) => { listaSost(sq).splice(i, 1); renderSostituzioniUI(); };
+  window.setSost = (sq, i, campo, el) => {
+    const s = listaSost(sq)[i], v = el.value;
+    if (campo === 'esce' || campo === 'entra') {
+      const o = el.options[el.selectedIndex];
+      s[campo + 'Id'] = v; s[campo] = v ? o.text : '';
+      if (s.esceId && s.esceId === s.entraId) { showMsg('Sostituzioni', 'Il calciatore che esce e quello che entra devono essere diversi.'); s[campo + 'Id'] = ''; s[campo] = ''; el.value = ''; }
+    } else { s[campo] = v; }
+    const row = $(`sost-${sq}-${i}`); if (row) row.classList.toggle('ok', sostOk(s));
+  };
+
+  // =====================================================================
+  //  9. ALLEGATI + UFFICIALI DI GARA
+  // =====================================================================
+  function ufficialiGara(g) {
+    const des = g.designazione || {};
+    return [['ae', 'AR'], ['aa1', 'AA1'], ['aa2', 'AA2'], ['qu', 'QU']].filter(([k]) => des[k]).map(([k, ruolo]) => {
+      const nominativo = des[k], u = findUtente(nominativo);
+      let nome, cognome;
+      if (u) { nome = (u.nome || '').toUpperCase(); cognome = (u.cognome || '').toUpperCase(); }
+      else { const t = nomeSenzaSezione(nominativo).split(' '); cognome = (t[0] || '').toUpperCase(); nome = t.slice(1).join(' ').toUpperCase(); }
+      return { key: k, ruolo, nominativo, codMec: (u && u.codMecc) || '', nome, cognome, sezione: sezioneDa(nominativo) || String((u && u.sezione) || '').toUpperCase(), tel: telefonoDa(u) };
+    });
+  }
+  function rapportoCell(u) {
+    if (u.key === 'ae') return '';
+    const st = REF().assistentiStatus[u.key] || 'rosso';
+    const cfg = st === 'verde' ? ['g', 'Confermato'] : st === 'giallo' ? ['y', 'Da Confermare'] : ['r', 'Da Compilare'];
+    return `<button type="button" class="rap-btn" onclick="apriModalAssistente('${u.key}')"><span class="dot ${cfg[0]}"></span>${cfg[1]}</button>`;
+  }
+  function renderAllegatiUI() {
+    const uff = ufficialiGara(currentGara);
+    const sqOpts = (sel) => ['', 'casa', 'fuori'].map(v => `<option value="${v}" ${v === sel ? 'selected' : ''}>${v === 'casa' ? esc(currentGara.squadraCasa).toUpperCase() : v === 'fuori' ? esc(currentGara.squadraOspite).toUpperCase() : ''}</option>`).join('');
+    const tipi = ['LISTA CALCIATORI', 'ALTRO (SPECIFICARE)'];
+    const righe = REF().allegati.map((a, i) => `<div class="all-row">
+      <img src="icon_del.png" class="del edit-only" onclick="rimuoviAllegato(${i})" alt="Rimuovi">
+      <select onchange="setAllegato(${i},'tipo',this.value)"><option value=""></option>${tipi.map(t => `<option ${t === a.tipo ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <select onchange="setAllegato(${i},'squadra',this.value)">${sqOpts(a.squadra)}</select>
+      <textarea maxlength="2000" placeholder="Eventuali Note relative all'Allegato..." onchange="setAllegato(${i},'note',this.value)">${esc(a.note || '')}</textarea>
+      <div style="font-size:11.5px;">${a.nomeFile ? `📎 ${esc(a.nomeFile)}` : ''}<input type="file" class="edit-only" onchange="setAllegato(${i},'nomeFile',this.files[0] ? this.files[0].name : '')"></div></div>`).join('');
+    $('allegati-ui').innerHTML = `
+      <div class="sec-box" style="padding-bottom:6px;">
+        <div class="sec-head">Ufficiali di Gara Designati</div>
+        <div class="yellow-bar">L'Arbitro potrà inviare il Referto al Giudice Sportivo solo dopo che TUTTI gli Ufficiali di Gara avranno compilato il proprio.</div>
+        <table class="off-table"><thead><tr><th>CodMec</th><th>Nome</th><th>Cognome</th><th>Sezione</th><th>Ruolo</th><th>Recapito</th><th>Rapporto</th></tr></thead>
+        <tbody>${uff.map(u => `<tr><td>${esc(u.codMec)}</td><td>${esc(u.nome)}</td><td>${esc(u.cognome)}</td><td>${esc(u.sezione)}</td><td>${u.ruolo}</td><td>${esc(u.tel)}</td><td>${rapportoCell(u)}</td></tr>`).join('')}</tbody></table>
+        <div style="text-align:right; padding-right:4px;" class="edit-only"><button type="button" class="tiny-btn n" onclick="renderAllegatiUI()">Ricarica Tabella</button></div>
+      </div>
+      <div class="red-bar">ATTENZIONE!!! Stiamo riscontrando un problema con gli Allegati in formato PDF. Qualora l'Anteprima della Stampa non riesca ad essere generata correttamente RIMUOVERE i suddetti ed inserirli in formato immagine (JPEG o PNG).</div>
+      <div class="sec-box">
+        <div class="sec-head">Allegati Referto</div>
+        ${righe}
+        <div class="gray-bar edit-only"><button type="button" class="tiny-btn n" onclick="aggiungiAllegato()"><img src="icon_add.png" alt="">Aggiungi Allegato</button></div>
+      </div>`;
+    applyReadOnly();
+  }
+  window.renderAllegatiUI = renderAllegatiUI;
+  window.aggiungiAllegato = () => { REF().allegati.push({ tipo: '', squadra: '', note: '', nomeFile: '' }); renderAllegatiUI(); };
+  window.rimuoviAllegato = (i) => { REF().allegati.splice(i, 1); renderAllegatiUI(); };
+  window.setAllegato = (i, campo, v) => { REF().allegati[i][campo] = v; if (campo === 'nomeFile') renderAllegatiUI(); };
+
+  // ---------- popup assistenti (anteprima / compilazione delegata) ----------
+  window.apriModalAssistente = (ruoloKey) => {
+    const u = ufficialiGara(currentGara).find(x => x.key === ruoloKey); if (!u) return;
+    const ref = REF();
+    const st = ref.assistentiStatus[ruoloKey] || 'rosso';
+    const dati = ref.assistentiDati[ruoloKey] || { tipo: 'niente', note: '' };
+    const titolo = ruoloKey === 'aa1' ? "Assistente dell'arbitro n°1" : (ruoloKey === 'aa2' ? "Assistente dell'arbitro n°2" : 'Quarto Ufficiale');
+    assistenteCorrente = ruoloKey;
+    const testo = (dati.note && dati.note.trim()) ? dati.note : (dati.tipo === 'segnalazioni' ? 'SEGNALAZIONI EFFETTUATE' : 'NIENTE DA SEGNALARE');
+    const anagr = `<table><tr><th>NOME</th><td>${esc(u.nome)}</td></tr><tr><th>COGNOME</th><td>${esc(u.cognome)}</td></tr><tr><th>SEZIONE</th><td>${esc(u.sezione)}</td></tr></table>`;
+    if (st === 'giallo' || st === 'verde' || isCurrentReadOnly) {
+      $('modal-asst-title').textContent = 'Anteprima Referto';
+      $('modal-assistente-body').innerHTML = `<div class="pt">${titolo}</div><div class="yellow-bar" style="margin:0 0 0; border-top:0;">Questa Segnalazione è stata inclusa come Allegato.</div>${anagr}
+        <div class="pt" style="margin-top:0; font-size:15px;">Testo della Segnalazione</div><div class="area">${esc(testo)}</div>`;
+      $('modal-asst-footer').innerHTML = (st === 'giallo' && !isCurrentReadOnly)
+        ? `<button type="button" class="btn-success" onclick="confermaAssistenteDaArbitro()">Conferma Referto Assistente</button><button type="button" class="btn-secondary" onclick="chiudiModal('modal-assistente')">Chiudi</button>`
+        : `<button type="button" class="btn-secondary" onclick="chiudiModal('modal-assistente')">Chiudi</button>`;
+    } else {
+      $('modal-asst-title').textContent = 'Anteprima Referto - Compilazione Delegata';
+      $('modal-assistente-body').innerHTML = `<div class="pt">${titolo}</div>
+        <div class="yellow-bar" style="background:#ffd0cb; border-color:#e08a82;">L'assistente non ha ancora inviato il rapporto: puoi compilarlo e confermarlo direttamente tu.</div>${anagr}
+        <div class="pt" style="margin-top:0; font-size:15px;">Esito Segnalazione</div>
+        <div style="padding:4px; background:#fff; border:1px solid #c8c8c8;"><select id="popup-asst-tipo" style="width:100%;" onchange="if(this.value==='niente' && !document.getElementById('popup-asst-note').value) document.getElementById('popup-asst-note').value='NIENTE DA SEGNALARE';"><option value="niente">NIENTE DA SEGNALARE</option><option value="segnalazioni">SEGNALAZIONI EFFETTUATE</option></select></div>
+        <div class="pt" style="font-size:15px;">Testo della Segnalazione</div>
+        <textarea id="popup-asst-note" style="width:100%; height:110px; border:1px solid #666; padding:6px; font-family:var(--font); font-size:12px;">NIENTE DA SEGNALARE</textarea>`;
+      $('modal-asst-footer').innerHTML = `<button type="button" class="btn-success" onclick="salvaEConfermaAssistenteDaArbitro()">Salva e Conferma</button><button type="button" class="btn-secondary" onclick="chiudiModal('modal-assistente')">Chiudi</button>`;
+    }
+    $('modal-assistente').classList.add('active');
+  };
+  window.confermaAssistenteDaArbitro = async () => {
+    REF().assistentiStatus[assistenteCorrente] = 'verde';
+    chiudiModal('modal-assistente'); renderAllegatiUI();
+    await salvaTuttoDB(); showToast('Referto assistente confermato!');
+  };
+  window.salvaEConfermaAssistenteDaArbitro = async () => {
+    REF().assistentiDati[assistenteCorrente] = { tipo: $('popup-asst-tipo').value, note: $('popup-asst-note').value };
+    REF().assistentiStatus[assistenteCorrente] = 'verde';
+    chiudiModal('modal-assistente'); renderAllegatiUI();
+    await salvaTuttoDB(); showToast('Rapporto assistente compilato e confermato!');
+  };
+
+  // =====================================================================
+  //  RAPPORTO ASSISTENTE (AA1 / AA2)
+  // =====================================================================
+  function apriRapportoAssistente(g, consegnato) {
+    ensureReferto(g);
+    const ruoloKey = myRoleInGara.toLowerCase();
+    $('asst-sub-title').textContent = `Rapporto Assistente dell'arbitro (${myRoleInGara})`;
+    $('asst-table-ufficiali').innerHTML = ufficialiGara(g).map(u => `<tr><td>${esc(u.codMec)}</td><td>${esc(u.nome)}</td><td>${esc(u.cognome)}</td><td>${esc(u.sezione)}</td><td>${u.ruolo}</td><td>${esc(u.tel)}</td></tr>`).join('');
+    const dati = g.referto.assistentiDati[ruoloKey] || { tipo: 'niente', note: '' };
+    const st = g.referto.assistentiStatus[ruoloKey] || 'rosso';
+    $('asst-segnalazione-tipo').value = dati.tipo || 'niente';
+    $('asst-note-testo').value = dati.note || '';
+    $('cnt-asst-note').textContent = Math.max(0, 2000 - ($('asst-note-testo').value.length));
+    const locked = consegnato || st === 'verde' || isCurrentReadOnly;
+    $('asst-banner').style.display = st === 'verde' ? 'block' : 'none';
+    $('asst-segnalazione-tipo').disabled = locked;
+    $('asst-note-testo').disabled = locked;
+    $('btn-invia-assistente').style.display = locked ? 'none' : 'flex';
+    showView('assistente');
+  }
+  window.inviaRefertoAssistente = async () => {
+    if (!currentGara) return;
+    const ruoloKey = myRoleInGara.toLowerCase();
+    ensureReferto(currentGara);
+    REF().assistentiDati[ruoloKey] = { tipo: $('asst-segnalazione-tipo').value, note: $('asst-note-testo').value };
+    REF().assistentiStatus[ruoloKey] = 'giallo';
+    try {
+      await updateDoc(doc(db, "gare_programmate", currentGara.id), {
+        "referto.assistentiDati": REF().assistentiDati, "referto.assistentiStatus": REF().assistentiStatus
+      });
+      showToast("Rapporto inviato con successo all'Arbitro!");
+      chiudiWizard();
+      await fetchRefertiGare(currentUser);
+    } catch (e) { showMsg('Errore', "Errore invio: " + esc(e.message)); }
+  };
+
+  // =====================================================================
+  //  INVIO AL GIUDICE SPORTIVO (con conferma, irreversibile)
+  // =====================================================================
+  window.consegnaRefertoDiretto = async (id) => {
+    const g = gareAcceptate.find(item => item.id === id); if (!g) return;
+    currentGara = g; ensureReferto(g); myRoleInGara = 'AR';
+    chiediInvioGS();
+  };
+  window.chiediInvioGS = () => {
+    if (!currentGara) return;
+    raccogliCampiTestuali();
+    const des = currentGara.designazione || {};
+    const st = REF().assistentiStatus || {};
+    if (des.aa1 && st.aa1 !== 'verde') { showMsg('Invio non possibile', "Impossibile inviare al Giudice Sportivo: manca o non è confermato il rapporto del <b>1° Assistente (AA1)</b>."); return; }
+    if (des.aa2 && st.aa2 !== 'verde') { showMsg('Invio non possibile', "Impossibile inviare al Giudice Sportivo: manca o non è confermato il rapporto del <b>2° Assistente (AA2)</b>."); return; }
+    $('confirm-gs-text').innerHTML = `<div style="margin-bottom:10px;">Confermi l'invio ufficiale del referto al Giudice Sportivo per la gara <b>${esc(currentGara.squadraCasa)} - ${esc(currentGara.squadraOspite)}</b>?</div>
+      <div>L'azione è <b>irreversibile</b>: la gara risulterà omologata e il referto non sarà più modificabile.</div>`;
+    $('btn-conferma-gs').disabled = false; $('btn-conferma-gs').textContent = 'Conferma';
+    $('modal-confirm-gs').classList.add('active');
+  };
+  window.eseguiConsegna = async () => {
+    const btn = $('btn-conferma-gs');
+    try {
+      btn.disabled = true; btn.textContent = 'Invio...';
+      const r = REF();
+      r.consegnato = true; r.aperto = true;
+      TABS.forEach(k => r.schedeSalvate[k] = true);
+      r.orarioFine = calcTempiDurata().fine;
+      const { c, f } = conteggioReti();
+      const risultato = `${c} - ${f}`;
+      currentGara.risultato = risultato;
+      await updateDoc(doc(db, "gare_programmate", currentGara.id), {
+        referto: JSON.parse(JSON.stringify(r)), risultato, golCasa: c, golFuori: f, statoOmologazione: "Omologata"
+      });
+      chiudiModal('modal-confirm-gs');
+      showToast('Referto inviato e gara omologata con successo!');
+      chiudiWizard();
+      await fetchRefertiGare(currentUser);
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false; btn.textContent = 'Conferma';
+      showMsg('Errore', "Errore durante l'invio: " + esc(e.message));
+    }
+  };
+
+  // =====================================================================
+  //  STAMPA (PDF) DEL REFERTO
+  // =====================================================================
+  window.stampaReferto = (id) => {
+    const g = id ? gareAcceptate.find(x => x.id === id) : currentGara;
+    if (!g) return;
+    if (id) { currentGara = g; ensureReferto(g); } else { raccogliCampiTestuali(); }
+    const r = REF();
+    const nm = (sq) => sq === 'casa' ? g.squadraCasa : g.squadraOspite;
+    const T = (head, rows) => `<table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(x => `<tr>${x.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('') || `<tr><td colspan="${head.length}">-</td></tr>`}</tbody></table>`;
+    const lista = (sq) => T(['N.', 'Tesserato', 'Cap.', 'Ruolo', 'Documento'], LISTA(sq).filter(s => s.nome).map(s => [s.numero, s.nome, s.cap, s.tipo === 'dirigente' ? s.ruolo : (s.tipo === 'riserva' ? 'Riserva' : 'Titolare'), `${s.docTipo} ${s.docNumero || ''}`]));
+    const { map, fine } = calcTempiDurata();
+    const durata = T(['Periodo', 'Evento', 'Minuti', 'Dalle', 'Alle', 'Note'], r.durataItems.map(i => [PER_TITLE[i.periodo], i.tipo, i.minuti, map[i.id]?.st, map[i.id]?.en, i.note]));
+    const reti = T(['Squadra', 'Tempo', 'Minuto', 'Rigore'], r.reti.map(x => [nm(x.squadra), x.tempo, x.minuto, x.rigore ? 'Sì' : 'No']));
+    const disc = (sq) => T(['Provvedimento', 'Tempo', 'Min.', 'Tesserato', 'Motivo / Fatti'], listaDisc(sq).map(x => [`${x.tipo.toUpperCase()}${x.soggetto === 'dirigente' ? ' DIRIGENTE' : ''}`, x.tempo, x.minuto, x.tesserato, `${x.motivo || ''} ${x.note || ''}`]));
+    const sost = (sq) => T(['Tempo', 'Minuto', 'Esce', 'Entra'], listaSost(sq).filter(s => s.esce || s.entra).map(s => [s.tempo, s.minuto, s.esce, s.entra]));
+    const uff = T(['CodMec', 'Nome', 'Cognome', 'Sezione', 'Ruolo', 'Recapito'], ufficialiGara(g).map(u => [u.codMec, u.nome, u.cognome, u.sezione, u.ruolo, u.tel]));
+    const cnt = conteggioReti();
+    const ord = ORDINE.find(o => o.val === r.forzaPubblica)?.t || '', amb = AMBUL.find(o => o.val === r.ambulanza)?.t || '';
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Referto ${esc(g.numeroGara || '')}</title><style>
+      body{font-family:Arial,sans-serif;font-size:11px;color:#000;margin:18px} h1{font-size:16px;margin:0 0 4px} h2{font-size:12px;background:#e4eeee;padding:3px 5px;margin:12px 0 4px}
+      table{width:100%;border-collapse:collapse;margin-bottom:4px} th,td{border:1px solid #999;padding:2px 4px;text-align:left;vertical-align:top} th{background:#eee} p{margin:2px 0 6px;white-space:pre-wrap}</style></head><body>
+      <h1>Referto di Gara n. ${esc(g.numeroGara || '')} ${r.consegnato ? '(Omologata)' : '(Bozza)'}</h1>
+      <p><b>${esc(g.categoria)}</b> girone ${esc(g.girone || '')} - ${esc(g.squadraCasa)} - ${esc(g.squadraOspite)} - ${esc(g.dataGara)} ore ${esc(g.oraGara)} - ${esc(g.impianto || '')} (${esc(g.localita || '')})</p>
+      <p><b>Risultato: ${cnt.c} - ${cnt.f}</b></p>
+      <h2>Svolgimento</h2><p><b>${esc(r.svolgimento)}</b></p><p>${esc(r.noteSvolgimento || '')}</p>
+      <h2>Sicurezza</h2><p>Misure d'Ordine: <b>${esc(ord)}</b> - Ambulanza: <b>${esc(amb)}</b></p><p>${esc(r.noteSicurezza || '')}</p>
+      <h2>Liste Gara - ${esc(g.squadraCasa)}</h2>${lista('casa')}<h2>Liste Gara - ${esc(g.squadraOspite)}</h2>${lista('fuori')}
+      <h2>Durata (fine gara ${fine})</h2>${durata}<h2>Reti</h2>${reti}
+      <h2>Disciplina - ${esc(g.squadraCasa)}</h2>${disc('casa')}<h2>Disciplina - ${esc(g.squadraOspite)}</h2>${disc('fuori')}
+      <h2>Sostituzioni - ${esc(g.squadraCasa)}</h2>${sost('casa')}<h2>Sostituzioni - ${esc(g.squadraOspite)}</h2>${sost('fuori')}
+      <h2>Note sul Pubblico ed eventuali Incidenti</h2><p>${esc(r.notePubblico || '')}</p><h2>Note Varie ed Eventuali</h2><p>${esc(r.noteVarie || '')}</p>
+      <h2>Ufficiali di Gara</h2>${uff}</body></html>`;
+    const f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+    document.body.appendChild(f);
+    f.contentDocument.open(); f.contentDocument.write(html); f.contentDocument.close();
+    setTimeout(() => { f.contentWindow.focus(); f.contentWindow.print(); setTimeout(() => f.remove(), 2000); }, 300);
+  };
+
+  // =====================================================================
+  //  LOGOUT E MENU
+  // =====================================================================
+  $('logout-btn').addEventListener('click', async () => {
+    try { await signOut(auth); window.location.replace('index.html'); } catch (e) { console.error("Errore durante il logout:", e); }
+  });
+  document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+    link.addEventListener('click', (e) => { e.preventDefault(); link.parentElement.classList.toggle('open'); });
+  });
+</script>
+</body>
+</html>

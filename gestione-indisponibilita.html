@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --blue: #2a8ac4;
+      --orange: #f29a1c;
+      --text-muted: #444444;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative; height: 77px; background: #fff; border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45); display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-end; padding: 0 18px 0 130px; z-index: 5;
+    }
+    .aia-header img.aia-logo { position: absolute; left: 12px; top: 2px; height: 100px; width: auto; }
+    .aia-header .fig { font-weight: 700; font-size: 19px; color: #d2b66f; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.15; }
+    .aia-header .aia { font-weight: 700; font-size: 26px; letter-spacing: -.5px; color: #1d5fa6; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.1; }
+
+    /* ========== LAYOUT / SIDEBAR ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+    .sidebar { width: 251px; flex-shrink: 0; background: #d1d5df; border-radius: 8px 8px 10px 10px; padding: 23px 0 42px; overflow: hidden; }
+    .side-section, .sidebar li[style*="uppercase"] {
+      display: flex !important; align-items: center; gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important; padding: 3px 6px 3px 4px !important; margin: 0 !important;
+      font-family: var(--font); font-size: 20px !important; font-weight: 700; letter-spacing: .3px !important;
+      text-transform: none !important; color: #000 !important; text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon, .sidebar li[style*="uppercase"]::before {
+      content: ""; width: 21px; height: 28px; border-radius: 3px; background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5); flex-shrink: 0;
+    }
+    .sidebar-nav, .sub-nav { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 15px; height: 22.5px; font-size: 14.5px; color: #0d0d0d; text-decoration: none; white-space: nowrap; }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+    .sidebar-nav li a::before { content: ""; width: 20px; height: 20px; background: url("icon075.gif") center / contain no-repeat; flex-shrink: 0; }
+    .sidebar-nav li.cat:not(.open) > a::before { background: url("icon074.gif") center / contain no-repeat; }
+    .sidebar-nav li a.globe::before { content: ""; width: 20px; height: 20px; margin: 0 1px; border: none; border-radius: 0; background: url("icon073.gif") center / contain no-repeat; box-shadow: none; }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TOPBAR / MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; background: #d1d5df; border-radius: 8px; height: 50px; padding: 0 12px 0 13px; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email { font-weight: 700; font-size: 19px; letter-spacing: -.3px; color: #000; text-shadow: 1px 1px 2px rgba(0,0,0,.35); }
+    .role-badge::after { content: " -"; }
+    .btn-logout { width: 28px; height: 28px; padding: 0; border: 0; background: url("icon_system_logout.png") center / contain no-repeat; font-size: 0; cursor: pointer; }
+    .dashboard-body { background: #fff; border-radius: 0 0 8px 8px; margin: 11px 0 0 3px; padding: 7px 6px 18px; }
+    .banca-dati-header { margin: 0 0 12px; border-bottom: 2px solid #f0a03a; }
+    .banca-dati-header h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.3px; color: var(--orange); text-shadow: 1px 1px 2px rgba(0,0,0,.35); line-height: 1.2; }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 14px; }
+    .elenco-title { background: var(--teal); color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.2px; padding: 3px 13px 4px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+    /* ========== TABELLE / FILTRI / PULSANTI ========== */
+    .box-container { background: #d1d5df; padding: 12px 12px 15px; }
+    .table-scroll { width: 100%; overflow-x: auto; background: #fff; border: 1px solid #c4c4c4; }
+    .s4y-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 12.5px; color: #111; }
+    .s4y-table th {
+      background: linear-gradient(#f5f6f9, #dce0e9);
+      border: 1px solid #c4c4c4;
+      padding: 5px 7px;
+      font-weight: 700;
+      text-align: left;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .s4y-table th.center-col { text-align: center; }
+    .s4y-table td {
+      border: 1px solid #c4c4c4;
+      padding: 4px 7px;
+      height: 29px;
+      vertical-align: middle;
+      font-size: 12.5px;
+    }
+    .s4y-table td.nowrap { white-space: nowrap; }
+    .s4y-table td.center-col { text-align: center; white-space: nowrap; }
+    .s4y-table tr:hover td { background: #f8fafc; }
+    .s4y-table tr.selected-user td { background: #e6f2fa; }
+    .s4y-table tfoot td { background: #e8eeee; font-weight: 700; padding: 5px 8px; color: #111; }
+
+    .status-icon { width: 16px; height: 16px; vertical-align: middle; display: inline-block; }
+    .attach-icon { width: 15px; height: 15px; vertical-align: middle; display: inline-block; }
+    .attach-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+
+    .action-btn {
+      background: none; border: none; padding: 1px 3px; margin: 0 2px;
+      cursor: pointer; vertical-align: middle; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .action-btn img { width: 16px; height: 16px; display: block; }
+    .action-btn:hover { opacity: .78; }
+
+    .mini-btn {
+      font-family: var(--font); font-size: 11.5px; font-weight: 700;
+      padding: 2px 7px; border-radius: 3px; cursor: pointer; margin: 0 2px;
+      border: 1px solid #b5bcc8; background: linear-gradient(#fdfdfd, #e6e9ef); color: #111;
+    }
+    .mini-btn:hover { background: #fff; }
+    .mini-btn.approve { background: #3f9a2a; border-color: #2f7a1d; color: #fff; }
+    .mini-btn.approve:hover { background: #46aa2f; }
+    .mini-btn.reject { background: #c0392b; border-color: #96281b; color: #fff; }
+    .mini-btn.reject:hover { background: #d04334; }
+    .mini-btn.select-u { color: var(--blue); border-color: #b7c8d6; }
+
+    .btn-s4y {
+      display: inline-block; padding: 4px 14px;
+      background: linear-gradient(#fdfdfd, #eef2f5); color: var(--blue);
+      border: 1px solid #c6d2dc; border-radius: 4px;
+      font-family: var(--font); font-weight: 700; font-size: 13px;
+      cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+    .btn-s4y:hover { background: #fff; }
+    .btn-s4y.primary { background: #3f9a2a; border-color: #2f7a1d; color: #fff; }
+    .btn-s4y.primary:hover { background: #46aa2f; }
+
+    .filter-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #c4c4c4; margin-bottom: 10px; }
+    .filter-table td { border: 1px solid #c4c4c4; padding: 5px 8px; font-size: 13px; vertical-align: middle; }
+    .filter-table td.flbl { background: #e8eeee; font-weight: 700; white-space: nowrap; width: 130px; }
+    .filter-table input[type="text"],
+    .filter-table select {
+      font-family: var(--font); font-size: 13px; height: 24px; width: 100%;
+      border: 1px solid #666; padding: 2px 6px; color: #111; background: #fff;
+    }
+
+    .selected-user-box {
+      background: #fff; border: 1px solid #c4c4c4; padding: 8px 10px; margin: 10px 0;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;
+      font-size: 13px;
+    }
+
+    /* ========== POPUP / DIALOG ========== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; align-items: center; justify-content: center; padding: 16px;
+      background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px), rgba(42, 80, 99, .72);
+      z-index: 3600;
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative; width: 100%; max-width: 560px; background: #f4f4f4; border: 1px solid #cfcfcf;
+      border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.5); overflow: hidden; display: flex;
+      flex-direction: column; max-height: calc(100vh - 32px); padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f); border: 1px solid #e58f14; border-radius: 4px;
+      color: #fff; padding: 7px 14px 7px 16px; font-weight: 700; font-size: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .designation-header-bar button {
+      background: none; border: none; color: #fff; font-size: 22px; font-weight: 700; cursor: pointer; line-height: 1; padding: 0;
+    }
+    .designation-body-content {
+      padding: 14px 16px; overflow-y: auto; background: linear-gradient(#fdfdfd, #f2f2f2);
+      font-size: 13.5px; line-height: 20px; color: #000;
+    }
+    .modal-form-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #c4c4c4; }
+    .modal-form-table td { border: 1px solid #c4c4c4; padding: 5px 8px; font-size: 13px; vertical-align: middle; }
+    .modal-form-table td.mlbl { background: #e8eeee; font-weight: 700; white-space: nowrap; width: 155px; }
+    .modal-form-table input[type="text"],
+    .modal-form-table select,
+    .modal-form-table textarea {
+      font-family: var(--font); font-size: 13px; color: #111; background: #fff; border: 1px solid #666; padding: 2px 6px;
+    }
+    .modal-form-table input[type="text"],
+    .modal-form-table select { height: 24px; width: 210px; max-width: 100%; }
+    .modal-form-table input[type="text"].readonly-f { background: #dcdcdc; border-color: #9a9a9a; font-weight: 700; width: 260px; }
+    .modal-form-table textarea { width: 100%; height: 70px; resize: vertical; padding: 4px 6px; }
+    .file-help { font-size: 11px; color: #333; margin-top: 3px; display: block; }
+    .current-attach-info { font-size: 12px; color: #28506a; margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .designation-footer-bar {
+      padding: 10px 16px; background: #f4f4f4; border-top: 1px solid #dcdcdc;
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .btn-secondary, .btn-success {
+      font-family: var(--font); font-size: 14px; font-weight: 700; border-radius: 4px; cursor: pointer; padding: 6px 15px;
+    }
+    .btn-secondary { background: #fff; color: var(--blue); border: 1px solid #d3dbe3; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .btn-secondary:hover { background: #f1f7fb; }
+    .btn-success { background: #3f9a2a; color: #fff; border: 1px solid #2f7a1d; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+
+    /* ========== TOAST / FOOTER ========== */
+    .toast {
+      position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px);
+      background: #244658; color: #fff; font-size: 15px; padding: 10px 20px; border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 5000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .aia-footer {
+      position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: calc(100% - 16px); max-width: 1250px;
+      background: #333; border-radius: 9px 9px 0 0; box-shadow: 0 -1px 5px rgba(0,0,0,.5); padding: 7px 12px 6px;
+      display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex; align-items: center; gap: 4px; background: #f4f4f4; color: #666;
+      font-family: Arial, Helvetica, sans-serif; font-size: 22px; padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px; height: 28px; border-radius: 50%; background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative; display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: ""; position: absolute; inset: 7px; background: #4285f4; border: 2px solid #fff; border-radius: 50%;
+    }
+
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li></ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat open">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav"><li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav"><li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li></ul>
+          </li>
+        </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header"><h3>Gestione Indisponibilità</h3></div>
+
+          <!-- SEZIONE SUPERIORE: RICHIESTE IN ARRIVO -->
+          <div class="box-wrap">
+            <div class="elenco-title">
+              <span>Richieste di Indisponibilità in Arrivo</span>
+              <button type="button" class="btn-s4y" onclick="ricaricaDati()">Aggiorna</button>
+            </div>
+            <div class="box-container">
+              <div class="table-scroll">
+                <table class="s4y-table" id="incoming-table">
+                  <thead>
+                    <tr>
+                      <th>Associato</th>
+                      <th>Sezione</th>
+                      <th>Tipo</th>
+                      <th>Inizio</th>
+                      <th>Fine</th>
+                      <th>Motivo</th>
+                      <th>Note</th>
+                      <th class="center-col">Allegato</th>
+                      <th class="center-col">Stato</th>
+                      <th class="center-col">Decisione</th>
+                      <th class="center-col">Azioni</th>
+                    </tr>
+                  </thead>
+                  <tbody id="incoming-tbody">
+                    <tr><td colspan="11" style="text-align:center; padding:12px;">Caricamento richieste in arrivo...</td></tr>
+                  </tbody>
+                  <tfoot>
+                    <tr><td colspan="11" id="incoming-totali">RICHIESTE IN ARRIVO : 0</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEZIONE INFERIORE: RICERCA ASSOCIATO E GESTIONE / INSERIMENTO INDISPONIBILITÀ -->
+          <div class="box-wrap">
+            <div class="elenco-title">Ricerca Associato e Gestione Indisponibilità</div>
+            <div class="box-container">
+
+              <table class="filter-table">
+                <tr>
+                  <td class="flbl">Organico</td>
+                  <td>
+                    <select id="filtro-organico" onchange="applicaFiltriAssociati()">
+                      <option value="">Tutti</option>
+                    </select>
+                  </td>
+                  <td class="flbl">Sezione</td>
+                  <td>
+                    <select id="filtro-sezione" onchange="applicaFiltriAssociati()">
+                      <option value="">Tutte</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="flbl">Nome / Cod. Mecc.</td>
+                  <td>
+                    <input type="text" id="filtro-nome" placeholder="Cerca nome, cognome o cod. mecc." oninput="applicaFiltriAssociati()">
+                  </td>
+                  <td class="flbl">Data (gg/mm/aaaa)</td>
+                  <td>
+                    <input type="text" id="filtro-data" maxlength="10" placeholder="es. 21/10/2026" oninput="applicaFiltriAssociati()">
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="text-align:right; padding:6px 8px;">
+                    <button type="button" class="btn-s4y" onclick="resetFiltriAssociati()">Pulisci Filtri</button>
+                  </td>
+                </tr>
+              </table>
+
+              <div class="table-scroll">
+                <table class="s4y-table" id="associati-table">
+                  <thead>
+                    <tr>
+                      <th>Cod. Mecc.</th>
+                      <th>Associato</th>
+                      <th>Sezione</th>
+                      <th>Organico</th>
+                      <th class="center-col">Indisp. Totali</th>
+                      <th class="center-col">Seleziona</th>
+                    </tr>
+                  </thead>
+                  <tbody id="associati-tbody">
+                    <tr><td colspan="6" style="text-align:center; padding:10px;">Caricamento associati...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div id="selected-user-panel" class="selected-user-box" style="display:none;">
+                <div id="selected-user-label"><b>Associato selezionato:</b> -</div>
+                <button type="button" class="btn-s4y primary" onclick="apriNuovaIndispAdmin()">+ Aggiungi Indisponibilità</button>
+              </div>
+
+              <div class="table-scroll" id="user-indisp-wrap" style="display:none;">
+                <table class="s4y-table" id="user-indisp-table">
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Inizio</th>
+                      <th>Fine</th>
+                      <th>Motivo</th>
+                      <th>Note</th>
+                      <th class="center-col">Allegato</th>
+                      <th class="center-col">Stato</th>
+                      <th class="center-col">Decisione</th>
+                      <th class="center-col">Azioni</th>
+                    </tr>
+                  </thead>
+                  <tbody id="user-indisp-tbody"></tbody>
+                  <tfoot>
+                    <tr><td colspan="9" id="user-indisp-totali">INDISPONIBILITA' ASSOCIATO : 0</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: MODIFICA COMPLETA INDISPONIBILITÀ -->
+  <div id="modal-edit-full" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>MODIFICA INDISPONIBILITÀ</span>
+        <button type="button" onclick="chiudiModal('modal-edit-full')">&times;</button>
+      </div>
+      <div class="designation-body-content">
+        <table class="modal-form-table">
+          <tr>
+            <td class="mlbl">Associato</td>
+            <td><input type="text" id="edit-associato" class="readonly-f" value="" readonly></td>
+          </tr>
+          <tr>
+            <td class="mlbl">Data Inizio</td>
+            <td><input type="text" id="edit-data-inizio" maxlength="10" placeholder="gg/mm/aaaa" autocomplete="off"></td>
+          </tr>
+          <tr>
+            <td class="mlbl">Data Fine</td>
+            <td><input type="text" id="edit-data-fine" maxlength="10" placeholder="gg/mm/aaaa" autocomplete="off"></td>
+          </tr>
+          <tr>
+            <td class="mlbl">Tipo Indisponibilità</td>
+            <td>
+              <select id="edit-tipo">
+                <option value="T">TOTALE</option>
+                <option value="S">SERA</option>
+                <option value="P">POMERIGGIO</option>
+                <option value="M">MATTINA</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="mlbl">Motivo Indisponibilità</td>
+            <td>
+              <select id="edit-motivo">
+                <option value="3">WEEK END</option>
+                <option value="5">FAMILIARI</option>
+                <option value="1">STUDIO</option>
+                <option value="4">LAVORO</option>
+                <option value="2">MALATTIA</option>
+                <option value="34">INCARICO AIA</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="mlbl">Allegato (Max 500KB)</td>
+            <td>
+              <input type="file" id="edit-file" accept=".jpg,.jpeg,.gif,.pdf,.doc,.odt,.xls,.xlsx,.docx">
+              <span class="file-help">Estensioni: .jpg, .jpeg, .gif, .pdf, .doc, .odt, .xls, .xlsx, .docx</span>
+              <div id="edit-current-attach" class="current-attach-info"></div>
+            </td>
+          </tr>
+          <tr>
+            <td class="mlbl">Note (Max 255 Chr.)</td>
+            <td><textarea id="edit-note" maxlength="255"></textarea></td>
+          </tr>
+        </table>
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-edit-full')">Annulla</button>
+        <button type="button" class="btn-success" id="btn-salva-edit-full" onclick="salvaModificaCompleta()">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: AGGIUNGI INDISPONIBILITÀ (STATO GIA' APPROVATO / VERDE) -->
+  <div id="modal-add-admin" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>NUOVA INDISPONIBILITÀ (APPROVATA)</span>
+        <button type="button" onclick="chiudiModal('modal-add-admin')">&times;</button>
+      </div>
+      <div class="designation-body-content">
+        <form id="form-add-admin" onsubmit="salvaNuovaIndispAdmin(event)" novalidate>
+          <table class="modal-form-table">
+            <tr>
+              <td class="mlbl">Associato</td>
+              <td><input type="text" id="add-associato" class="readonly-f" value="" readonly></td>
+            </tr>
+            <tr>
+              <td class="mlbl">Data Inizio</td>
+              <td><input type="text" id="add-data-inizio" maxlength="10" placeholder="gg/mm/aaaa" autocomplete="off"></td>
+            </tr>
+            <tr>
+              <td class="mlbl">Data Fine</td>
+              <td><input type="text" id="add-data-fine" maxlength="10" placeholder="gg/mm/aaaa" autocomplete="off"></td>
+            </tr>
+            <tr>
+              <td class="mlbl">Tipo Indisponibilità</td>
+              <td>
+                <select id="add-tipo">
+                  <option value=""></option>
+                  <option value="T">TOTALE</option>
+                  <option value="S">SERA</option>
+                  <option value="P">POMERIGGIO</option>
+                  <option value="M">MATTINA</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="mlbl">Motivo Indisponibilità</td>
+              <td>
+                <select id="add-motivo">
+                  <option value=""></option>
+                  <option value="3">WEEK END</option>
+                  <option value="5">FAMILIARI</option>
+                  <option value="1">STUDIO</option>
+                  <option value="4">LAVORO</option>
+                  <option value="2">MALATTIA</option>
+                  <option value="34">INCARICO AIA</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="mlbl">Validatore Competente</td>
+              <td><input type="text" id="add-validatore" class="readonly-f" value="" readonly></td>
+            </tr>
+            <tr>
+              <td class="mlbl">Allegato (Max 500KB)</td>
+              <td>
+                <input type="file" id="add-file" accept=".jpg,.jpeg,.gif,.pdf,.doc,.odt,.xls,.xlsx,.docx">
+                <span class="file-help">Estensioni: .jpg, .jpeg, .gif, .pdf, .doc, .odt, .xls, .xlsx, .docx</span>
+              </td>
+            </tr>
+            <tr>
+              <td class="mlbl">Note (Max 255 Chr.)</td>
+              <td><textarea id="add-note" maxlength="255"></textarea></td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-add-admin')">Annulla</button>
+        <button type="button" class="btn-success" id="btn-salva-add-admin" onclick="salvaNuovaIndispAdmin(event)">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: CONFERMA ANNULLAMENTO (ROSSO) -->
+  <div id="modal-elimina-admin" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>ATTENZIONE</span>
+        <button type="button" onclick="chiudiModal('modal-elimina-admin')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="elimina-admin-text">
+        Sei sicuro di voler annullare l'indisponibilità?
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-elimina-admin')">Annulla</button>
+        <button type="button" class="btn-success" id="btn-conferma-elimina-admin" onclick="confermaEliminaAdmin()">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: MESSAGGIO -->
+  <div id="modal-msg" class="modal-overlay" style="z-index:3700;">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span id="msg-title">Informazione</span>
+        <button type="button" onclick="chiudiModal('modal-msg')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="msg-text" style="min-height:60px;"></div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-msg')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE01</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+<script type="module">
+  import { auth, db } from './firebase-config.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { collection, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const MAX_FILE_BYTES = 500 * 1024;
+  const EXT_CONSENTITE = ['.jpg', '.jpeg', '.gif', '.pdf', '.doc', '.odt', '.xls', '.xlsx', '.docx'];
+
+  const TIPO_MAP = { T: 'TOTALE', S: 'SERA', P: 'POMERIGGIO', M: 'MATTINA' };
+  const MOTIVO_MAP = { '3': 'WEEK END', '5': 'FAMILIARI', '1': 'STUDIO', '4': 'LAVORO', '2': 'MALATTIA', '34': 'INCARICO AIA' };
+
+  let currentUser = null;
+  let currentUserProfile = null;
+  let allUsers = [];
+  let allIndisp = [];
+  let selectedUserUid = null;
+  let editingId = null;
+  let editKeepExistingAttach = true;
+  let deletingId = null;
+
+  function parseDateIT(s) {
+    const m = String(s || '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return (d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1]) ? d : null;
+  }
+
+  function formatDateIT(d) {
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  function dateValue(str) {
+    const d = parseDateIT(str);
+    return d ? d.getTime() : 0;
+  }
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  window.chiudiModal = (id) => $(id).classList.remove('active');
+
+  function showMsg(titolo, html) {
+    $('msg-title').textContent = titolo;
+    $('msg-text').innerHTML = html;
+    $('modal-msg').classList.add('active');
+  }
+
+  function normalizzaStato(statoRaw) {
+    const s = String(statoRaw || '').trim().toLowerCase();
+    if (s === 'approvata' || s === 'approvato' || s === 'attivo' || s === 'green') {
+      return { code: 'approvata', icon: 'light_green.png', title: 'DATO APPROVATO - ATTIVO' };
+    }
+    if (s === 'annullata' || s === 'annullato' || s === 'rifiutata' || s === 'rifiutato' || s === 'non_approvato' || s === 'red') {
+      return { code: 'annullata', icon: 'light_red.png', title: 'MODIFICA/DATO NON APPROVATO' };
+    }
+    return { code: 'in_attesa', icon: 'light_yellow.png', title: 'DATO IN APPROVAZIONE' };
+  }
+
+  function getUserSezione(u) {
+    return String(u?.sezione ?? u?.sezioneProvenienza ?? u?.sez ?? '').trim();
+  }
+
+  function getUserOrganico(u) {
+    return String(u?.organico ?? u?.categoria ?? u?.ruoloTecnico ?? '').trim();
+  }
+
+  function getUserFullName(u) {
+    return [u?.nome, u?.cognome].filter(Boolean).join(' ').trim();
+  }
+
+  function calcolaValidatore(u) {
+    const customVal = typeof u?.validCompetente === 'string' ? u.validCompetente.trim() : '';
+    if (customVal) return customVal;
+    const sez = getUserSezione(u);
+    if (!sez) return 'SEZ. -';
+    return `SEZ. ${sez.replace(/^SEZ\.?\s*/i, '').trim().toUpperCase()}`;
+  }
+
+  function renderAllegato(allegato) {
+    if (!allegato || !allegato.dataUrl) {
+      return `<img src="icon_noattach.png" alt="NESSUN ALLEGATO" title="NESSUN ALLEGATO" class="attach-icon">`;
+    }
+    const nome = esc(allegato.nomeFile || 'allegato');
+    return `<a href="${esc(allegato.dataUrl)}" download="${nome}" class="attach-link" title="Scarica allegato: ${nome}">
+      <img src="icon_attach.png" alt="ALLEGATO PRESENTE" title="ALLEGATO: ${nome}" class="attach-icon" onerror="this.src='icon_noattach.png'">
+    </a>`;
+  }
+
+  function renderDecisione(item) {
+    const st = normalizzaStato(item.stato);
+    const id = esc(item.id);
+    if (st.code === 'approvata') {
+      return `<button type="button" class="mini-btn reject" onclick="cambiaStatoAdmin('${id}', 'rifiutata')">Rifiuta</button>`;
+    }
+    if (st.code === 'annullata') {
+      return `<button type="button" class="mini-btn approve" onclick="cambiaStatoAdmin('${id}', 'approvata')">Approva</button>`;
+    }
+    return `
+      <button type="button" class="mini-btn approve" onclick="cambiaStatoAdmin('${id}', 'approvata')">Approva</button>
+      <button type="button" class="mini-btn reject" onclick="cambiaStatoAdmin('${id}', 'rifiutata')">Rifiuta</button>`;
+  }
+
+  function renderAzioniAdmin(item) {
+    const id = esc(item.id);
+    return `
+      <button type="button" class="action-btn" title="Modifica Indisponibilità" onclick="apriModificaCompleta('${id}')">
+        <img src="icon_mod.png" alt="Modifica">
+      </button>
+      <button type="button" class="action-btn" title="Annulla / Non Approva" onclick="apriEliminaAdmin('${id}')">
+        <img src="icon_del.png" alt="Elimina">
+      </button>`;
+  }
+
+  function renderIncomingTable() {
+    const tbody = $('incoming-tbody');
+    const incoming = allIndisp
+      .filter(i => normalizzaStato(i.stato).code === 'in_attesa')
+      .sort((a, b) => dateValue(b.dataInizio) - dateValue(a.dataInizio));
+
+    $('incoming-totali').textContent = `RICHIESTE IN ARRIVO : ${incoming.length}`;
+
+    if (incoming.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:10px;">Nessuna richiesta di indisponibilità in attesa di approvazione.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = incoming.map(item => {
+      const u = allUsers.find(x => x.id === item.uid);
+      const nomeAssoc = esc(item.nomeAssociato || getUserFullName(u) || item.codMecc || item.uid || '-');
+      const sez = esc(item.sezione || getUserSezione(u) || '-');
+      const st = normalizzaStato(item.stato);
+
+      return `
+        <tr>
+          <td class="nowrap"><b>${nomeAssoc}</b></td>
+          <td class="nowrap">${sez}</td>
+          <td class="nowrap">${esc(item.tipoLabel || TIPO_MAP[item.tipoCodice] || item.tipoCodice || 'TOTALE')}</td>
+          <td class="nowrap">${esc(item.dataInizio || '')}</td>
+          <td class="nowrap">${esc(item.dataFine || '')}</td>
+          <td class="nowrap">${esc(item.motivoLabel || MOTIVO_MAP[item.motivoCodice] || item.motivoCodice || '')}</td>
+          <td>${esc(item.note || '')}</td>
+          <td class="center-col">${renderAllegato(item.allegato)}</td>
+          <td class="center-col"><img src="${st.icon}" alt="${esc(st.title)}" title="${esc(st.title)}" class="status-icon"></td>
+          <td class="center-col">${renderDecisione(item)}</td>
+          <td class="center-col">${renderAzioniAdmin(item)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function popolaOpzioniFiltri() {
+    const orgSet = new Set(allUsers.map(getUserOrganico).filter(Boolean));
+    const sezSet = new Set(allUsers.map(getUserSezione).filter(Boolean));
+
+    const orgSel = $('filtro-organico');
+    const sezSel = $('filtro-sezione');
+    const prevOrg = orgSel.value;
+    const prevSez = sezSel.value;
+
+    orgSel.innerHTML = '<option value="">Tutti</option>' + [...orgSet].sort((a, b) => a.localeCompare(b, 'it')).map(o => `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+    sezSel.innerHTML = '<option value="">Tutte</option>' + [...sezSet].sort((a, b) => a.localeCompare(b, 'it')).map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+
+    if ([...orgSet].includes(prevOrg)) orgSel.value = prevOrg;
+    if ([...sezSet].includes(prevSez)) sezSel.value = prevSez;
+  }
+
+  function dataCopreGiorno(item, targetMs) {
+    const ini = dateValue(item.dataInizio);
+    const fin = dateValue(item.dataFine) || ini;
+    if (!ini) return false;
+    return targetMs >= ini && targetMs <= fin;
+  }
+
+  window.applicaFiltriAssociati = () => {
+    const orgFilter = $('filtro-organico').value.trim().toLowerCase();
+    const sezFilter = $('filtro-sezione').value.trim().toLowerCase();
+    const nameFilter = $('filtro-nome').value.trim().toLowerCase();
+    const dateStr = $('filtro-data').value.trim();
+    const parsedFilterDate = parseDateIT(dateStr);
+    const targetMs = parsedFilterDate ? Date.UTC(parsedFilterDate.getFullYear(), parsedFilterDate.getMonth(), parsedFilterDate.getDate()) : null;
+
+    const filtrati = allUsers.filter(u => {
+      const org = getUserOrganico(u).toLowerCase();
+      const sez = getUserSezione(u).toLowerCase();
+      const full = `${getUserFullName(u)} ${u.codMecc || ''} ${u.email || ''}`.toLowerCase();
+
+      if (orgFilter && org !== orgFilter) return false;
+      if (sezFilter && sez !== sezFilter) return false;
+      if (nameFilter && !full.includes(nameFilter)) return false;
+
+      if (targetMs !== null) {
+        const haIndispInData = allIndisp.some(ind => ind.uid === u.id && dataCopreGiorno(ind, targetMs));
+        if (!haIndispInData) return false;
+      }
+      return true;
+    });
+
+    renderAssociatiTable(filtrati);
+  };
+
+  window.resetFiltriAssociati = () => {
+    $('filtro-organico').value = '';
+    $('filtro-sezione').value = '';
+    $('filtro-nome').value = '';
+    $('filtro-data').value = '';
+    applicaFiltriAssociati();
+  };
+
+  function renderAssociatiTable(list) {
+    const tbody = $('associati-tbody');
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:10px;">Nessun associato trovato con i filtri impostati.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map(u => {
+      const countIndisp = allIndisp.filter(i => i.uid === u.id).length;
+      const isSel = u.id === selectedUserUid;
+      const cod = esc((u.codMecc || '').trim() || '-');
+      const nome = esc(getUserFullName(u) || u.email || '-');
+      const sez = esc(getUserSezione(u) || '-');
+      const org = esc(getUserOrganico(u) || '-');
+
+      return `
+        <tr class="${isSel ? 'selected-user' : ''}">
+          <td class="nowrap">${cod}</td>
+          <td class="nowrap"><b>${nome}</b></td>
+          <td class="nowrap">${sez}</td>
+          <td class="nowrap">${org}</td>
+          <td class="center-col">${countIndisp}</td>
+          <td class="center-col">
+            <button type="button" class="mini-btn select-u" onclick="selezionaAssociato('${esc(u.id)}')">${isSel ? 'Selezionato' : 'Gestisci'}</button>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  window.selezionaAssociato = (uid) => {
+    selectedUserUid = uid;
+    applicaFiltriAssociati();
+    renderSelectedUserIndisp();
+  };
+
+  function renderSelectedUserIndisp() {
+    const u = allUsers.find(x => x.id === selectedUserUid);
+    if (!u) {
+      $('selected-user-panel').style.display = 'none';
+      $('user-indisp-wrap').style.display = 'none';
+      return;
+    }
+
+    const cod = (u.codMecc || '').trim();
+    const nome = getUserFullName(u) || u.email || '-';
+    $('selected-user-label').innerHTML = `<b>Associato selezionato:</b> ${esc(cod ? `${cod} - ${nome}` : nome)} <span style="color:#444;">(${esc(getUserSezione(u) || 'Sez. -')})</span>`;
+    $('selected-user-panel').style.display = 'flex';
+    $('user-indisp-wrap').style.display = 'block';
+
+    const items = allIndisp
+      .filter(i => i.uid === selectedUserUid)
+      .sort((a, b) => dateValue(b.dataInizio) - dateValue(a.dataInizio));
+
+    $('user-indisp-totali').textContent = `INDISPONIBILITA' ASSOCIATO : ${items.length}`;
+
+    if (items.length === 0) {
+      $('user-indisp-tbody').innerHTML = `<tr><td colspan="9" style="text-align:center; padding:10px;">Nessuna indisponibilità registrata per questo associato.</td></tr>`;
+      return;
+    }
+
+    $('user-indisp-tbody').innerHTML = items.map(item => {
+      const st = normalizzaStato(item.stato);
+      return `
+        <tr>
+          <td class="nowrap">${esc(item.tipoLabel || TIPO_MAP[item.tipoCodice] || item.tipoCodice || 'TOTALE')}</td>
+          <td class="nowrap">${esc(item.dataInizio || '')}</td>
+          <td class="nowrap">${esc(item.dataFine || '')}</td>
+          <td class="nowrap">${esc(item.motivoLabel || MOTIVO_MAP[item.motivoCodice] || item.motivoCodice || '')}</td>
+          <td>${esc(item.note || '')}</td>
+          <td class="center-col">${renderAllegato(item.allegato)}</td>
+          <td class="center-col"><img src="${st.icon}" alt="${esc(st.title)}" title="${esc(st.title)}" class="status-icon"></td>
+          <td class="center-col">${renderDecisione(item)}</td>
+          <td class="center-col">${renderAzioniAdmin(item)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  window.cambiaStatoAdmin = async (id, nuovoStato) => {
+    const item = allIndisp.find(i => i.id === id);
+    if (!item) return;
+
+    const isApprove = nuovoStato === 'approvata';
+    const payload = {
+      stato: isApprove ? 'approvata' : 'annullata',
+      esitoLabel: isApprove ? 'Dato approvato - Attivo' : 'Modifica/Dato non approvato',
+      gestitoDa: currentUser?.uid || '',
+      gestitoIl: serverTimestamp()
+    };
+
+    try {
+      await updateDoc(doc(db, 'richieste_indisponibilita', id), payload);
+      Object.assign(item, payload);
+      renderIncomingTable();
+      renderSelectedUserIndisp();
+      applicaFiltriAssociati();
+      showToast(isApprove ? 'Indisponibilità approvata (stato verde).' : 'Indisponibilità rifiutata/non approvata (stato rosso).');
+    } catch (err) {
+      console.error('Errore cambio stato:', err);
+      showMsg('ATTENZIONE', "Impossibile aggiornare lo stato: " + esc(err.message));
+    }
+  };
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Impossibile leggere il file selezionato.'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function validaAllegatoFile(file) {
+    const lowerName = file.name.toLowerCase();
+    const okExt = EXT_CONSENTITE.some(ext => lowerName.endsWith(ext));
+    if (!okExt) {
+      return 'Estensione file non consentita.<br>Consentite: <b>.jpg, .jpeg, .gif, .pdf, .doc, .odt, .xls, .xlsx, .docx</b>.';
+    }
+    if (file.size > MAX_FILE_BYTES) {
+      return 'Il file supera la dimensione massima consentita di <b>500KB</b>.';
+    }
+    return null;
+  }
+
+  function aggiornaAnteprimaAllegatoModifica(allegato) {
+    const box = $('edit-current-attach');
+    if (editKeepExistingAttach && allegato && allegato.dataUrl) {
+      box.innerHTML = `<span>Allegato attuale: <b>${esc(allegato.nomeFile || 'allegato')}</b></span>
+        <button type="button" class="mini-btn reject" onclick="rimuoviAllegatoInModifica()">Rimuovi allegato</button>`;
+    } else {
+      box.innerHTML = '<span>Nessun allegato attivo per questa modifica.</span>';
+    }
+  }
+
+  window.rimuoviAllegatoInModifica = () => {
+    editKeepExistingAttach = false;
+    $('edit-file').value = '';
+    aggiornaAnteprimaAllegatoModifica(null);
+  };
+
+  window.apriModificaCompleta = (id) => {
+    const item = allIndisp.find(i => i.id === id);
+    if (!item) return;
+    const u = allUsers.find(x => x.id === item.uid);
+
+    editingId = id;
+    editKeepExistingAttach = Boolean(item.allegato && item.allegato.dataUrl);
+
+    $('edit-associato').value = item.nomeAssociato || getUserFullName(u) || item.codMecc || item.uid || '-';
+    $('edit-data-inizio').value = item.dataInizio || '';
+    $('edit-data-fine').value = item.dataFine || '';
+    $('edit-tipo').value = item.tipoCodice || 'T';
+    $('edit-motivo').value = item.motivoCodice || '1';
+    $('edit-file').value = '';
+    $('edit-note').value = item.note || '';
+    aggiornaAnteprimaAllegatoModifica(item.allegato);
+
+    $('btn-salva-edit-full').disabled = false;
+    $('modal-edit-full').classList.add('active');
+  };
+
+  window.salvaModificaCompleta = async () => {
+    if (!editingId) return;
+    const item = allIndisp.find(i => i.id === editingId);
+    if (!item) return;
+
+    const dIni = parseDateIT($('edit-data-inizio').value.trim());
+    const dFin = parseDateIT($('edit-data-fine').value.trim());
+    const tipoCode = $('edit-tipo').value;
+    const motivoCode = $('edit-motivo').value;
+    const note = $('edit-note').value.trim();
+    const file = $('edit-file').files[0] || null;
+
+    if (!dIni) {
+      showMsg('ATTENZIONE', 'Inserisci una <b>Data Inizio</b> valida nel formato <b>gg/mm/aaaa</b>.');
+      return;
+    }
+    if (!dFin) {
+      showMsg('ATTENZIONE', 'Inserisci una <b>Data Fine</b> valida nel formato <b>gg/mm/aaaa</b>.');
+      return;
+    }
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffGiorni = Math.round((Date.UTC(dFin.getFullYear(), dFin.getMonth(), dFin.getDate()) - Date.UTC(dIni.getFullYear(), dIni.getMonth(), dIni.getDate())) / msPerDay);
+    if (diffGiorni < 0) {
+      showMsg('ATTENZIONE', 'La <b>Data Fine</b> non può essere precedente alla <b>Data Inizio</b>.');
+      return;
+    }
+    if (diffGiorni > 14) {
+      showMsg('ATTENZIONE', "L'indisponibilità può coprire un <b>massimo di 14 giorni</b>.");
+      return;
+    }
+
+    let nextAllegato = editKeepExistingAttach ? (item.allegato || null) : null;
+    if (file) {
+      const errMsg = validaAllegatoFile(file);
+      if (errMsg) {
+        showMsg('ATTENZIONE', errMsg);
+        return;
+      }
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
+        nextAllegato = {
+          nomeFile: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          dimensione: file.size,
+          dataUrl
+        };
+      } catch (e) {
+        showMsg('ATTENZIONE', esc(e.message));
+        return;
+      }
+    }
+
+    const dataInizioNorm = formatDateIT(dIni);
+    const dataFineNorm = formatDateIT(dFin);
+    const tipoLabel = TIPO_MAP[tipoCode] || tipoCode;
+    const motivoLabel = MOTIVO_MAP[motivoCode] || motivoCode;
+
+    const patch = {
+      dataInizio: dataInizioNorm,
+      dataFine: dataFineNorm,
+      giorni: diffGiorni + 1,
+      tipoCodice: tipoCode,
+      tipoLabel,
+      motivoCodice: motivoCode,
+      motivoLabel,
+      allegato: nextAllegato,
+      note,
+      modificatoDa: currentUser?.uid || '',
+      modificatoIl: serverTimestamp()
+    };
+
+    const btn = $('btn-salva-edit-full');
+    try {
+      btn.disabled = true;
+      await updateDoc(doc(db, 'richieste_indisponibilita', editingId), patch);
+      Object.assign(item, patch);
+      editingId = null;
+      chiudiModal('modal-edit-full');
+      renderIncomingTable();
+      renderSelectedUserIndisp();
+      applicaFiltriAssociati();
+      showMsg('CONFERMA', 'Modifica indisponibilità salvata con successo.');
+      showToast('Indisponibilità aggiornata!');
+    } catch (err) {
+      console.error('Errore modifica completa:', err);
+      btn.disabled = false;
+      chiudiModal('modal-edit-full');
+      showMsg('ATTENZIONE', 'Impossibile salvare la modifica: ' + esc(err.message));
+    }
+  };
+
+  window.apriEliminaAdmin = (id) => {
+    const item = allIndisp.find(i => i.id === id);
+    if (!item) return;
+    deletingId = id;
+    $('elimina-admin-text').innerHTML = `Sei sicuro di voler annullare l'indisponibilità dal <b>${esc(item.dataInizio)}</b> al <b>${esc(item.dataFine)}</b>? Lo stato diventerà non approvato (rosso).`;
+    $('btn-conferma-elimina-admin').disabled = false;
+    $('modal-elimina-admin').classList.add('active');
+  };
+
+  window.confermaEliminaAdmin = async () => {
+    if (!deletingId) return;
+    const id = deletingId;
+    deletingId = null;
+    $('btn-conferma-elimina-admin').disabled = true;
+    chiudiModal('modal-elimina-admin');
+    await cambiaStatoAdmin(id, 'rifiutata');
+  };
+
+  window.apriNuovaIndispAdmin = () => {
+    const u = allUsers.find(x => x.id === selectedUserUid);
+    if (!u) return;
+
+    const cod = (u.codMecc || '').trim();
+    const nome = getUserFullName(u) || u.email || '-';
+    $('add-associato').value = cod ? `${cod} - ${nome}` : nome;
+    $('add-data-inizio').value = '';
+    $('add-data-fine').value = '';
+    $('add-tipo').value = '';
+    $('add-motivo').value = '';
+    $('add-validatore').value = calcolaValidatore(u);
+    $('add-file').value = '';
+    $('add-note').value = '';
+    $('btn-salva-add-admin').disabled = false;
+    $('modal-add-admin').classList.add('active');
+  };
+
+  window.salvaNuovaIndispAdmin = async (event) => {
+    event.preventDefault();
+    const u = allUsers.find(x => x.id === selectedUserUid);
+    if (!u) return;
+
+    const dIni = parseDateIT($('add-data-inizio').value.trim());
+    const dFin = parseDateIT($('add-data-fine').value.trim());
+    const tipoCode = $('add-tipo').value;
+    const motivoCode = $('add-motivo').value;
+    const note = $('add-note').value.trim();
+    const file = $('add-file').files[0] || null;
+
+    if (!dIni || !dFin) {
+      showMsg('ATTENZIONE', 'Inserisci <b>Data Inizio</b> e <b>Data Fine</b> valide nel formato <b>gg/mm/aaaa</b>.');
+      return;
+    }
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffGiorni = Math.round((Date.UTC(dFin.getFullYear(), dFin.getMonth(), dFin.getDate()) - Date.UTC(dIni.getFullYear(), dIni.getMonth(), dIni.getDate())) / msPerDay);
+    if (diffGiorni < 0) {
+      showMsg('ATTENZIONE', 'La <b>Data Fine</b> non può essere precedente alla <b>Data Inizio</b>.');
+      return;
+    }
+    if (diffGiorni > 14) {
+      showMsg('ATTENZIONE', "L'indisponibilità può coprire un <b>massimo di 14 giorni</b>.");
+      return;
+    }
+    if (!tipoCode) {
+      showMsg('ATTENZIONE', 'Seleziona il <b>Tipo Indisponibilità</b>.');
+      return;
+    }
+    if (!motivoCode) {
+      showMsg('ATTENZIONE', 'Seleziona il <b>Motivo Indisponibilità</b>.');
+      return;
+    }
+
+    let allegatoData = null;
+    if (file) {
+      const errMsg = validaAllegatoFile(file);
+      if (errMsg) {
+        showMsg('ATTENZIONE', errMsg);
+        return;
+      }
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
+        allegatoData = {
+          nomeFile: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          dimensione: file.size,
+          dataUrl
+        };
+      } catch (e) {
+        showMsg('ATTENZIONE', esc(e.message));
+        return;
+      }
+    }
+
+    const payload = {
+      uid: u.id,
+      codMecc: (u.codMecc || '').trim(),
+      nomeAssociato: getUserFullName(u) || u.email || '',
+      sezione: getUserSezione(u),
+      dataInizio: formatDateIT(dIni),
+      dataFine: formatDateIT(dFin),
+      giorni: diffGiorni + 1,
+      tipoCodice: tipoCode,
+      tipoLabel: TIPO_MAP[tipoCode] || tipoCode,
+      motivoCodice: motivoCode,
+      motivoLabel: MOTIVO_MAP[motivoCode] || motivoCode,
+      validCompetente: calcolaValidatore(u),
+      note,
+      allegato: allegatoData,
+      stato: 'approvata',
+      esitoLabel: 'Dato approvato - Attivo',
+      gestitoDa: currentUser?.uid || '',
+      creatoIl: serverTimestamp(),
+      gestitoIl: serverTimestamp()
+    };
+
+    const btn = $('btn-salva-add-admin');
+    try {
+      btn.disabled = true;
+      const docRef = await addDoc(collection(db, 'richieste_indisponibilita'), payload);
+      allIndisp.push({ id: docRef.id, ...payload });
+      chiudiModal('modal-add-admin');
+      renderIncomingTable();
+      renderSelectedUserIndisp();
+      applicaFiltriAssociati();
+      showMsg('CONFERMA', 'Indisponibilità inserita e già approvata (stato verde).');
+      showToast('Indisponibilità aggiunta e approvata!');
+    } catch (err) {
+      console.error('Errore inserimento indisponibilità admin:', err);
+      btn.disabled = false;
+      chiudiModal('modal-add-admin');
+      showMsg('ATTENZIONE', 'Impossibile salvare la richiesta: ' + esc(err.message));
+    }
+  };
+
+  window.ricaricaDati = async () => {
+    try {
+      const [usersSnap, indispSnap] = await Promise.all([
+        getDocs(collection(db, 'utenti')),
+        getDocs(collection(db, 'richieste_indisponibilita'))
+      ]);
+      allUsers = usersSnap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => getUserFullName(a).localeCompare(getUserFullName(b), 'it'));
+      allIndisp = indispSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      popolaOpzioniFiltri();
+      renderIncomingTable();
+      applicaFiltriAssociati();
+      if (selectedUserUid) renderSelectedUserIndisp();
+    } catch (err) {
+      console.error('Errore caricamento dati gestione indisponibilità:', err);
+      $('incoming-tbody').innerHTML = `<tr><td colspan="11" style="text-align:center; padding:10px; color:#b00000;">Errore durante il caricamento dei dati.</td></tr>`;
+    }
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.replace('index.html');
+      return;
+    }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db, 'utenti', user.uid));
+      if (snap.exists()) {
+        currentUserProfile = snap.data();
+        const ruolo = currentUserProfile.ruolo || 'utente';
+        $('user-codmecc').textContent = (currentUserProfile.codMecc || '').trim() || '-';
+        $('user-fullname').textContent = [currentUserProfile.nome, currentUserProfile.cognome].filter(Boolean).join(' ').toUpperCase() || '-';
+        if (ruolo !== 'admin') {
+          window.location.replace('home.html');
+          return;
+        }
+        $('admin-menu-container').innerHTML = `
+          <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+          <li><a href="admin.html">Gestione Associati</a></li>
+          <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+          <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+          <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+          <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+          <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>`;
+      } else {
+        window.location.replace('home.html');
+        return;
+      }
+    } catch (e) {
+      console.error('Errore profilo utente:', e);
+      $('user-fullname').textContent = '-';
+    } finally {
+      document.body.classList.remove('auth-loading');
+      await ricaricaDati();
+    }
+  });
+
+  $('logout-btn').addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      window.location.replace('index.html');
+    } catch (e) {
+      console.error('Errore durante il logout:', e);
+    }
+  });
+
+  document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      link.parentElement.classList.toggle('open');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section,
+    .sidebar li[style*="uppercase"] {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important;
+      padding: 3px 6px 3px 4px !important;
+      margin: 0 !important;
+      font-family: var(--font);
+      font-size: 20px !important;
+      font-weight: 700;
+      letter-spacing: .3px !important;
+      text-transform: none !important;
+      color: #000 !important;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon,
+    .sidebar li[style*="uppercase"]::before {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav,
+    .sub-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url("icon075.gif") center / contain no-repeat;
+      flex-shrink: 0;
+    }
+
+    .sidebar-nav li.cat:not(.open) > a::before {
+      background: url("icon074.gif") center / contain no-repeat;
+    }
+
+    .sidebar-nav li a.globe::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+    }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar .page-title { display: none; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email {
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+    .role-badge::after { content: " -"; }
+
+    .btn-logout {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: url("icon_system_logout.png") center / contain no-repeat;
+      box-shadow: none;
+      font-size: 0;
+      cursor: pointer;
+    }
+    .btn-logout::before,
+    .btn-logout::after {
+      content: none;
+    }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+    .welcome-title {
+      margin: 0 0 12px;
+      padding-bottom: 0;
+      border-bottom: 2px solid #f0a03a;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+
+    /* ----- box ----- */
+    .box {
+      background: #d1d5df;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 0 12px;
+    }
+    .box-head,
+    .profile-card h2 {
+      margin: 0;
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+      border-radius: 8px 8px 0 0;
+    }
+    .box-body { padding: 5px 13px 6px; font-size: 14.5px; line-height: 1.2; }
+    .news-body { padding: 24px 13px 32px; min-height: 120px; }
+    .news-body .empty { color: #333; text-align: center; }
+
+    /* ----- profilo ----- */
+    .profile-card { background: #d1d5df; border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .profile-card .box-sub { margin: 0; padding: 6px 13px 0; color: #222; font-size: 14px; }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 14px;
+      padding: 8px 13px 13px;
+    }
+    .profile-item label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #222;
+      margin-bottom: 2px;
+    }
+    .profile-item span {
+      display: block;
+      min-height: 25px;
+      padding: 3px 7px;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      font-size: 14.5px;
+      color: #000;
+    }
+
+    :root { --primary: #000000; }
+
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TITOLO PAGINA ========== */
+    .banca-dati-header {
+      margin: 0 0 12px;
+      border-bottom: 2px solid #f0a03a;
+    }
+    .banca-dati-header h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .elenco-title {
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+    }
+
+    /* ========== TABELLA ========== */
+    .table-container {
+      background: #d1d5df;
+      padding: 15px 13px 20px;
+      overflow-x: auto;
+    }
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font);
+      font-size: 14px;
+      color: #222;
+      background: #ffffff;
+    }
+    .styled-table thead th {
+      background: #eceff3;
+      border: 1px solid #aab0bc;
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: left;
+      padding: 6px 7px 7px;
+      white-space: nowrap;
+    }
+    .styled-table thead th:last-child { text-align: left !important; }
+    .styled-table tbody td {
+      background: #ffffff;
+      border: 1px solid #b6bbc6;
+      padding: 5px 7px;
+      height: 37px;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+    .styled-table tbody td:first-child,
+    .styled-table tbody td:nth-child(10),
+    .styled-table tbody td:last-child { vertical-align: middle; text-align: center; }
+    .styled-table tbody td b,
+    .styled-table tbody td strong { font-weight: 400; }
+    .styled-table tbody td:nth-child(7),
+    .styled-table tbody td:nth-child(8) { text-transform: uppercase; }
+
+    .btn-emoji {
+      border: 0 !important;
+      padding: 0 !important;
+      cursor: pointer;
+      width: 24px !important;
+      height: 24px !important;
+      border-radius: 0 !important;
+      background: url("icon_info.png") center / contain no-repeat !important;
+      color: transparent !important;
+      font-size: 0 !important;
+      line-height: 1;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none !important;
+    }
+    .status-dot-table {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .dot-green  {
+      background: url("light_green.png") center / contain no-repeat;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    /* ========== BOTTONI ========== */
+    .btn-secondary,
+    .btn-success {
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-secondary {
+      background: #ffffff;
+      color: #2a8ac4;
+      border: 1px solid #d3dbe3;
+      box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    }
+    .btn-secondary:hover { background: #f1f7fb; }
+    .btn-success {
+      background: #3f9a2a;
+      color: #ffffff;
+      border: 1px solid #2f7a1d;
+      box-shadow: 0 1px 2px rgba(0,0,0,.25);
+    }
+    .btn-success:hover { background: #378a24; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+
+    /* ========== MODALE DETTAGLI ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px),
+        rgba(42, 80, 99, .72);
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 884px;
+      background: #f4f4f4;
+      border: 1px solid #cfcfcf;
+      border-radius: 5px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 32px);
+      padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f);
+      border: 1px solid #e58f14;
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 7px 16px 7px 18px;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .designation-header-bar button {
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 22px !important;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+    }
+    .designation-body-content {
+      padding: 18px 22px 12px;
+      min-height: min(520px, 60vh);
+      overflow-y: auto;
+      background: linear-gradient(#fdfdfd, #f2f2f2);
+      font-size: 14.5px;
+      line-height: 22px;
+      color: #000;
+    }
+    .designation-body-content b { font-weight: 700; }
+    .d-block { margin: 0 0 21px; }
+    .collab-title { margin-top: 0; }
+    .collab-row {
+      display: grid;
+      grid-template-columns: 50px 47% 1fr;
+      align-items: center;
+      min-height: 38px;
+    }
+    .collab-row .c-contact { line-height: 17px; }
+    .designation-footer-bar {
+      padding: 12px 24px 12px;
+      background: #f4f4f4;
+      border-top: 1px solid #dcdcdc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .designation-footer-bar .btn-secondary,
+    .designation-footer-bar .btn-success { padding: 8px 16px !important; }
+    #btn-chiudi-modal {
+      background: #fff4cc;
+      color: #d98a0a;
+      border: 1px solid #f0c34a;
+    }
+    #btn-chiudi-modal:hover { background: #ffecaa; }
+    #btn-chiudi-modal:focus-visible { outline: 2px solid #000; outline-offset: 0; border-radius: 6px; }
+    .designation-modal-card::after {
+      content: "";
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, transparent 0 45%, #8a8a8a 45% 55%, transparent 55% 70%, #8a8a8a 70% 80%, transparent 80%);
+      pointer-events: none;
+    }
+
+    /* ----- pulsante azione (pallino verde) ----- */
+    .btn-azione {
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-azione .status-dot-table {
+      width: 18px;
+      height: 18px;
+      display: block;
+      object-fit: contain;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .btn-azione:hover .status-dot-table {
+      filter: brightness(1.12);
+      transform: scale(1.06);
+    }
+    .btn-azione:focus-visible {
+      outline: 2px solid #000;
+      border-radius: 50%;
+    }
+
+    /* ----- popup di conferma (più piccolo) ----- */
+    .confirm-card { max-width: 470px; }
+    .confirm-card::after { display: none; }
+    .confirm-card .designation-body-content {
+      min-height: 0;
+      padding: 20px 22px 14px;
+    }
+    .confirm-card .designation-footer-bar { padding: 10px 16px 12px; }
+
+    /* ----- tooltip dello stato ----- */
+    .status-tip {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 4000;
+      background: #2f2f2f;
+      color: #ffffff;
+      font-size: 13px;
+      line-height: 1.3;
+      padding: 6px 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s;
+    }
+    .status-tip.show { opacity: 1; }
+
+    /* ========== TOAST ========== */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 80px;
+      transform: translateX(-50%) translateY(20px);
+      background: #244658;
+      color: #fff;
+      font-size: 15px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 3000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .profile-item[style] { grid-column: auto !important; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <!-- Header AIA -->
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li>
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li>
+             </ul>
+          </li>
+                    <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li>
+             </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li>                  
+             </ul>
+          </li>
+          </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <!-- Area Principale -->
+      <div class="main-content">
+        <header class="topbar">
+          <div class="page-title">
+            <strong>Gestione Accettazione Designazioni</strong>
+          </div>
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header">
+            <h3>Gestione Accettazione</h3>
+          </div>
+
+          <div class="box-wrap">
+            <div class="elenco-title">Elenco Gare</div>
+
+            <div class="table-container">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px; text-align: center;">Info</th>
+                    <th>Cat.</th>
+                    <th>Gir.</th>
+                    <th>Giorn.</th>
+                    <th>Data</th>
+                    <th>Ora</th>
+                    <th>Squadra Ospitante</th>
+                    <th>Squadra Ospite</th>
+                    <th>Attività</th>
+                    <th style="text-align: center;">Stato</th>
+                    <th style="text-align: center;">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="accettazione-table-body">
+                  <tr>
+                    <td colspan="11" style="text-align: center; color: var(--text-muted);">Caricamento designazioni in corso...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE DETTAGLI E ACCETTAZIONE -->
+  <div id="designation-modal" class="modal-overlay" style="z-index: 1500;">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>DETTAGLI DESIGNAZIONE</span>
+        <button type="button" id="modal-close-x">&times;</button>
+      </div>
+      <div class="designation-body-content" id="modal-designation-text"></div>
+      <div class="designation-footer-bar">
+        <button type="button" id="btn-chiudi-modal" class="btn-secondary" style="padding: 6px 16px;">Chiudi</button>
+        <button type="button" id="btn-stampa-modal" class="btn-secondary" style="padding: 6px 16px;">Stampa Designazione</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP CONFERMA ACCETTAZIONE -->
+  <div id="confirm-modal" class="modal-overlay" style="z-index: 1600;">
+    <div class="designation-modal-card confirm-card">
+      <div class="designation-header-bar">
+        <span id="confirm-title">ACCETTAZIONE DESIGNAZIONE</span>
+        <button type="button" id="confirm-close-x">&times;</button>
+      </div>
+      <div class="designation-body-content" id="confirm-text"></div>
+      <div class="designation-footer-bar">
+        <button type="button" id="btn-conferma-modal" class="btn-success">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-tip" class="status-tip"></div>
+
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <!-- Footer -->
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE02</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+<script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const userCodMeccSpan = document.getElementById('user-codmecc');
+    const userFullNameSpan = document.getElementById('user-fullname');
+    const adminMenuContainer = document.getElementById('admin-menu-container');
+    const logoutBtn = document.getElementById('logout-btn');
+    const tableBody = document.getElementById('accettazione-table-body');
+    const toast = document.getElementById('toast');
+    const statusTip = document.getElementById('status-tip');
+
+    const designationModal = document.getElementById('designation-modal');
+    const modalCloseX = document.getElementById('modal-close-x');
+    const btnChiudiModal = document.getElementById('btn-chiudi-modal');
+    const btnStampaModal = document.getElementById('btn-stampa-modal');
+    const modalDesignationText = document.getElementById('modal-designation-text');
+
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmTitle = document.getElementById('confirm-title');
+    const confirmText = document.getElementById('confirm-text');
+    const confirmCloseX = document.getElementById('confirm-close-x');
+    const btnConfermaModal = document.getElementById('btn-conferma-modal');
+
+    let currentUser = null;
+    let currentUserProfile = null;
+    let myDesignatedGare = [];
+    let garaDaConfermare = null;
+    let utentiList = [];
+    let utentiLoaded = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+      currentUser = user;
+
+      try {
+        const userSnap = await getDoc(doc(db, "utenti", user.uid));
+        if (userSnap.exists()) {
+          currentUserProfile = userSnap.data();
+          const ruolo = currentUserProfile.ruolo || 'utente';
+
+          const codMecc = (currentUserProfile.codMecc || '').trim();
+          const nome = (currentUserProfile.nome || '').trim();
+          const cognome = (currentUserProfile.cognome || '').trim();
+          const nomeCompleto = [nome, cognome].filter(Boolean).join(' ') || '-';
+
+          if (userCodMeccSpan) userCodMeccSpan.textContent = codMecc || '-';
+          if (userFullNameSpan) userFullNameSpan.textContent = nomeCompleto;
+
+          if (ruolo === 'admin' && adminMenuContainer) {
+            adminMenuContainer.innerHTML = `
+              <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+              <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+              <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+              <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+              <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+            `;
+          }
+        } else {
+          if (userCodMeccSpan) userCodMeccSpan.textContent = '-';
+          if (userFullNameSpan) userFullNameSpan.textContent = '-';
+        }
+      } catch (e) {
+        console.error("Errore profilo utente:", e);
+        if (userCodMeccSpan) userCodMeccSpan.textContent = '-';
+        if (userFullNameSpan) userFullNameSpan.textContent = '-';
+      }
+
+      try {
+        await fetchMyDesignations();
+      } finally {
+        document.body.classList.remove('auth-loading');
+      }
+    });
+
+    function garaTimestamp(g) {
+      const s = (g.dataGara || '').trim();
+      let y = 0, m = 0, d = 0;
+      let mt = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+      if (mt) { d = +mt[1]; m = +mt[2]; y = +mt[3]; }
+      else {
+        mt = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (mt) { y = +mt[1]; m = +mt[2]; d = +mt[3]; }
+      }
+      if (!y) return 0;
+      const parts = (g.oraGara || '00:00').split(/[:.]/).map(n => parseInt(n, 10) || 0);
+      return new Date(y, m - 1, d, parts[0] || 0, parts[1] || 0).getTime();
+    }
+
+    function nomeSenzaSezione(nominativo) {
+      return (nominativo || '').replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function chiaveNome(s) {
+      return (s || '')
+        .replace(/\([^)]*\)/g, ' ')
+        .toUpperCase()
+        .replace(/[^A-ZÀ-Ü0-9\s']/g, ' ')
+        .split(/\s+/)
+        .filter(Boolean)
+        .sort()
+        .join(' ');
+    }
+
+    function matchesCurrentUser(valoreRuolo) {
+      if (!valoreRuolo) return false;
+      const raw = String(valoreRuolo).trim();
+      const myFullName = `${currentUserProfile?.cognome || ''} ${currentUserProfile?.nome || ''}`.trim().toUpperCase();
+      const myRevName = `${currentUserProfile?.nome || ''} ${currentUserProfile?.cognome || ''}`.trim().toUpperCase();
+      const myEmail = (currentUser?.email || '').toLowerCase();
+      const myCodMecc = (currentUserProfile?.codMecc || '').trim().toUpperCase();
+
+      if (myEmail && raw.toLowerCase().includes(myEmail)) return true;
+      if (myCodMecc && raw.toUpperCase().includes(myCodMecc)) return true;
+      if (myFullName && raw.toUpperCase().includes(myFullName)) return true;
+      if (myRevName && raw.toUpperCase().includes(myRevName)) return true;
+      if (myFullName && chiaveNome(raw) === chiaveNome(myFullName)) return true;
+      return false;
+    }
+
+    function getMyRoleInfo(des) {
+      const roles = [
+        { key: 'ae', label: 'Arbitro', activity: 'AR', val: des?.ae || '' },
+        { key: 'aa1', label: '1° Assistente', activity: 'AA1', val: des?.aa1 || '' },
+        { key: 'aa2', label: '2° Assistente', activity: 'AA2', val: des?.aa2 || '' },
+        { key: 'qu', label: 'Quarto Ufficiale', activity: 'QU', val: des?.qu || '' }
+      ];
+      return roles.find(r => matchesCurrentUser(r.val)) || null;
+    }
+
+    function getRoleAcceptedStatus(des, roleKey) {
+      if (!des || !roleKey) return false;
+      const accMap = (des.accettazioni && typeof des.accettazioni === 'object') ? des.accettazioni : null;
+      if (accMap && Object.prototype.hasOwnProperty.call(accMap, roleKey)) {
+        return accMap[roleKey] === true;
+      }
+      return des.accettata === true;
+    }
+
+    function getRoleVariationStatus(des, roleKey) {
+      if (!des || !roleKey) return false;
+      if (des.variazioneDaAccettare !== true) return false;
+      const varMap = (des.variazioniRuoli && typeof des.variazioniRuoli === 'object') ? des.variazioniRuoli : null;
+      if (varMap && Object.prototype.hasOwnProperty.call(varMap, roleKey)) {
+        return varMap[roleKey] === true;
+      }
+      return true;
+    }
+
+    function getRoleDetail(des, roleKey) {
+      const detailsMap = (des?.accettazioniDettaglio && typeof des.accettazioniDettaglio === 'object')
+        ? des.accettazioniDettaglio
+        : null;
+      if (detailsMap && detailsMap[roleKey]) {
+        return detailsMap[roleKey];
+      }
+      return {
+        accettataTipo: des?.accettataTipo || 'designazione',
+        accettataIl: des?.accettataIl || null,
+        accettataIp: des?.accettataIp || ''
+      };
+    }
+
+    async function loadUtenti() {
+      if (utentiLoaded) return;
+      utentiLoaded = true;
+      try {
+        const snap = await getDocs(collection(db, "utenti"));
+        utentiList = snap.docs.map(d => d.data());
+      } catch (e) {
+        console.warn("Elenco utenti non leggibile: contatti dei colleghi non disponibili.", e);
+      }
+    }
+
+    function findContatti(nominativo) {
+      const key = chiaveNome(nominativo);
+      if (!key) return null;
+      const u = utentiList.find(x => chiaveNome(`${x.nome || ''} ${x.cognome || ''}`) === key);
+      if (!u) return null;
+      return {
+        tel: u.cellulare || u.telefono || u.cell || u.tel || u.phone || '',
+        email: u.email || u.mail || ''
+      };
+    }
+
+    async function getClientIp() {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 4000);
+        const r = await fetch('https://api.ipify.org?format=json', { signal: ctrl.signal });
+        clearTimeout(t);
+        const j = await r.json();
+        return j.ip || '';
+      } catch (e) {
+        console.warn("IP non rilevabile:", e);
+        return '';
+      }
+    }
+
+    function testoAccettazione(roleDetail) {
+      const tipo = roleDetail?.accettataTipo === 'variazione' ? 'Variazione' : 'Designazione';
+      const ts = roleDetail?.accettataIl;
+      const d = ts && typeof ts.toDate === 'function' ? ts.toDate() : (ts ? new Date(ts) : null);
+      let quando = '';
+      if (d && !isNaN(d)) {
+        quando = ` il ${d.toLocaleDateString('it-IT')} alle ore ${d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+      }
+      const da = roleDetail?.accettataIp ? ` da ${roleDetail.accettataIp}` : '';
+      return `${tipo} accettata${da}${quando}`;
+    }
+
+    async function fetchMyDesignations() {
+      try {
+        await loadUtenti();
+        const snap = await getDocs(collection(db, "gare_programmate"));
+        myDesignatedGare = [];
+
+        snap.forEach(d => {
+          const g = { id: d.id, ...d.data() };
+          const des = g.designazione;
+
+          if (des && des.pubblicata) {
+            const roleInfo = getMyRoleInfo(des);
+            if (roleInfo) {
+              myDesignatedGare.push(g);
+            }
+          }
+        });
+
+        myDesignatedGare.sort((a, b) => garaTimestamp(b) - garaTimestamp(a));
+
+        renderTable(myDesignatedGare);
+      } catch (err) {
+        console.error("Errore caricamento designazioni:", err);
+        tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: var(--danger);">Errore di caricamento dal database.</td></tr>`;
+      }
+    }
+
+    function renderTable(list) {
+      if (list.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: var(--text-muted);">Nessuna designazione pubblicata trovata per il tuo profilo.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = list.map(g => {
+        const des = g.designazione || {};
+        const roleInfo = getMyRoleInfo(des);
+        const roleKey = roleInfo?.key || 'ae';
+        const isAccettata = getRoleAcceptedStatus(des, roleKey);
+        const hasVariazione = getRoleVariationStatus(des, roleKey);
+        const roleDetail = getRoleDetail(des, roleKey);
+
+        let dotClass = 'dot-orange';
+        let statusTitle = 'In attesa di accettazione';
+        if (hasVariazione) {
+          dotClass = 'dot-blue';
+          statusTitle = 'Variazione da accettare';
+        } else if (isAccettata) {
+          dotClass = 'dot-green';
+          statusTitle = testoAccettazione(roleDetail);
+        }
+
+        const needsAction = !isAccettata || hasVariazione;
+        const azioneHtml = needsAction ? `
+          <button type="button" class="btn-azione" onclick="openConfirmModal('${g.id}')" data-tip="${hasVariazione ? 'Accetta variazione' : 'Accetta designazione'}">
+            <span class="status-dot-table dot-green"></span>
+          </button>` : '';
+
+        let catShort = (g.categoria || 'N/D').substring(0, 3).toUpperCase();
+
+        return `
+          <tr>
+            <td style="text-align: center;">
+              <button class="btn-emoji" onclick="openDesignationModal('${g.id}')" title="Visualizza Dettagli" style="background:#e0f2fe; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; color:#0369a1; font-weight:bold;">i</button>
+            </td>
+            <td><b>${catShort}</b></td>
+            <td>${g.girone || '-'}</td>
+            <td>${g.giornata || '-'}</td>
+            <td>${g.dataGara || '-'}</td>
+            <td>${g.oraGara || '-'}</td>
+            <td><strong>${g.squadraCasa || '-'}</strong></td>
+            <td><strong>${g.squadraOspite || '-'}</strong></td>
+            <td><b>${roleInfo?.activity || 'AR'}</b></td>
+            <td style="text-align: center;">
+              <span class="status-dot-table ${dotClass}" data-tip="${statusTitle}"></span>
+            </td>
+            <td style="text-align: center;">${azioneHtml}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.openDesignationModal = (id) => {
+      const g = myDesignatedGare.find(item => item.id === id);
+      if (!g) return;
+
+      const des = g.designazione || {};
+      const roleInfo = getMyRoleInfo(des);
+      const mioRuolo = roleInfo ? roleInfo.label : "Arbitro";
+      const mioNominativo = roleInfo ? roleInfo.val : des.ae;
+      const hasVariazione = roleInfo ? getRoleVariationStatus(des, roleInfo.key) : (des.variazioneDaAccettare === true);
+
+      const mioNomePulito = nomeSenzaSezione(mioNominativo) || currentUser.email;
+
+      let collaborazioneHtml = '';
+      let colleghi = [];
+      if (des.ae && mioNominativo !== des.ae) colleghi.push({ ruolo: 'AE', nome: des.ae });
+      if (des.aa1 && mioNominativo !== des.aa1) colleghi.push({ ruolo: 'AA1', nome: des.aa1 });
+      if (des.aa2 && mioNominativo !== des.aa2) colleghi.push({ ruolo: 'AA2', nome: des.aa2 });
+      if (des.qu && mioNominativo !== des.qu) colleghi.push({ ruolo: 'QU', nome: des.qu });
+
+      if (colleghi.length > 0) {
+        collaborazioneHtml = `<div class="collab-title">In collaborazione con:</div>`;
+        colleghi.forEach(c => {
+          const ct = findContatti(c.nome);
+          const contattiHtml = ct
+            ? `${ct.tel ? `<div>Cell.: ${ct.tel}</div>` : ''}${ct.email ? `<div>Email: ${ct.email}</div>` : ''}`
+            : '';
+          collaborazioneHtml += `<div class="collab-row"><span class="c-role">${c.ruolo}</span><span class="c-name">${c.nome}</span><span class="c-contact">${contattiHtml}</span></div>`;
+        });
+      }
+
+      const bannerVariazione = hasVariazione ? `
+        <div style="background: #dbeafe; border-left: 4px solid #2563eb; color: #1e40af; padding: 10px 12px; border-radius: 4px; margin-bottom: 14px; font-size: 0.88rem;">
+          <strong>⚠️ ATTENZIONE - VARIAZIONE GARA:</strong> Sono stati modificati data, orario o impianto di gioco. È necessario accettare la variazione dalla colonna Azioni.
+        </div>
+      ` : '';
+
+      modalDesignationText.innerHTML = `
+        ${bannerVariazione}
+        <div class="d-block">
+          <b>${mioNomePulito}</b>, sei designato a svolgere l'incarico di <b>${mioRuolo}</b><br>
+          per la gara n.${g.numeroGara || ''} di ${g.categoria || ''} girone ${g.girone || ''} del Comitato/Delegazione ${g.comitato || 'LND TOSCANA'}, giornata ${g.giornata || ''} tra
+        </div>
+        <div class="d-block"><b>${g.squadraCasa} - ${g.squadraOspite}</b></div>
+        <div class="d-block">
+          La partita si disputerà <b>${g.giornoSettimana || 'Domenica'} ${g.dataGara || ''}</b> alle ore <b>${g.oraGara || ''}</b><br>
+          a ${g.localita || ''} sull'impianto ${g.impianto || ''} sito in ${g.indirizzo || ''}
+        </div>
+        <div class="d-block">Rimborso: ${g.rimborso || '0 €'} (${g.km || '0 Km'})</div>
+        ${collaborazioneHtml}
+      `;
+
+      designationModal.classList.add('active');
+    };
+
+    modalCloseX.addEventListener('click', () => designationModal.classList.remove('active'));
+    btnChiudiModal.addEventListener('click', () => designationModal.classList.remove('active'));
+
+    btnStampaModal.addEventListener('click', () => {
+      window.print();
+    });
+
+    window.openConfirmModal = (id) => {
+      const g = myDesignatedGare.find(item => item.id === id);
+      if (!g) return;
+      garaDaConfermare = g;
+
+      const roleInfo = getMyRoleInfo(g.designazione || {});
+      const isVar = roleInfo ? getRoleVariationStatus(g.designazione || {}, roleInfo.key) : (g.designazione?.variazioneDaAccettare === true);
+      confirmTitle.textContent = isVar ? 'ACCETTAZIONE VARIAZIONE' : 'ACCETTAZIONE DESIGNAZIONE';
+      confirmText.innerHTML = `
+        <div style="margin-bottom: 10px;">
+          Confermi l'accettazione ${isVar ? 'della variazione ' : ''}della gara <b>${g.squadraCasa} - ${g.squadraOspite}</b>?
+        </div>
+        <div>L'azione è irreversibile.</div>
+      `;
+      btnConfermaModal.disabled = false;
+      btnConfermaModal.textContent = 'Conferma';
+      confirmModal.classList.add('active');
+    };
+
+    function closeConfirmModal() {
+      confirmModal.classList.remove('active');
+      garaDaConfermare = null;
+    }
+    confirmCloseX.addEventListener('click', closeConfirmModal);
+    confirmModal.addEventListener('click', (e) => { if (e.target === confirmModal) closeConfirmModal(); });
+
+    btnConfermaModal.addEventListener('click', async () => {
+      if (!garaDaConfermare) return;
+      const gara = garaDaConfermare;
+      const des = gara.designazione || {};
+      const roleInfo = getMyRoleInfo(des);
+      const roleKey = roleInfo?.key || 'ae';
+      const isVar = getRoleVariationStatus(des, roleKey);
+
+      try {
+        btnConfermaModal.disabled = true;
+        btnConfermaModal.textContent = "Registrazione...";
+
+        const ip = await getClientIp();
+        const now = new Date();
+        const tipoAcc = isVar ? 'variazione' : 'designazione';
+
+        const prevAccMap = (des.accettazioni && typeof des.accettazioni === 'object') ? { ...des.accettazioni } : {};
+        // Inizializza eventuali ruoli già assegnati senza sovrascrivere chi non ha ancora accettato
+        ['ae', 'aa1', 'aa2', 'qu'].forEach(r => {
+          if (des[r] && prevAccMap[r] === undefined) {
+            prevAccMap[r] = des.accettata === true;
+          }
+        });
+        prevAccMap[roleKey] = true;
+
+        const prevDetailsMap = (des.accettazioniDettaglio && typeof des.accettazioniDettaglio === 'object')
+          ? { ...des.accettazioniDettaglio }
+          : {};
+        prevDetailsMap[roleKey] = {
+          accettataTipo: tipoAcc,
+          accettataIl: now.toISOString(),
+          accettataIp: ip,
+          nominativo: roleInfo?.val || ''
+        };
+
+        const prevVarMap = (des.variazioniRuoli && typeof des.variazioniRuoli === 'object')
+          ? { ...des.variazioniRuoli }
+          : {};
+        if (des.variazioneDaAccettare === true) {
+          ['ae', 'aa1', 'aa2', 'qu'].forEach(r => {
+            if (des[r] && prevVarMap[r] === undefined) {
+              prevVarMap[r] = true;
+            }
+          });
+        }
+        prevVarMap[roleKey] = false;
+
+        const anyRoleNeedsVariation = ['ae', 'aa1', 'aa2', 'qu'].some(r => des[r] && prevVarMap[r] === true);
+        const allAssignedAccepted = ['ae', 'aa1', 'aa2', 'qu']
+          .filter(r => Boolean(des[r]))
+          .every(r => prevAccMap[r] === true);
+
+        const updatedDes = {
+          ...des,
+          accettazioni: prevAccMap,
+          accettazioniDettaglio: prevDetailsMap,
+          variazioniRuoli: prevVarMap,
+          accettata: allAssignedAccepted,
+          variazioneDaAccettare: anyRoleNeedsVariation,
+          accettataIl: serverTimestamp(),
+          accettataIp: ip,
+          accettataTipo: tipoAcc
+        };
+
+        await updateDoc(doc(db, "gare_programmate", gara.id), { designazione: updatedDes });
+
+        closeConfirmModal();
+        await fetchMyDesignations();
+        showToast(isVar ? "Variazione gara accettata con successo!" : "Designazione accettata con successo!");
+      } catch (err) {
+        console.error("Errore accettazione:", err);
+        alert("Errore durante l'accettazione: " + err.message);
+      } finally {
+        btnConfermaModal.disabled = false;
+        btnConfermaModal.textContent = 'Conferma';
+      }
+    });
+
+    function positionTip(el) {
+      const r = el.getBoundingClientRect();
+      statusTip.style.left = '0px';
+      statusTip.style.top = '0px';
+      const tw = statusTip.offsetWidth;
+      const th = statusTip.offsetHeight;
+      let x = r.left + r.width / 2 - tw / 2;
+      x = Math.max(6, Math.min(x, window.innerWidth - tw - 6));
+      let y = r.top - th - 8;
+      if (y < 6) y = r.bottom + 8;
+      statusTip.style.left = x + 'px';
+      statusTip.style.top = y + 'px';
+    }
+    document.addEventListener('mouseover', (e) => {
+      const el = e.target.closest ? e.target.closest('[data-tip]') : null;
+      if (!el) return;
+      statusTip.textContent = el.dataset.tip;
+      positionTip(el);
+      statusTip.classList.add('show');
+    });
+    document.addEventListener('mouseout', (e) => {
+      const el = e.target.closest ? e.target.closest('[data-tip]') : null;
+      if (el) statusTip.classList.remove('show');
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.replace('index.html');
+    });
+
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Gare - Gestionale Designazioni</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .form-grid-2 label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .form-grid-2 input, .form-grid-2 select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+    .tooltip-container {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+    .info-hover-badge {
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      user-select: none;
+    }
+    .tooltip-popup {
+      visibility: hidden;
+      opacity: 0;
+      width: 330px;
+      background-color: #0f172a;
+      color: #f8fafc;
+      text-align: left;
+      border-radius: 8px;
+      padding: 12px 14px;
+      position: absolute;
+      z-index: 1000;
+      bottom: 135%;
+      left: 0;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      pointer-events: none;
+    }
+    .tooltip-container:hover .tooltip-popup {
+      visibility: visible;
+      opacity: 1;
+    }
+    .badge-programmata {
+      background: #dcfce7;
+      color: #166534;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-annullata {
+      background: #fecaca;
+      color: #991b1b;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span>⚽ Designazioni</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="banca-dati.html">Banca Dati (Gare)</a></li>
+        <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Amministrazione</li>
+        <li><a href="admin.html">Gestione Anagrafiche</a></li>
+        <li><a href="gestione-gare.html" class="active">Gestione Gare</a></li>
+        <li><a href="gestione-designazioni.html">Gestione Designazioni</a></li>
+        <li><a href="accettazione-gare.html">Accettazione Gare</a></li>
+      </ul>
+    </aside>
+
+    <!-- Area Principale -->
+    <div class="main-content">
+      <header class="topbar">
+        <div class="page-title">
+          <strong>Gestione Gare Programmate</strong>
+        </div>
+        <div class="user-info">
+          <span id="user-role" class="role-badge">ADMIN</span>
+          <span id="user-email" class="user-email">Caricamento...</span>
+          <button id="logout-btn" class="btn-logout">Esci</button>
+        </div>
+      </header>
+
+      <main class="dashboard-body">
+        <div class="banca-dati-header">
+          <h2 style="color: var(--primary);">Calendario Gare</h2>
+          <div class="search-and-btn" style="gap: 10px;">
+            <input type="text" id="search-gare-box" class="search-input" placeholder="Cerca per numero gara, squadra, categoria o data...">
+            <button id="btn-open-create-gara" class="btn-success">➕ Crea Gara</button>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>N° Gara</th>
+                <th>Data e Ora</th>
+                <th>Categoria / Girone</th>
+                <th>Incontro</th>
+                <th>Modulo Ufficiali</th>
+                <th>Stato</th>
+                <th style="text-align: center;">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="gare-table-body">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted);">Caricamento gare...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODALE CREAZIONE GARA -->
+  <div id="create-gara-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">Crea Nuova Gara</div>
+
+      <form id="create-gara-form">
+        <div class="form-grid-2">
+          <div>
+            <label>Numero Gara *</label>
+            <input type="text" id="g-numero" placeholder="es. 749" required>
+          </div>
+          <div>
+            <label>Tipo Ufficiali Coinvolti *</label>
+            <select id="g-ufficiali" required>
+              <option value="(AE)">(AE)</option>
+              <option value="(AE+AA1+AA2)">(AE+AA1+AA2)</option>
+              <option value="(AE+AA1+AA2+QU)">(AE+AA1+AA2+QU)</option>
+            </select>
+          </div>
+          <div>
+            <label>Categoria / Campionato *</label>
+            <input type="text" id="g-categoria" placeholder="es. JUNIORES NAZIONALI" required>
+          </div>
+          <div>
+            <label>Girone *</label>
+            <input type="text" id="g-girone" placeholder="es. E" required>
+          </div>
+          <div>
+            <label>Comitato / Delegazione</label>
+            <input type="text" id="g-comitato" placeholder="es. LND TOSCANA">
+          </div>
+          <div>
+            <label>Giornata *</label>
+            <input type="text" id="g-giornata" placeholder="es. 11 and." required>
+          </div>
+          <div>
+            <label>Squadra Casa *</label>
+            <input type="text" id="g-casa" placeholder="es. AQUILA MONTEVARCHI 1902" required>
+          </div>
+          <div>
+            <label>Squadra Ospite *</label>
+            <input type="text" id="g-ospite" placeholder="es. TERRANUOVA TRAIANA" required>
+          </div>
+          <div>
+            <label>Giorno Settimana *</label>
+            <select id="g-giorno-sett" required>
+              <option value="Sabato">Sabato</option>
+              <option value="Domenica" selected>Domenica</option>
+              <option value="Lunedì">Lunedì</option>
+              <option value="Martedì">Martedì</option>
+              <option value="Mercoledì">Mercoledì</option>
+              <option value="Giovedì">Giovedì</option>
+              <option value="Venerdì">Venerdì</option>
+            </select>
+          </div>
+          <div>
+            <label>Data (GG/MM/AAAA) *</label>
+            <input type="text" id="g-data" placeholder="es. 14/11/2026" required>
+          </div>
+          <div>
+            <label>Ora (HH:MM) *</label>
+            <input type="text" id="g-ora" placeholder="es. 14:30" required>
+          </div>
+          <div>
+            <label>Località (Comune e Prov.) *</label>
+            <input type="text" id="g-localita" placeholder="es. MONTEVARCHI (AR)" required>
+          </div>
+          <div>
+            <label>Impianto Sportivo *</label>
+            <input type="text" id="g-impianto" placeholder="es. ANTISTADIO COMUNALE E.A." required>
+          </div>
+          <div>
+            <label>Indirizzo Impianto *</label>
+            <input type="text" id="g-indirizzo" placeholder="es. VIA MEUCCI RUINI SNC" required>
+          </div>
+          <div>
+            <label>Rimborso (€) *</label>
+            <input type="text" id="g-rimborso" placeholder="es. 74 €" required>
+          </div>
+          <div>
+            <label>Distanza (Km) *</label>
+            <input type="text" id="g-km" placeholder="es. 76 Km" required>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" id="create-gara-cancel" class="btn-secondary">Annulla</button>
+          <button type="submit" id="create-gara-submit" class="btn-success">💾 Salva Gara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE VARIAZIONE GARA -->
+  <div id="variazione-gara-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 560px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" id="variazione-title">Variazione Gara</div>
+      <p style="color: var(--text-muted); font-size: 0.86rem; margin-bottom: 14px;">
+        Aggiorna i dati di luogo, data e ora. Verrà richiesta la riaccettazione agli ufficiali.
+      </p>
+
+      <form id="variazione-gara-form">
+        <input type="hidden" id="var-id">
+        <div class="form-grid-2">
+          <div>
+            <label>Giorno Settimana *</label>
+            <select id="var-giorno-sett" required>
+              <option value="Sabato">Sabato</option>
+              <option value="Domenica">Domenica</option>
+              <option value="Lunedì">Lunedì</option>
+              <option value="Martedì">Martedì</option>
+              <option value="Mercoledì">Mercoledì</option>
+              <option value="Giovedì">Giovedì</option>
+              <option value="Venerdì">Venerdì</option>
+            </select>
+          </div>
+          <div>
+            <label>Nuova Data (GG/MM/AAAA) *</label>
+            <input type="text" id="var-data" required>
+          </div>
+          <div>
+            <label>Nuova Ora (HH:MM) *</label>
+            <input type="text" id="var-ora" required>
+          </div>
+          <div>
+            <label>Località *</label>
+            <input type="text" id="var-localita" required>
+          </div>
+          <div>
+            <label>Impianto *</label>
+            <input type="text" id="var-impianto" required>
+          </div>
+          <div>
+            <label>Indirizzo Impianto *</label>
+            <input type="text" id="var-indirizzo" required>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" id="variazione-cancel" class="btn-secondary">Annulla</button>
+          <button type="submit" id="variazione-submit" class="btn-primary" style="width: auto; padding: 10px 24px;">💾 Conferma Variazione</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST DI NOTIFICA -->
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const userEmailSpan = document.getElementById('user-email');
+    const logoutBtn = document.getElementById('logout-btn');
+    const tableBody = document.getElementById('gare-table-body');
+    const searchBox = document.getElementById('search-gare-box');
+    const toast = document.getElementById('toast');
+
+    const createModal = document.getElementById('create-gara-modal');
+    const btnOpenCreate = document.getElementById('btn-open-create-gara');
+    const createCancel = document.getElementById('create-gara-cancel');
+    const createForm = document.getElementById('create-gara-form');
+
+    const varModal = document.getElementById('variazione-gara-modal');
+    const varCancel = document.getElementById('variazione-cancel');
+    const varForm = document.getElementById('variazione-gara-form');
+
+    let allGare = [];
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+      userEmailSpan.textContent = user.email;
+
+      try {
+        const userSnap = await getDoc(doc(db, "utenti", user.uid));
+        if (!userSnap.exists() || userSnap.data().ruolo !== 'admin') {
+          alert("Accesso negato: Area riservata agli amministratori.");
+          window.location.replace('home.html');
+          return;
+        }
+      } catch (e) {
+        console.error("Errore verifica permessi:", e);
+        window.location.replace('home.html');
+        return;
+      }
+
+      await fetchGare();
+      document.body.classList.remove('auth-loading');
+    });
+
+    async function fetchGare() {
+      try {
+        const snap = await getDocs(collection(db, "gare_programmate"));
+        allGare = [];
+        snap.forEach(d => allGare.push({ id: d.id, ...d.data() }));
+        renderGareTable(allGare);
+      } catch (err) {
+        console.error("Errore caricamento gare:", err);
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger);">Errore di caricamento dal database.</td></tr>`;
+      }
+    }
+
+    function renderGareTable(list) {
+      if (list.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Nessuna gara programmata. Clicca su "Crea Gara".</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = list.map(g => {
+        const isAnnullata = g.stato === 'Annullata';
+        return `
+          <tr>
+            <td><strong>${g.numeroGara || '-'}</strong></td>
+            <td>${g.giornoSettimana || ''} ${g.dataGara || ''} - <b>${g.oraGara || ''}</b></td>
+            <td>${g.categoria || ''} (Gir. ${g.girone || '-'})</td>
+            <td>
+              <div style="display: flex; align-items: center;">
+                <div class="tooltip-container">
+                  <span class="info-hover-badge">i</span>
+                  <div class="tooltip-popup">
+                    <div style="font-weight:700; color:#38bdf8; margin-bottom:4px;">Gara n. ${g.numeroGara} — ${g.categoria} Gir. ${g.girone}</div>
+                    <div><b>Comitato:</b> ${g.comitato || 'N/D'} | <b>Giornata:</b> ${g.giornata}</div>
+                    <div><b>Data/Ora:</b> ${g.giornoSettimana} ${g.dataGara} ore ${g.oraGara}</div>
+                    <div><b>Località:</b> ${g.localita}</div>
+                    <div><b>Impianto:</b> ${g.impianto} (${g.indirizzo})</div>
+                    <div><b>Rimborso:</b> ${g.rimborso} (${g.km})</div>
+                    <div><b>Ufficiali:</b> ${g.tipoUfficiali}</div>
+                  </div>
+                </div>
+                <span><strong>${g.squadraCasa}</strong> - <strong>${g.squadraOspite}</strong></span>
+              </div>
+            </td>
+            <td><span style="background:#f1f5f9; padding:3px 8px; border-radius:5px; font-size:0.8rem; font-weight:600;">${g.tipoUfficiali || '(AE)'}</span></td>
+            <td><span class="${isAnnullata ? 'badge-annullata' : 'badge-programmata'}">${isAnnullata ? 'ANNULLATA' : 'PROGRAMMATA'}</span></td>
+            <td style="text-align: center; white-space: nowrap;">
+              <button class="btn-emoji" onclick="openVariazione('${g.id}')" title="Variazione (Luogo, Data, Ora)">✏️</button>
+              <button class="btn-emoji" onclick="annullaGara('${g.id}', '${g.stato || 'Programmata'}')" title="${isAnnullata ? 'Ripristina Gara' : 'Annulla Gara'}">🚫</button>
+              <button class="btn-emoji" onclick="eliminaGara('${g.id}', '${g.numeroGara}')" title="Cancellazione Definitiva">🗑️</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    searchBox.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allGare.filter(g =>
+        (g.numeroGara && g.numeroGara.toLowerCase().includes(term)) ||
+        (g.squadraCasa && g.squadraCasa.toLowerCase().includes(term)) ||
+        (g.squadraOspite && g.squadraOspite.toLowerCase().includes(term)) ||
+        (g.categoria && g.categoria.toLowerCase().includes(term)) ||
+        (g.dataGara && g.dataGara.toLowerCase().includes(term))
+      );
+      renderGareTable(filtered);
+    });
+
+    btnOpenCreate.addEventListener('click', () => {
+      createForm.reset();
+      createModal.classList.add('active');
+    });
+    createCancel.addEventListener('click', () => createModal.classList.remove('active'));
+
+    createForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('create-gara-submit');
+
+      try {
+        btn.disabled = true;
+        btn.textContent = "Salvataggio...";
+
+        await addDoc(collection(db, "gare_programmate"), {
+          numeroGara: document.getElementById('g-numero').value.trim(),
+          tipoUfficiali: document.getElementById('g-ufficiali').value,
+          categoria: document.getElementById('g-categoria').value.trim().toUpperCase(),
+          girone: document.getElementById('g-girone').value.trim().toUpperCase(),
+          comitato: document.getElementById('g-comitato').value.trim().toUpperCase(),
+          giornata: document.getElementById('g-giornata').value.trim(),
+          squadraCasa: document.getElementById('g-casa').value.trim().toUpperCase(),
+          squadraOspite: document.getElementById('g-ospite').value.trim().toUpperCase(),
+          giornoSettimana: document.getElementById('g-giorno-sett').value,
+          dataGara: document.getElementById('g-data').value.trim(),
+          oraGara: document.getElementById('g-ora').value.trim(),
+          localita: document.getElementById('g-localita').value.trim().toUpperCase(),
+          impianto: document.getElementById('g-impianto').value.trim().toUpperCase(),
+          indirizzo: document.getElementById('g-indirizzo').value.trim().toUpperCase(),
+          rimborso: document.getElementById('g-rimborso').value.trim(),
+          km: document.getElementById('g-km').value.trim(),
+          stato: 'Programmata',
+          creatoIl: serverTimestamp()
+        });
+
+        createModal.classList.remove('active');
+        await fetchGare();
+        showToast("Gara creata e aggiunta in lista!");
+      } catch (err) {
+        console.error("Errore creazione gara:", err);
+        alert("Errore durante il salvataggio: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 Salva Gara";
+      }
+    });
+
+    window.openVariazione = (id) => {
+      const g = allGare.find(item => item.id === id);
+      if (!g) return;
+
+      document.getElementById('var-id').value = g.id;
+      document.getElementById('variazione-title').textContent = `Variazione Gara n. ${g.numeroGara} (${g.squadraCasa} - ${g.squadraOspite})`;
+      document.getElementById('var-giorno-sett').value = g.giornoSettimana || 'Domenica';
+      document.getElementById('var-data').value = g.dataGara || '';
+      document.getElementById('var-ora').value = g.oraGara || '';
+      document.getElementById('var-localita').value = g.localita || '';
+      document.getElementById('var-impianto').value = g.impianto || '';
+      document.getElementById('var-indirizzo').value = g.indirizzo || '';
+
+      varModal.classList.add('active');
+    };
+
+    varCancel.addEventListener('click', () => varModal.classList.remove('active'));
+
+    varForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('var-id').value;
+      const btn = document.getElementById('variazione-submit');
+      const garaCorrente = allGare.find(item => item.id === id);
+
+      try {
+        btn.disabled = true;
+        btn.textContent = "Aggiornamento...";
+
+        const updatePayload = {
+          giornoSettimana: document.getElementById('var-giorno-sett').value,
+          dataGara: document.getElementById('var-data').value.trim(),
+          oraGara: document.getElementById('var-ora').value.trim(),
+          localita: document.getElementById('var-localita').value.trim().toUpperCase(),
+          impianto: document.getElementById('var-impianto').value.trim().toUpperCase(),
+          indirizzo: document.getElementById('var-indirizzo').value.trim().toUpperCase(),
+          aggiornatoIl: serverTimestamp()
+        };
+
+        if (garaCorrente && garaCorrente.designazione && garaCorrente.designazione.ae) {
+          updatePayload.designazione = {
+            ...garaCorrente.designazione,
+            accettata: false,
+            variazioneDaAccettare: true
+          };
+        }
+
+        await updateDoc(doc(db, "gare_programmate", id), updatePayload);
+
+        varModal.classList.remove('active');
+        await fetchGare();
+        showToast("Variazione registrata! Richiesta riaccettazione agli ufficiali.");
+      } catch (err) {
+        console.error("Errore variazione gara:", err);
+        alert("Errore durante l'aggiornamento: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 Conferma Variazione";
+      }
+    });
+
+    window.annullaGara = async (id, statoAttuale) => {
+      const nuovoStato = statoAttuale === 'Annullata' ? 'Programmata' : 'Annullata';
+      const msg = nuovoStato === 'Annullata'
+        ? "Confermi l'annullamento di questa gara?"
+        : "Vuoi ripristinare questa gara come Programmata?";
+      if (!confirm(msg)) return;
+
+      try {
+        await updateDoc(doc(db, "gare_programmate", id), {
+          stato: nuovoStato,
+          aggiornatoIl: serverTimestamp()
+        });
+        await fetchGare();
+        showToast(`Gara segnata come ${nuovoStato}!`);
+      } catch (err) {
+        console.error("Errore cambio stato gara:", err);
+        alert("Errore durante l'aggiornamento.");
+      }
+    };
+
+    window.eliminaGara = async (id, numGara) => {
+      if (!confirm(`Sei sicuro di voler eliminare DEFINITIVAMENTE la gara n. ${numGara}? L'operazione è irreversibile.`)) return;
+      try {
+        await deleteDoc(doc(db, "gare_programmate", id));
+        await fetchGare();
+        showToast("Gara cancellata definitivamente.");
+      } catch (err) {
+        console.error("Errore cancellazione gara:", err);
+        alert("Errore durante la cancellazione.");
+      }
+    };
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.replace('index.html');
+    });
+  </script>
+</body>
+</html>

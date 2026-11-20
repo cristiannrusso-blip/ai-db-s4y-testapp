@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section,
+    #menu-ruolo li[style*="uppercase"] {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important;
+      padding: 3px 6px 3px 4px !important;
+      margin: 0 !important;
+      font-family: var(--font);
+      font-size: 20px !important;
+      font-weight: 700;
+      letter-spacing: .3px !important;
+      text-transform: none !important;
+      color: #000 !important;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon,
+    #menu-ruolo li[style*="uppercase"]::before {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav,
+    .sub-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+    /* icona cartella (categoria / voce standard) */
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url("icon075.gif") center / contain no-repeat;
+      flex-shrink: 0;
+    }
+
+    /* icona cartella chiusa (categoria con sottomenu non aperta) */
+    .sidebar-nav li.cat:not(.open) > a::before {
+      background: url("icon074.gif") center / contain no-repeat;
+    }
+
+    /* icona globo (sottocategoria) */
+    .sidebar-nav li a.globe::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+    }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar .page-title { display: none; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email {
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+    .role-badge::after { content: " -"; }
+    .btn-logout {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: url("icon_system_logout.png") center / contain no-repeat;
+      box-shadow: none;
+      font-size: 0;
+      cursor: pointer;
+    }
+    .btn-logout::before,
+    .btn-logout::after {
+      content: none;
+    }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+
+    /* ========== TITOLO PAGINA ========== */
+    .com-page-header {
+      margin: 0 0 12px;
+      border-bottom: 2px solid #f0a03a;
+    }
+    .com-page-header h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+
+    /* ========== BOX FORM NUOVA COMUNICAZIONE ========== */
+    .box {
+      background: #d1d5df;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 0 14px;
+    }
+    .box-head {
+      margin: 0;
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+      border-radius: 8px 8px 0 0;
+    }
+    .form-panel {
+      background: #efefef;
+      border: 1px solid #d4d7de;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      padding: 12px 13px 14px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 10px 14px;
+    }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #222;
+      margin-bottom: 3px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="url"],
+    .form-group textarea {
+      width: 100%;
+      padding: 5px 8px;
+      font-family: var(--font);
+      font-size: 14px;
+      color: #111;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      border-radius: 2px;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 2px rgba(40,80,106,.22);
+    }
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+    .att-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .file-label-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 30px;
+      padding: 0 10px;
+      background: #f7f9fa;
+      border: 1px solid #8f97a6;
+      border-radius: 3px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1b8fc4;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .file-label-btn:hover { background: #ffffff; }
+    .helper-hint {
+      font-size: 12px;
+      color: #444;
+      margin-top: 3px;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #c6cbd4;
+    }
+    .status-msg {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .status-msg.err { color: var(--danger); }
+
+    .btn-s4u {
+      height: 30px;
+      padding: 0 16px;
+      background: var(--teal);
+      color: #ffffff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.35);
+      border: 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-s4u:hover { background: #1f4157; }
+    .btn-s4u:disabled { opacity: .6; cursor: not-allowed; }
+
+    .btn-clear {
+      height: 30px;
+      padding: 0 12px;
+      background: #e4e7ed;
+      color: #222;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 13px;
+      border: 1px solid #8f97a6;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-clear:hover { background: #ffffff; }
+
+    /* ========== ELENCO COMUNICAZIONI INVIATE ========== */
+    .com-panel {
+      background: #ffffff;
+      border: 1px solid #d4d7de;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      padding: 6px 6px 12px;
+    }
+    .com-subbanner {
+      background: #e9ebef;
+      border: 1px solid #c6cbd4;
+      color: #111111;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 5px 8px;
+      margin-bottom: 6px;
+    }
+    .com-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #ffffff;
+    }
+    .com-table > tbody > tr > td {
+      border: 1px solid #c2c6ce;
+      vertical-align: top;
+      padding: 0;
+    }
+    .com-table > tbody > tr + tr > td {
+      border-top: 4px solid #ffffff;
+    }
+    .com-col-main { width: auto; background: #f5f6f8; }
+    .com-col-meta { width: 225px; background: #ffffff; padding: 5px 8px !important; }
+
+    .com-subject-bar {
+      background: linear-gradient(#ffe38a, #f4c842);
+      border-bottom: 1px solid #d8b548;
+      padding: 4px 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #111111;
+      line-height: 1.2;
+    }
+    .com-body-scroll {
+      width: 100%;
+      height: 100px;
+      padding: 5px 8px;
+      margin: 0;
+      border: 0;
+      background: #f3f4f6;
+      color: #222222;
+      font-family: var(--font);
+      font-size: 13px;
+      line-height: 1.32;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      display: block;
+    }
+    .com-meta-line {
+      font-size: 12.5px;
+      font-style: italic;
+      color: #333333;
+      line-height: 1.25;
+    }
+    .com-meta-sender {
+      font-size: 12.5px;
+      font-style: italic;
+      color: #111111;
+      line-height: 1.25;
+      margin-bottom: 7px;
+    }
+    .meta-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    /* Pulsante / riquadro allegato */
+    .att-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 40px;
+      background: #f4f5f7;
+      border: 1px solid #c5c9d2;
+      border-radius: 3px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 1px 1px rgba(0,0,0,.08);
+      cursor: pointer;
+      text-decoration: none;
+      padding: 0;
+    }
+    .att-box:hover { background: #ffffff; border-color: #9aa2b1; }
+    .att-box.no-att { cursor: default; }
+    .att-box.no-att:hover { background: #f4f5f7; border-color: #c5c9d2; }
+
+    .att-qmark-sheet {
+      position: relative;
+      width: 20px;
+      height: 25px;
+      background: #ffffff;
+      border: 1.5px solid #222222;
+      border-radius: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .att-qmark-circle {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #7be0ff, #0099dd 65%, #006da3);
+      border: 1px solid #005b8a;
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-style: normal;
+      font-weight: 700;
+      font-size: 10.5px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 1px 1px rgba(0,0,0,.45);
+    }
+
+    .att-file-sheet {
+      position: relative;
+      width: 21px;
+      height: 26px;
+      background: #ffffff;
+      border: 1.5px solid #222222;
+      border-radius: 1px;
+      box-shadow: 2px 2px 0 rgba(0,0,0,.12);
+    }
+    .att-file-sheet::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 6px;
+      background: #d7dce5;
+      border-left: 1.5px solid #222222;
+      border-bottom: 1.5px solid #222222;
+    }
+    .att-file-sheet::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      top: 10px;
+      height: 8px;
+      border-top: 1.5px solid #3a546d;
+      border-bottom: 1.5px solid #3a546d;
+    }
+
+    .btn-del-com {
+      height: 26px;
+      padding: 0 9px;
+      background: #fff0f0;
+      color: #a30000;
+      border: 1px solid #d49a9a;
+      border-radius: 3px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-del-com:hover { background: #ffe0e0; }
+
+    .com-empty-cell {
+      padding: 20px 12px !important;
+      text-align: center;
+      color: #333333;
+      background: #f5f6f8;
+    }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .com-table > tbody > tr > td { display: block; width: 100%; }
+      .com-col-meta { width: 100%; border-top: 0 !important; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <!-- Header AIA -->
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav" id="menu-ruolo">
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <!-- Area Principale -->
+      <div class="main-content">
+        <header class="topbar">
+          <div class="page-title">
+            <strong>Gestione Comunicazioni</strong>
+          </div>
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="com-page-header">
+            <h3>Gestione Comunicazioni</h3>
+          </div>
+
+          <!-- FORM INVIO NUOVA COMUNICAZIONE -->
+          <div class="box">
+            <div class="box-head">Nuova Comunicazione</div>
+            <div class="form-panel">
+              <form id="comunicazione-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="com-oggetto">Oggetto *</label>
+                    <input type="text" id="com-oggetto" placeholder="Es. CENA DI NATALE" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="com-mittente">Inviato Da (Mittente) *</label>
+                    <input type="text" id="com-mittente" placeholder="Es. Sez. SIENA oppure AIA" required>
+                  </div>
+
+                  <div class="form-group full">
+                    <label for="com-testo">Testo Comunicazione *</label>
+                    <textarea id="com-testo" placeholder="Scrivi il testo completo della comunicazione..." required></textarea>
+                  </div>
+
+                  <div class="form-group full">
+                    <label for="com-allegato-url">Allegato (Facoltativo)</label>
+                    <div class="att-row">
+                      <input type="text" id="com-allegato-url" placeholder="Incolla link URL dell'allegato oppure carica un file PDF/immagine (max 700 KB)">
+                      <label class="file-label-btn" for="com-allegato-file">
+                        Scegli file
+                        <input type="file" id="com-allegato-file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style="display:none;">
+                      </label>
+                    </div>
+                    <div id="allegato-info" class="helper-hint">Nessun allegato inserito (verrà mostrata l'icona blu con punto interrogativo).</div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <div id="form-status" class="status-msg"></div>
+                  <div style="display:flex; gap:8px;">
+                    <button type="button" id="btn-reset-form" class="btn-clear">Pulisci</button>
+                    <button type="submit" id="btn-invia-com" class="btn-s4u">Invia Comunicazione</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- ELENCO COMUNICAZIONI INVIATE -->
+          <div class="box" style="margin-bottom:0;">
+            <div class="box-head">Comunicazioni Pubblicate</div>
+            <div class="com-panel">
+              <div class="com-subbanner">ULTIME 50 COMUNICAZIONI INVIATE</div>
+              <table class="com-table">
+                <tbody id="admin-com-tbody">
+                  <tr>
+                    <td colspan="2" class="com-empty-cell">Caricamento comunicazioni...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE02</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      doc,
+      getDoc,
+      collection,
+      addDoc,
+      deleteDoc,
+      query,
+      orderBy,
+      limit,
+      getDocs,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const logoutBtn = document.getElementById('logout-btn');
+    const menuRuolo = document.getElementById('menu-ruolo');
+    const userCodMeccSpan = document.getElementById('user-codmecc');
+    const userFullNameSpan = document.getElementById('user-fullname');
+
+    const comForm = document.getElementById('comunicazione-form');
+    const inputOggetto = document.getElementById('com-oggetto');
+    const inputMittente = document.getElementById('com-mittente');
+    const inputTesto = document.getElementById('com-testo');
+    const inputAllegatoUrl = document.getElementById('com-allegato-url');
+    const inputAllegatoFile = document.getElementById('com-allegato-file');
+    const allegatoInfo = document.getElementById('allegato-info');
+    const formStatus = document.getElementById('form-status');
+    const btnInviaCom = document.getElementById('btn-invia-com');
+    const btnResetForm = document.getElementById('btn-reset-form');
+    const adminComTbody = document.getElementById('admin-com-tbody');
+
+    let currentAdminUid = null;
+    let defaultMittente = 'Sez. SIENA';
+    let loadedFileDataUrl = '';
+    let loadedFileName = '';
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatDateTime(raw) {
+      if (!raw) return 'Adesso';
+      let d = null;
+      if (typeof raw.toDate === 'function') {
+        d = raw.toDate();
+      } else if (raw instanceof Date) {
+        d = raw;
+      } else if (typeof raw === 'string' || typeof raw === 'number') {
+        const parsed = new Date(raw);
+        if (!Number.isNaN(parsed.getTime())) d = parsed;
+      }
+      if (!d) return String(raw);
+
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function setStatus(msg, isError = false) {
+      formStatus.textContent = msg;
+      formStatus.classList.toggle('err', isError);
+    }
+
+    function clearAttachmentState() {
+      loadedFileDataUrl = '';
+      loadedFileName = '';
+      inputAllegatoFile.value = '';
+      inputAllegatoUrl.value = '';
+      allegatoInfo.textContent = 'Nessun allegato inserito (verrà mostrata l\'icona blu con punto interrogativo).';
+    }
+
+    // Gestione caricamento file locale (max ~700 KB per stare dentro il limite di 1 MB di Firestore)
+    inputAllegatoFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 700 * 1024) {
+        alert('Il file supera i 700 KB. Per file più grandi caricalo su Drive/web e incolla il link URL nel campo accanto.');
+        inputAllegatoFile.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        loadedFileDataUrl = String(reader.result || '');
+        loadedFileName = file.name;
+        inputAllegatoUrl.value = `[File allegato: ${file.name}]`;
+        allegatoInfo.textContent = `File pronto per l'invio: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    inputAllegatoUrl.addEventListener('input', () => {
+      if (!inputAllegatoUrl.value.startsWith('[File allegato:')) {
+        loadedFileDataUrl = '';
+        loadedFileName = '';
+        const val = inputAllegatoUrl.value.trim();
+        allegatoInfo.textContent = val
+          ? `Verrà allegato il link: ${val}`
+          : 'Nessun allegato inserito (verrà mostrata l\'icona blu con punto interrogativo).';
+      }
+    });
+
+    btnResetForm.addEventListener('click', () => {
+      comForm.reset();
+      inputMittente.value = defaultMittente;
+      clearAttachmentState();
+      setStatus('');
+    });
+
+    async function loadAdminComunicazioni() {
+      try {
+        const q = query(
+          collection(db, "comunicazioni"),
+          orderBy("inviatoIl", "desc"),
+          limit(50)
+        );
+        const snap = await getDocs(q);
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (items.length === 0) {
+          adminComTbody.innerHTML = `
+            <tr>
+              <td colspan="2" class="com-empty-cell">Nessuna comunicazione pubblicata finora.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        adminComTbody.innerHTML = items.map((com) => {
+          const oggetto = escapeHtml(com.oggetto || '');
+          const testo = escapeHtml(com.testo || '');
+          const mittente = escapeHtml(com.mittente || 'AIA');
+          const dataOra = escapeHtml(formatDateTime(com.inviatoIl));
+          const allegatoUrl = (com.allegatoUrl || '').trim();
+          const allegatoNome = escapeHtml(com.allegatoNome || 'Apri allegato');
+
+          const attachmentHtml = allegatoUrl
+            ? `<a class="att-box" href="${escapeHtml(allegatoUrl)}" target="_blank" rel="noopener noreferrer" download="${allegatoNome}" title="${allegatoNome}">
+                 <span class="att-file-sheet"></span>
+               </a>`
+            : `<span class="att-box no-att" title="Nessun allegato">
+                 <span class="att-qmark-sheet"><span class="att-qmark-circle">?</span></span>
+               </span>`;
+
+          return `
+            <tr>
+              <td class="com-col-main">
+                <div class="com-subject-bar">Oggetto: ${oggetto}</div>
+                <div class="com-body-scroll">${testo}</div>
+              </td>
+              <td class="com-col-meta">
+                <div class="com-meta-line">Inviato il ${dataOra}</div>
+                <div class="com-meta-sender">Da <strong>${mittente}</strong></div>
+                <div class="meta-actions-row">
+                  ${attachmentHtml}
+                  <button type="button" class="btn-del-com" data-id="${escapeHtml(com.id)}">Elimina</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        adminComTbody.querySelectorAll('.btn-del-com').forEach((btn) => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
+            if (!confirm('Vuoi eliminare definitivamente questa comunicazione?')) return;
+            try {
+              btn.disabled = true;
+              await deleteDoc(doc(db, "comunicazioni", id));
+              await loadAdminComunicazioni();
+            } catch (err) {
+              console.error("Errore eliminazione comunicazione:", err);
+              alert("Errore durante l'eliminazione: " + err.message);
+              btn.disabled = false;
+            }
+          });
+        });
+      } catch (err) {
+        console.error("Errore lettura comunicazioni:", err);
+        adminComTbody.innerHTML = `
+          <tr>
+            <td colspan="2" class="com-empty-cell">Errore nel caricamento delle comunicazioni.</td>
+          </tr>
+        `;
+      }
+    }
+
+    comForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const oggetto = inputOggetto.value.trim();
+      const mittente = inputMittente.value.trim();
+      const testo = inputTesto.value.trim();
+
+      if (!oggetto || !mittente || !testo) {
+        setStatus('Compila Oggetto, Mittente e Testo comunicazione.', true);
+        return;
+      }
+
+      let allegatoUrl = '';
+      let allegatoNome = '';
+
+      if (loadedFileDataUrl) {
+        allegatoUrl = loadedFileDataUrl;
+        allegatoNome = loadedFileName || 'allegato';
+      } else {
+        const rawUrl = inputAllegatoUrl.value.trim();
+        if (rawUrl && !rawUrl.startsWith('[File allegato:')) {
+          allegatoUrl = rawUrl;
+          allegatoNome = 'Allegato comunicazione';
+        }
+      }
+
+      btnInviaCom.disabled = true;
+      setStatus('Invio comunicazione in corso...');
+
+      try {
+        await addDoc(collection(db, "comunicazioni"), {
+          oggetto,
+          mittente,
+          testo,
+          allegatoUrl,
+          allegatoNome,
+          inviatoIl: serverTimestamp(),
+          autoreUid: currentAdminUid || ''
+        });
+
+        comForm.reset();
+        inputMittente.value = defaultMittente;
+        clearAttachmentState();
+        setStatus('Comunicazione inviata con successo!');
+        await loadAdminComunicazioni();
+      } catch (err) {
+        console.error("Errore invio comunicazione:", err);
+        setStatus('Errore durante l\'invio: ' + err.message, true);
+      } finally {
+        btnInviaCom.disabled = false;
+      }
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+      currentAdminUid = user.uid;
+
+      try {
+        const userSnap = await getDoc(doc(db, "utenti", user.uid));
+        if (!userSnap.exists()) {
+          window.location.replace('home.html');
+          return;
+        }
+
+        const data = userSnap.data();
+        const ruolo = data.ruolo || 'utente';
+
+        // Protezione pagina admin
+        if (ruolo !== 'admin') {
+          window.location.replace('home.html');
+          return;
+        }
+
+        const codMecc = (data.codMecc || '').trim();
+        const nome = (data.nome || '').trim();
+        const cognome = (data.cognome || '').trim();
+        const nomeCompleto = [nome, cognome].filter(Boolean).join(' ') || '-';
+
+        userCodMeccSpan.textContent = codMecc || '-';
+        userFullNameSpan.textContent = nomeCompleto;
+
+        if (data.sezione) {
+          defaultMittente = `Sez. ${String(data.sezione).trim().toUpperCase()}`;
+        }
+        inputMittente.value = defaultMittente;
+
+        if (menuRuolo) {
+          const adminMenuHTML = `
+            <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+            <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+            <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+            <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+            <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+            <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>
+          `;
+          menuRuolo.insertAdjacentHTML('beforeend', adminMenuHTML);
+        }
+
+        await loadAdminComunicazioni();
+        document.body.classList.remove('auth-loading');
+      } catch (e) {
+        console.error("Errore verifica admin:", e);
+        window.location.replace('home.html');
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.replace('index.html');
+      } catch (error) {
+        console.error("Errore durante il logout:", error);
+      }
+    });
+
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

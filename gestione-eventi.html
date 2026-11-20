@@ -1,0 +1,2023 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section,
+    .sidebar li[style*="uppercase"],
+    #menu-ruolo li[style*="uppercase"] {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important;
+      padding: 3px 6px 3px 4px !important;
+      margin: 0 !important;
+      font-family: var(--font);
+      font-size: 20px !important;
+      font-weight: 700;
+      letter-spacing: .3px !important;
+      text-transform: none !important;
+      color: #000 !important;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon,
+    .sidebar li[style*="uppercase"]::before,
+    #menu-ruolo li[style*="uppercase"]::before {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav,
+    .sub-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url("icon075.gif") center / contain no-repeat;
+      flex-shrink: 0;
+    }
+    .sidebar-nav li.cat:not(.open) > a::before {
+      background: url("icon074.gif") center / contain no-repeat;
+    }
+    .sidebar-nav li a.globe::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+    }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar .page-title { display: none; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email {
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+    .role-badge::after { content: " -"; }
+    .btn-logout {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: url("icon_system_logout.png") center / contain no-repeat;
+      box-shadow: none;
+      font-size: 0;
+      cursor: pointer;
+    }
+    .btn-logout::before,
+    .btn-logout::after {
+      content: none;
+    }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+
+    :root { --primary: #000000; }
+    #admin-menu-container:empty { display: none; }
+
+    .banca-dati-header {
+      margin: 0 0 12px;
+      border-bottom: 2px solid #f0a03a;
+    }
+    .banca-dati-header h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 14px; }
+    .elenco-title {
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+    }
+
+    /* ========== FORM CREAZIONE / MODIFICA EVENTO & ORGANICI ========== */
+    .form-panel {
+      background: #efefef;
+      border: 1px solid #d4d7de;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      padding: 12px 13px 14px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+    }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #222;
+      margin-bottom: 3px;
+    }
+    .form-group input[type="text"],
+    .form-group input[type="datetime-local"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 5px 8px;
+      font-family: var(--font);
+      font-size: 13.5px;
+      color: #111;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      border-radius: 2px;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 2px rgba(40,80,106,.22);
+    }
+    .form-group textarea {
+      min-height: 85px;
+      resize: vertical;
+      line-height: 1.35;
+    }
+
+    /* Selezione multipla organici nell'evento */
+    .multi-org-box {
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      border-radius: 2px;
+      padding: 7px 9px;
+      max-height: 150px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 10px;
+    }
+    .multi-org-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #111;
+      cursor: pointer;
+      padding: 3px 5px;
+      border-radius: 2px;
+      background: #f8f9fb;
+      border: 1px solid #d8dce3;
+      text-transform: none !important;
+      font-weight: 400 !important;
+      margin: 0 !important;
+    }
+    .multi-org-item input[type="checkbox"] {
+      margin: 0;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .att-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .file-label-btn {
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 10px;
+      background: #f7f9fa;
+      border: 1px solid #8f97a6;
+      border-radius: 3px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1b8fc4;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .file-label-btn:hover { background: #ffffff; }
+    .helper-hint {
+      font-size: 12px;
+      color: #444;
+      margin-top: 3px;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #c6cbd4;
+    }
+    .status-msg {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .status-msg.err { color: var(--danger); }
+
+    .btn-s4u {
+      height: 30px;
+      padding: 0 15px;
+      background: var(--teal);
+      color: #ffffff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 13.5px;
+      text-transform: uppercase;
+      border: 0;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-s4u:hover { background: #1f4157; }
+    .btn-s4u:disabled { opacity: .6; cursor: not-allowed; }
+
+    .btn-clear {
+      height: 30px;
+      padding: 0 12px;
+      background: #e4e7ed;
+      color: #222;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 13px;
+      border: 1px solid #8f97a6;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-clear:hover { background: #ffffff; }
+
+    /* ========== ORGANICI PANEL ========== */
+    .org-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .org-box {
+      background: #ffffff;
+      border: 1px solid #c2c6ce;
+      border-radius: 4px;
+      padding: 10px;
+    }
+    .org-box-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #111;
+      background: #eceff3;
+      border: 1px solid #c6cbd4;
+      padding: 5px 8px;
+      margin: -10px -10px 10px;
+      border-radius: 3px 3px 0 0;
+    }
+    .org-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 6px 8px;
+      border: 1px solid #d4d7de;
+      background: #f8f9fb;
+      border-radius: 3px;
+      margin-bottom: 6px;
+    }
+    .org-list-item.active {
+      border-color: var(--teal);
+      background: #e6eff6;
+    }
+    .org-item-info {
+      min-width: 0;
+      cursor: pointer;
+    }
+    .org-item-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #111;
+    }
+    .org-item-sub {
+      font-size: 12px;
+      color: #444;
+    }
+    .org-item-btns {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .members-dual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .member-list-box {
+      border: 1px solid #c6cbd4;
+      background: #f9fafc;
+      border-radius: 3px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 6px;
+    }
+    .member-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 4px 6px;
+      background: #ffffff;
+      border: 1px solid #d8dce3;
+      border-radius: 2px;
+      margin-bottom: 5px;
+      font-size: 12.5px;
+    }
+    .member-meta {
+      min-width: 0;
+    }
+    .member-name {
+      font-weight: 700;
+      color: #111;
+    }
+    .member-sub {
+      font-size: 11.5px;
+      color: #444;
+    }
+
+    /* ========== TABELLA LISTA EVENTI ========== */
+    .table-container {
+      background: #ffffff;
+      padding: 10px 8px 16px;
+      overflow-x: auto;
+      border: 1px solid #d4d7de;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+    }
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font);
+      font-size: 13px;
+      color: #222;
+      background: #ffffff;
+    }
+    .styled-table thead th {
+      background: #eceff3;
+      border: 1px solid #b6bbc6;
+      color: #000;
+      font-weight: 700;
+      text-align: left;
+      padding: 6px 7px;
+      white-space: nowrap;
+    }
+    .styled-table thead th.c { text-align: center; }
+    .styled-table tbody td {
+      background: #ffffff;
+      border: 1px solid #c2c6ce;
+      padding: 5px 7px;
+      vertical-align: middle;
+    }
+    .styled-table tbody td.c { text-align: center; white-space: nowrap; }
+
+    .btn-mini {
+      height: 25px;
+      padding: 0 8px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid #8f97a6;
+      background: #f4f6f9;
+      color: #111;
+    }
+    .btn-mini:hover { background: #ffffff; }
+    .btn-mini.add {
+      background: #e3f5df;
+      border-color: #6ab55b;
+      color: #1d6310;
+    }
+    .btn-mini.add:hover { background: #d0ecc9; }
+    .btn-mini.part {
+      background: #e3eff8;
+      border-color: #6b9ec4;
+      color: #164463;
+    }
+    .btn-mini.part:hover { background: #d2e6f5; }
+    .btn-mini.del {
+      background: #fff0f0;
+      border-color: #d49a9a;
+      color: #a30000;
+    }
+    .btn-mini.del:hover { background: #ffe0e0; }
+
+    /* ========== MODALE DETTAGLIO PARTECIPANTI ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px),
+        rgba(42, 80, 99, .72);
+      z-index: 2000;
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 920px;
+      background: #f4f4f4;
+      border: 1px solid #cfcfcf;
+      border-radius: 5px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 32px);
+      padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f);
+      border: 1px solid #e58f14;
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 7px 14px 7px 16px;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .designation-header-bar button {
+      background: #ffffff;
+      border: 1px solid #d98a0a;
+      border-radius: 2px;
+      color: #e38e12;
+      font-size: 16px !important;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .designation-body-content {
+      padding: 12px 14px;
+      overflow-y: auto;
+      background: #ffffff;
+      font-size: 13.5px;
+      line-height: 1.4;
+      color: #111;
+    }
+    .part-summary-bar {
+      background: #e9ebef;
+      border: 1px solid #c6cbd4;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .part-section-title {
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px 4px 0 0;
+      margin-top: 8px;
+    }
+    .part-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    .part-table th,
+    .part-table td {
+      border: 1px solid #c2c6ce;
+      padding: 5px 8px;
+      text-align: left;
+    }
+    .part-table th {
+      background: #eceff3;
+      font-weight: 700;
+    }
+    .badge-ok {
+      display: inline-block;
+      background: #dff5d8;
+      color: #216e0d;
+      border: 1px solid #7fc26b;
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .badge-wait {
+      display: inline-block;
+      background: #fff0d6;
+      color: #9a5208;
+      border: 1px solid #e0a64b;
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .designation-footer-bar {
+      padding: 10px 16px;
+      background: #f4f4f4;
+      border-top: 1px solid #dcdcdc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .btn-secondary {
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 6px 16px;
+      background: #fff4cc;
+      color: #d98a0a;
+      border: 1px solid #f0c34a;
+    }
+    .btn-secondary:hover { background: #ffecaa; }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    @media (max-width: 960px) {
+      .org-layout { grid-template-columns: 1fr; }
+      .members-dual { grid-template-columns: 1fr; }
+      .multi-org-box { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <!-- Header AIA -->
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav" id="menu-ruolo">
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <!-- Area Principale -->
+      <div class="main-content">
+        <header class="topbar">
+          <div class="page-title">
+            <strong>Gestione Eventi</strong>
+          </div>
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header">
+            <h3>Gestione Eventi</h3>
+          </div>
+
+          <!-- GESTIONE ORGANICI (GRUPPI) -->
+          <div class="box-wrap">
+            <div class="elenco-title">Gestione Organici (Gruppi)</div>
+            <div class="form-panel">
+              <form id="organico-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="org-nome">Nome Organico / Gruppo *</label>
+                    <input type="text" id="org-nome" placeholder="Es. Arbitri Prima Categoria / Assistenti / Organico Sezionale" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="org-desc">Descrizione / Note</label>
+                    <input type="text" id="org-desc" placeholder="Es. Convocazione dedicata a questo organico">
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <div id="org-status-msg" class="status-msg"></div>
+                  <div style="display:flex; gap:8px;">
+                    <button type="button" id="btn-org-nuovo" class="btn-clear">Nuovo Organico</button>
+                    <button type="submit" id="btn-org-salva" class="btn-s4u">Salva Organico</button>
+                  </div>
+                </div>
+              </form>
+
+              <div class="org-layout">
+                <div class="org-box">
+                  <div class="org-box-title">Organici Creati</div>
+                  <div id="organici-list-container">
+                    <div style="font-size:12.5px; color:var(--text-muted);">Caricamento organici...</div>
+                  </div>
+                </div>
+
+                <div class="org-box">
+                  <div class="org-box-title" id="org-members-title">Membri dell'Organico: seleziona o crea un organico</div>
+                  <div class="form-group" style="margin-bottom:8px;">
+                    <input type="text" id="org-member-search" placeholder="Cerca associato per nome, cognome, codice meccanografico o qualifica...">
+                  </div>
+
+                  <div class="members-dual">
+                    <div>
+                      <div style="font-size:12px; font-weight:700; margin-bottom:4px; color:#222;">MEMBRI NELL'ORGANICO (<span id="org-in-count">0</span>)</div>
+                      <div class="member-list-box" id="org-members-in">
+                        <div style="font-size:12px; color:var(--text-muted);">Nessun organico selezionato.</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div style="font-size:12px; font-weight:700; margin-bottom:4px; color:#222;">ASSOCIATI DISPONIBILI (<span id="org-out-count">0</span>)</div>
+                      <div class="member-list-box" id="org-members-out">
+                        <div style="font-size:12px; color:var(--text-muted);">Seleziona o salva prima un organico.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FORM CREA / MODIFICA EVENTO -->
+          <div class="box-wrap">
+            <div class="elenco-title" id="form-box-title">Nuovo Evento</div>
+            <div class="form-panel">
+              <form id="evento-form">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="ev-nome">Nome Evento *</label>
+                    <input type="text" id="ev-nome" placeholder="Es. RTO 16/11 CON SETTORE TECNICO" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ev-tipologia">Tipologia *</label>
+                    <select id="ev-tipologia" required>
+                      <option value="Riunione Tecnica">Riunione Tecnica (accettazione automatica)</option>
+                      <option value="Assemblea Annuale Sezionale">Assemblea Annuale Sezionale (richiede accettazione)</option>
+                      <option value="Raduni">Raduni (richiede accettazione)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ev-destinatari">Destinatari / Filtro Organico *</label>
+                    <select id="ev-destinatari" required>
+                      <option value="tutti">Tutti gli associati</option>
+                      <option value="arbitri">Solo Arbitri</option>
+                      <option value="assistenti">Solo Assistenti</option>
+                      <option value="prima_categoria">Arbitri di Prima Categoria</option>
+                      <option value="promozione_eccellenza">Arbitri di Promozione / Eccellenza</option>
+                      <option value="organico">Organico / Più Organici creati...</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" id="ev-organico-wrap" style="display:none;">
+                    <label>Seleziona Uno o Più Organici *</label>
+                    <div id="ev-organici-multi" class="multi-org-box">
+                      <div style="font-size:12px; color:var(--text-muted);">Nessun organico disponibile.</div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ev-inizio">Data e Ora Inizio *</label>
+                    <input type="datetime-local" id="ev-inizio" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ev-fine">Data e Ora Fine *</label>
+                    <input type="datetime-local" id="ev-fine" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ev-luogo">Località e Indirizzo *</label>
+                    <input type="text" id="ev-luogo" placeholder="Es. Piazzale Rosselli 13" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ev-comune">Comune *</label>
+                    <input type="text" id="ev-comune" placeholder="Es. SIENA" required>
+                  </div>
+
+                  <div class="form-group full">
+                    <label for="ev-note">Note</label>
+                    <textarea id="ev-note" placeholder="Dettagli convocazione, programma, avvisi per gli associati..."></textarea>
+                  </div>
+
+                  <div class="form-group full">
+                    <label for="ev-allegato-url">Allegato (Facoltativo)</label>
+                    <div class="att-row">
+                      <input type="text" id="ev-allegato-url" placeholder="Incolla link URL dell'allegato oppure carica un file (max 700 KB)">
+                      <label class="file-label-btn" for="ev-allegato-file">
+                        Scegli file
+                        <input type="file" id="ev-allegato-file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" style="display:none;">
+                      </label>
+                    </div>
+                    <div id="ev-allegato-info" class="helper-hint">Nessun allegato inserito.</div>
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <div id="ev-status-msg" class="status-msg"></div>
+                  <div style="display:flex; gap:8px;">
+                    <button type="button" id="btn-annulla-modifica" class="btn-clear">Annulla / Pulisci</button>
+                    <button type="submit" id="btn-salva-evento" class="btn-s4u">Salva Evento</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- LISTA EVENTI -->
+          <div class="box-wrap" style="margin-bottom:0;">
+            <div class="elenco-title">Lista Eventi Convocati</div>
+            <div class="table-container">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Tipologia</th>
+                    <th>Destinatari</th>
+                    <th>Inizio</th>
+                    <th>Fine</th>
+                    <th>Luogo</th>
+                    <th class="c">Partecipanti</th>
+                    <th class="c">Azioni Admin</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-eventi-tbody">
+                  <tr>
+                    <td colspan="8" style="text-align:center; color: var(--text-muted);">Caricamento eventi...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE PARTECIPANTI EVENTO -->
+  <div id="partecipanti-modal" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span id="part-modal-title">DETTAGLIO PARTECIPANTI</span>
+        <button type="button" id="part-modal-close-x" title="Chiudi">&times;</button>
+      </div>
+      <div class="designation-body-content" id="part-modal-body"></div>
+      <div class="designation-footer-bar">
+        <button type="button" id="btn-chiudi-part-modal" class="btn-secondary">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE02</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      doc,
+      getDoc,
+      collection,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      getDocs,
+      query,
+      orderBy,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const userCodMeccSpan = document.getElementById('user-codmecc');
+    const userFullNameSpan = document.getElementById('user-fullname');
+    const menuRuolo = document.getElementById('menu-ruolo');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // Organici elements
+    const orgForm = document.getElementById('organico-form');
+    const orgNomeInput = document.getElementById('org-nome');
+    const orgDescInput = document.getElementById('org-desc');
+    const orgStatusMsg = document.getElementById('org-status-msg');
+    const btnOrgNuovo = document.getElementById('btn-org-nuovo');
+    const btnOrgSalva = document.getElementById('btn-org-salva');
+    const organiciListContainer = document.getElementById('organici-list-container');
+    const orgMembersTitle = document.getElementById('org-members-title');
+    const orgMemberSearch = document.getElementById('org-member-search');
+    const orgMembersIn = document.getElementById('org-members-in');
+    const orgMembersOut = document.getElementById('org-members-out');
+    const orgInCount = document.getElementById('org-in-count');
+    const orgOutCount = document.getElementById('org-out-count');
+
+    // Eventi elements
+    const formBoxTitle = document.getElementById('form-box-title');
+    const eventoForm = document.getElementById('evento-form');
+    const inputNome = document.getElementById('ev-nome');
+    const inputTipologia = document.getElementById('ev-tipologia');
+    const inputDestinatari = document.getElementById('ev-destinatari');
+    const evOrganicoWrap = document.getElementById('ev-organico-wrap');
+    const evOrganiciMulti = document.getElementById('ev-organici-multi');
+    const inputInizio = document.getElementById('ev-inizio');
+    const inputFine = document.getElementById('ev-fine');
+    const inputLuogo = document.getElementById('ev-luogo');
+    const inputComune = document.getElementById('ev-comune');
+    const inputNote = document.getElementById('ev-note');
+    const inputAllegatoUrl = document.getElementById('ev-allegato-url');
+    const inputAllegatoFile = document.getElementById('ev-allegato-file');
+    const allegatoInfo = document.getElementById('ev-allegato-info');
+    const statusMsg = document.getElementById('ev-status-msg');
+    const btnSalvaEvento = document.getElementById('btn-salva-evento');
+    const btnAnnullaModifica = document.getElementById('btn-annulla-modifica');
+    const adminEventiTbody = document.getElementById('admin-eventi-tbody');
+
+    const partModal = document.getElementById('partecipanti-modal');
+    const partModalTitle = document.getElementById('part-modal-title');
+    const partModalBody = document.getElementById('part-modal-body');
+    const partModalCloseX = document.getElementById('part-modal-close-x');
+    const btnChiudiPartModal = document.getElementById('btn-chiudi-part-modal');
+
+    let editingEventId = null;
+    let currentEditingAttachmentUrl = '';
+    let currentEditingAttachmentName = '';
+    let loadedFileDataUrl = '';
+    let loadedFileName = '';
+    let eventiCache = [];
+    let utentiCache = [];
+    let organiciCache = [];
+    let selectedOrganicoId = null;
+    let editingOrganicoId = null;
+
+    function escapeHtml(val) {
+      return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function setStatus(msg, isErr = false) {
+      statusMsg.textContent = msg;
+      statusMsg.classList.toggle('err', isErr);
+    }
+
+    function setOrgStatus(msg, isErr = false) {
+      orgStatusMsg.textContent = msg;
+      orgStatusMsg.classList.toggle('err', isErr);
+    }
+
+    function parseDateObj(raw) {
+      if (!raw) return null;
+      if (typeof raw.toDate === 'function') return raw.toDate();
+      if (raw instanceof Date) return Number.isNaN(raw.getTime()) ? null : raw;
+      const d = new Date(String(raw));
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDateTime(raw) {
+      const d = parseDateObj(raw);
+      if (!d) return '-';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function formatDateTimeSec(raw) {
+      const d = parseDateObj(raw);
+      if (!d) return '-';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function toDatetimeLocalValue(raw) {
+      const d = parseDateObj(raw);
+      if (!d) return '';
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function isRiunioneTecnica(tipologia) {
+      return String(tipologia || '').trim().toLowerCase() === 'riunione tecnica';
+    }
+
+    function getUserLabel(u) {
+      const nomeCognome = `${(u.nome || '').trim()} ${(u.cognome || '').trim()}`.trim() || u.email || u.uid;
+      const codMecc = (u.codMecc || '').trim();
+      const ruoloTech = (u.qualifica || u.ruoloTecnico || u.categoria || u.sezione || '').trim();
+      const isAdminBadge = (u.ruolo === 'admin') ? 'Admin' : '';
+      return { nomeCognome, codMecc, ruoloTech, isAdminBadge };
+    }
+
+    // Include anche gli utenti con ruolo admin tra gli associati gestibili negli organici/eventi
+    function getPlateaAssociati() {
+      return utentiCache;
+    }
+
+    function matchesPresetFilter(u, filterKey) {
+      const txt = `${u.qualifica || ''} ${u.ruoloTecnico || ''} ${u.categoria || ''} ${u.organico || ''} ${u.inquadramento || ''}`.toLowerCase();
+      if (filterKey === 'arbitri') {
+        return txt.includes('arbitro') || (!txt.includes('assistent') && !txt.includes('aa'));
+      }
+      if (filterKey === 'assistenti') {
+        return txt.includes('assistent') || /\baa\b/.test(txt);
+      }
+      if (filterKey === 'prima_categoria') {
+        return txt.includes('prima categoria') || txt.includes('1ª categoria') || txt.includes('1a categoria') || /\b1\s*cat/.test(txt);
+      }
+      if (filterKey === 'promozione_eccellenza') {
+        return txt.includes('promozione') || txt.includes('eccellenza');
+      }
+      return true;
+    }
+
+    function getSelectedOrganicoIds(evFallback = null) {
+      const checked = Array.from(evOrganiciMulti.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+      if (checked.length) return checked;
+      if (evFallback) {
+        if (Array.isArray(evFallback.destinatariOrganicoIds) && evFallback.destinatariOrganicoIds.length) {
+          return evFallback.destinatariOrganicoIds;
+        }
+        if (evFallback.destinatariOrganicoId) {
+          return [evFallback.destinatariOrganicoId];
+        }
+      }
+      return [];
+    }
+
+    function resolveTargetUsers(filterKey, organicoIds) {
+      const platea = getPlateaAssociati();
+      if (filterKey === 'organico') {
+        const ids = Array.isArray(organicoIds) ? organicoIds : (organicoIds ? [organicoIds] : []);
+        const memberSet = new Set();
+        for (const id of ids) {
+          const org = organiciCache.find(o => o.id === id);
+          if (org && Array.isArray(org.membri)) {
+            for (const uid of org.membri) memberSet.add(uid);
+          }
+        }
+        return platea.filter(u => memberSet.has(u.uid));
+      }
+      if (!filterKey || filterKey === 'tutti') {
+        return platea;
+      }
+      return platea.filter(u => matchesPresetFilter(u, filterKey));
+    }
+
+    function getFilterLabel(filterKey, organicoIds, fallbackLabel = '') {
+      if (filterKey === 'arbitri') return 'Solo Arbitri';
+      if (filterKey === 'assistenti') return 'Solo Assistenti';
+      if (filterKey === 'prima_categoria') return 'Arbitri di Prima Categoria';
+      if (filterKey === 'promozione_eccellenza') return 'Arbitri di Promozione / Eccellenza';
+      if (filterKey === 'organico') {
+        const ids = Array.isArray(organicoIds) ? organicoIds : (organicoIds ? [organicoIds] : []);
+        const names = ids
+          .map(id => organiciCache.find(o => o.id === id)?.nome)
+          .filter(Boolean);
+        if (names.length) return `Organici: ${names.join(', ')}`;
+        if (fallbackLabel) return fallbackLabel;
+        return 'Organici';
+      }
+      return 'Tutti gli associati';
+    }
+
+    // ---------- ORGANICI (GRUPPI) ----------
+
+    function resetOrganicoForm() {
+      editingOrganicoId = null;
+      orgNomeInput.value = '';
+      orgDescInput.value = '';
+      btnOrgSalva.textContent = 'Salva Organico';
+      setOrgStatus('');
+    }
+
+    btnOrgNuovo.addEventListener('click', () => {
+      resetOrganicoForm();
+      orgNomeInput.focus();
+    });
+
+    function populateOrganicoMultiSelect(selectedIds = []) {
+      const currentSet = new Set(Array.isArray(selectedIds) ? selectedIds : []);
+      if (!currentSet.size) {
+        evOrganiciMulti.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => currentSet.add(cb.value));
+      }
+
+      if (!organiciCache.length) {
+        evOrganiciMulti.innerHTML = `<div style="font-size:12px; color:var(--text-muted); grid-column:1 / -1;">Nessun organico creato nella sezione sopra.</div>`;
+        return;
+      }
+
+      evOrganiciMulti.innerHTML = organiciCache.map(o => {
+        const count = Array.isArray(o.membri) ? o.membri.length : 0;
+        const checkedAttr = currentSet.has(o.id) ? 'checked' : '';
+        return `
+          <label class="multi-org-item">
+            <input type="checkbox" value="${escapeHtml(o.id)}" ${checkedAttr}>
+            <span><strong>${escapeHtml(o.nome)}</strong> (${count})</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function renderOrganiciList() {
+      if (!organiciCache.length) {
+        organiciListContainer.innerHTML = `<div style="font-size:12.5px; color:var(--text-muted);">Nessun organico creato. Usa il form in alto per crearne uno.</div>`;
+        renderOrganicoMembers();
+        return;
+      }
+
+      if (!selectedOrganicoId || !organiciCache.some(o => o.id === selectedOrganicoId)) {
+        selectedOrganicoId = organiciCache[0].id;
+      }
+
+      organiciListContainer.innerHTML = organiciCache.map(org => {
+        const isSel = org.id === selectedOrganicoId;
+        const count = Array.isArray(org.membri) ? org.membri.length : 0;
+        return `
+          <div class="org-list-item ${isSel ? 'active' : ''}">
+            <div class="org-item-info" onclick="selectOrganico('${escapeHtml(org.id)}')">
+              <div class="org-item-name">${escapeHtml(org.nome)}</div>
+              <div class="org-item-sub">${count} associat${count === 1 ? 'o' : 'i'}${org.descrizione ? ` • ${escapeHtml(org.descrizione)}` : ''}</div>
+            </div>
+            <div class="org-item-btns">
+              <button type="button" class="btn-mini" onclick="editOrganico('${escapeHtml(org.id)}')">Modifica</button>
+              <button type="button" class="btn-mini del" onclick="deleteOrganico('${escapeHtml(org.id)}')">Elimina</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderOrganicoMembers();
+    }
+
+    function renderOrganicoMembers() {
+      const org = organiciCache.find(o => o.id === selectedOrganicoId);
+      const q = (orgMemberSearch.value || '').trim().toLowerCase();
+
+      if (!org) {
+        orgMembersTitle.textContent = 'Membri dell\'Organico: seleziona o crea un organico';
+        orgInCount.textContent = '0';
+        orgOutCount.textContent = '0';
+        orgMembersIn.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">Nessun organico selezionato.</div>`;
+        orgMembersOut.innerHTML = `<div style="font-size:12px; color:var(--text-muted);">Seleziona o salva prima un organico.</div>`;
+        return;
+      }
+
+      const memberIds = new Set(Array.isArray(org.membri) ? org.membri : []);
+      orgMembersTitle.textContent = `Membri dell'Organico: ${org.nome}`;
+
+      const platea = getPlateaAssociati();
+      const inList = [];
+      const outList = [];
+
+      for (const u of platea) {
+        const info = getUserLabel(u);
+        const hay = `${info.nomeCognome} ${info.codMecc} ${info.ruoloTech} ${info.isAdminBadge}`.toLowerCase();
+        if (q && !hay.includes(q)) continue;
+
+        if (memberIds.has(u.uid)) {
+          inList.push({ u, info });
+        } else {
+          outList.push({ u, info });
+        }
+      }
+
+      inList.sort((a, b) => a.info.nomeCognome.localeCompare(b.info.nomeCognome, 'it'));
+      outList.sort((a, b) => a.info.nomeCognome.localeCompare(b.info.nomeCognome, 'it'));
+
+      orgInCount.textContent = String(memberIds.size);
+      orgOutCount.textContent = String(outList.length);
+
+      orgMembersIn.innerHTML = inList.length
+        ? inList.map(({ u, info }) => {
+            const extraBits = [
+              info.codMecc ? `Cod. ${escapeHtml(info.codMecc)}` : '',
+              info.ruoloTech ? escapeHtml(info.ruoloTech) : '',
+              info.isAdminBadge ? escapeHtml(info.isAdminBadge) : ''
+            ].filter(Boolean).join(' • ');
+            return `
+              <div class="member-row">
+                <div class="member-meta">
+                  <div class="member-name">${escapeHtml(info.nomeCognome)}</div>
+                  <div class="member-sub">${extraBits}</div>
+                </div>
+                <button type="button" class="btn-mini del" onclick="removeMemberFromOrganico('${escapeHtml(org.id)}', '${escapeHtml(u.uid)}')">Rimuovi</button>
+              </div>
+            `;
+          }).join('')
+        : `<div style="font-size:12px; color:var(--text-muted);">Nessun membro presente nell'organico.</div>`;
+
+      orgMembersOut.innerHTML = outList.length
+        ? outList.map(({ u, info }) => {
+            const extraBits = [
+              info.codMecc ? `Cod. ${escapeHtml(info.codMecc)}` : '',
+              info.ruoloTech ? escapeHtml(info.ruoloTech) : '',
+              info.isAdminBadge ? escapeHtml(info.isAdminBadge) : ''
+            ].filter(Boolean).join(' • ');
+            return `
+              <div class="member-row">
+                <div class="member-meta">
+                  <div class="member-name">${escapeHtml(info.nomeCognome)}</div>
+                  <div class="member-sub">${extraBits}</div>
+                </div>
+                <button type="button" class="btn-mini add" onclick="addMemberToOrganico('${escapeHtml(org.id)}', '${escapeHtml(u.uid)}')">Aggiungi</button>
+              </div>
+            `;
+          }).join('')
+        : `<div style="font-size:12px; color:var(--text-muted);">Nessun altro associato disponibile.</div>`;
+    }
+
+    orgMemberSearch.addEventListener('input', renderOrganicoMembers);
+
+    window.selectOrganico = (id) => {
+      selectedOrganicoId = id;
+      renderOrganiciList();
+    };
+
+    window.editOrganico = (id) => {
+      const org = organiciCache.find(o => o.id === id);
+      if (!org) return;
+      selectedOrganicoId = org.id;
+      editingOrganicoId = org.id;
+      orgNomeInput.value = org.nome || '';
+      orgDescInput.value = org.descrizione || '';
+      btnOrgSalva.textContent = 'Aggiorna Organico';
+      setOrgStatus(`Modifica organico: ${org.nome}`);
+      renderOrganiciList();
+    };
+
+    window.deleteOrganico = async (id) => {
+      const org = organiciCache.find(o => o.id === id);
+      if (!org) return;
+      if (!confirm(`Eliminare definitivamente l'organico "${org.nome}"?`)) return;
+
+      try {
+        await deleteDoc(doc(db, "organici", id));
+        if (selectedOrganicoId === id) selectedOrganicoId = null;
+        if (editingOrganicoId === id) resetOrganicoForm();
+        await loadOrganiciAll();
+        setOrgStatus('Organico eliminato.');
+      } catch (err) {
+        console.error("Errore eliminazione organico:", err);
+        alert("Errore durante l'eliminazione dell'organico: " + err.message);
+      }
+    };
+
+    window.addMemberToOrganico = async (orgId, uid) => {
+      const org = organiciCache.find(o => o.id === orgId);
+      if (!org) return;
+      const nextMembers = Array.from(new Set([...(org.membri || []), uid]));
+      try {
+        await updateDoc(doc(db, "organici", orgId), {
+          membri: nextMembers,
+          aggiornatoIl: serverTimestamp()
+        });
+        org.membri = nextMembers;
+        populateOrganicoMultiSelect();
+        renderOrganiciList();
+      } catch (err) {
+        console.error("Errore aggiunta membro:", err);
+        alert("Errore durante l'aggiunta del membro: " + err.message);
+      }
+    };
+
+    window.removeMemberFromOrganico = async (orgId, uid) => {
+      const org = organiciCache.find(o => o.id === orgId);
+      if (!org) return;
+      const nextMembers = (org.membri || []).filter(id => id !== uid);
+      try {
+        await updateDoc(doc(db, "organici", orgId), {
+          membri: nextMembers,
+          aggiornatoIl: serverTimestamp()
+        });
+        org.membri = nextMembers;
+        populateOrganicoMultiSelect();
+        renderOrganiciList();
+      } catch (err) {
+        console.error("Errore rimozione membro:", err);
+        alert("Errore durante la rimozione del membro: " + err.message);
+      }
+    };
+
+    orgForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nome = orgNomeInput.value.trim();
+      const descrizione = orgDescInput.value.trim();
+
+      if (!nome) {
+        setOrgStatus('Inserisci il nome dell\'organico.', true);
+        return;
+      }
+
+      btnOrgSalva.disabled = true;
+      setOrgStatus(editingOrganicoId ? 'Aggiornamento organico...' : 'Creazione organico...');
+
+      try {
+        if (editingOrganicoId) {
+          await updateDoc(doc(db, "organici", editingOrganicoId), {
+            nome,
+            descrizione,
+            aggiornatoIl: serverTimestamp()
+          });
+          selectedOrganicoId = editingOrganicoId;
+          setOrgStatus('Organico aggiornato con successo!');
+        } else {
+          const ref = await addDoc(collection(db, "organici"), {
+            nome,
+            descrizione,
+            membri: [],
+            creatoIl: serverTimestamp(),
+            aggiornatoIl: serverTimestamp()
+          });
+          selectedOrganicoId = ref.id;
+          setOrgStatus('Organico creato! Ora puoi aggiungere i membri qui sotto.');
+        }
+        resetOrganicoForm();
+        await loadOrganiciAll();
+      } catch (err) {
+        console.error("Errore salvataggio organico:", err);
+        setOrgStatus('Errore salvataggio organico: ' + err.message, true);
+      } finally {
+        btnOrgSalva.disabled = false;
+      }
+    });
+
+    async function loadOrganiciAll() {
+      try {
+        const snap = await getDocs(collection(db, "organici"));
+        organiciCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        organiciCache.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'it'));
+        populateOrganicoMultiSelect();
+        renderOrganiciList();
+      } catch (err) {
+        console.error("Errore caricamento organici:", err);
+        organiciListContainer.innerHTML = `<div style="color:var(--danger); font-size:12.5px;">Errore caricamento organici.</div>`;
+      }
+    }
+
+    // ---------- EVENTI ----------
+
+    function toggleOrganicoField(selectedIds = null) {
+      const isOrg = inputDestinatari.value === 'organico';
+      evOrganicoWrap.style.display = isOrg ? 'flex' : 'none';
+      if (isOrg) {
+        populateOrganicoMultiSelect(Array.isArray(selectedIds) ? selectedIds : []);
+      }
+    }
+    inputDestinatari.addEventListener('change', () => toggleOrganicoField());
+
+    function resetFormMode() {
+      editingEventId = null;
+      currentEditingAttachmentUrl = '';
+      currentEditingAttachmentName = '';
+      loadedFileDataUrl = '';
+      loadedFileName = '';
+      eventoForm.reset();
+      inputDestinatari.value = 'tutti';
+      evOrganiciMulti.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+      toggleOrganicoField([]);
+      inputAllegatoFile.value = '';
+      formBoxTitle.textContent = 'Nuovo Evento';
+      btnSalvaEvento.textContent = 'Salva Evento';
+      allegatoInfo.textContent = 'Nessun allegato inserito.';
+      setStatus('');
+    }
+
+    btnAnnullaModifica.addEventListener('click', resetFormMode);
+
+    inputAllegatoFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (file.size > 700 * 1024) {
+        alert('File troppo grande (max 700 KB). Per file più grandi usa un link URL.');
+        inputAllegatoFile.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        loadedFileDataUrl = String(reader.result || '');
+        loadedFileName = file.name;
+        inputAllegatoUrl.value = `[File allegato: ${file.name}]`;
+        allegatoInfo.textContent = `File pronto: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    inputAllegatoUrl.addEventListener('input', () => {
+      if (!inputAllegatoUrl.value.startsWith('[File allegato:')) {
+        loadedFileDataUrl = '';
+        loadedFileName = '';
+        currentEditingAttachmentUrl = '';
+        currentEditingAttachmentName = '';
+      }
+    });
+
+    async function loadUtentiAll() {
+      const snap = await getDocs(collection(db, "utenti"));
+      utentiCache = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+    }
+
+    async function loadEventiList() {
+      try {
+        const snap = await getDocs(query(collection(db, "eventi"), orderBy("inizio", "desc")));
+        eventiCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (_) {
+        const snap = await getDocs(collection(db, "eventi"));
+        eventiCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      }
+
+      eventiCache.sort((a, b) => (parseDateObj(b.inizio)?.getTime() || 0) - (parseDateObj(a.inizio)?.getTime() || 0));
+
+      if (!eventiCache.length) {
+        adminEventiTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">Nessun evento creato finora.</td></tr>`;
+        return;
+      }
+
+      adminEventiTbody.innerHTML = eventiCache.map(ev => {
+        const auto = isRiunioneTecnica(ev.tipologia);
+        const badgeTipo = auto
+          ? `<span class="badge-ok" title="Accettazione automatica">Obbligatoria</span>`
+          : `<span class="badge-wait" title="Richiede accettazione associati">Da accettare</span>`;
+        const orgIds = Array.isArray(ev.destinatariOrganicoIds) && ev.destinatariOrganicoIds.length
+          ? ev.destinatariOrganicoIds
+          : (ev.destinatariOrganicoId ? [ev.destinatariOrganicoId] : []);
+        const destLabel = getFilterLabel(ev.destinatariTipo || 'tutti', orgIds, ev.destinatariLabel || '');
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(ev.nome || '-')}</strong></td>
+            <td>${escapeHtml(ev.tipologia || '-')} ${badgeTipo}</td>
+            <td>${escapeHtml(destLabel)}</td>
+            <td>${formatDateTime(ev.inizio)}</td>
+            <td>${formatDateTime(ev.fine)}</td>
+            <td>${escapeHtml(ev.luogo || '-')}</td>
+            <td class="c">
+              <button type="button" class="btn-mini part" onclick="openPartecipantiModal('${escapeHtml(ev.id)}')">Partecipanti</button>
+            </td>
+            <td class="c">
+              <button type="button" class="btn-mini" onclick="startEditEvento('${escapeHtml(ev.id)}')">Modifica</button>
+              <button type="button" class="btn-mini del" onclick="deleteEvento('${escapeHtml(ev.id)}')">Elimina</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.startEditEvento = (id) => {
+      const ev = eventiCache.find(x => x.id === id);
+      if (!ev) return;
+
+      editingEventId = ev.id;
+      currentEditingAttachmentUrl = (ev.allegatoUrl || '').trim();
+      currentEditingAttachmentName = (ev.allegatoNome || 'Allegato').trim();
+      loadedFileDataUrl = '';
+      loadedFileName = '';
+      inputAllegatoFile.value = '';
+
+      inputNome.value = ev.nome || '';
+      inputTipologia.value = ev.tipologia || 'Riunione Tecnica';
+      inputDestinatari.value = ev.destinatariTipo || 'tutti';
+      const savedOrgIds = Array.isArray(ev.destinatariOrganicoIds) && ev.destinatariOrganicoIds.length
+        ? ev.destinatariOrganicoIds
+        : (ev.destinatariOrganicoId ? [ev.destinatariOrganicoId] : []);
+      toggleOrganicoField(savedOrgIds);
+      inputInizio.value = toDatetimeLocalValue(ev.inizio);
+      inputFine.value = toDatetimeLocalValue(ev.fine);
+      inputLuogo.value = ev.luogo || '';
+      inputComune.value = ev.comune || '';
+      inputNote.value = ev.note || '';
+
+      if (currentEditingAttachmentUrl.startsWith('data:')) {
+        inputAllegatoUrl.value = `[File allegato: ${currentEditingAttachmentName}]`;
+        allegatoInfo.textContent = `Allegato salvato: ${currentEditingAttachmentName}`;
+      } else {
+        inputAllegatoUrl.value = currentEditingAttachmentUrl;
+        allegatoInfo.textContent = currentEditingAttachmentUrl ? `Link allegato: ${currentEditingAttachmentUrl}` : 'Nessun allegato inserito.';
+      }
+
+      formBoxTitle.textContent = 'Modifica Evento';
+      btnSalvaEvento.textContent = 'Aggiorna Evento';
+      setStatus(`Modifica in corso: ${ev.nome || ''}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.deleteEvento = async (id) => {
+      const ev = eventiCache.find(x => x.id === id);
+      if (!ev) return;
+      if (!confirm(`Eliminare definitivamente l'evento "${ev.nome || ''}"?`)) return;
+
+      try {
+        await deleteDoc(doc(db, "eventi", id));
+        if (editingEventId === id) resetFormMode();
+        await loadEventiList();
+        setStatus('Evento eliminato.');
+      } catch (err) {
+        console.error("Errore eliminazione evento:", err);
+        alert("Errore durante l'eliminazione: " + err.message);
+      }
+    };
+
+    eventoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const nome = inputNome.value.trim();
+      const tipologia = inputTipologia.value.trim();
+      const destinatariTipo = inputDestinatari.value;
+      const destinatariOrganicoIds = destinatariTipo === 'organico' ? getSelectedOrganicoIds() : [];
+      const destinatariOrganicoId = destinatariOrganicoIds[0] || '';
+      const inizioVal = inputInizio.value;
+      const fineVal = inputFine.value;
+      const luogo = inputLuogo.value.trim();
+      const comune = inputComune.value.trim();
+      const note = inputNote.value.trim();
+
+      if (!nome || !tipologia || !inizioVal || !fineVal || !luogo || !comune) {
+        setStatus('Compila tutti i campi obbligatori (*).', true);
+        return;
+      }
+
+      if (destinatariTipo === 'organico' && !destinatariOrganicoIds.length) {
+        setStatus('Seleziona almeno un organico per l\'invio mirato.', true);
+        return;
+      }
+
+      const inizioDate = new Date(inizioVal);
+      const fineDate = new Date(fineVal);
+      if (Number.isNaN(inizioDate.getTime()) || Number.isNaN(fineDate.getTime())) {
+        setStatus('Date di inizio o fine non valide.', true);
+        return;
+      }
+
+      let allegatoUrl = '';
+      let allegatoNome = '';
+
+      if (loadedFileDataUrl) {
+        allegatoUrl = loadedFileDataUrl;
+        allegatoNome = loadedFileName || 'allegato';
+      } else if (inputAllegatoUrl.value.startsWith('[File allegato:') && currentEditingAttachmentUrl) {
+        allegatoUrl = currentEditingAttachmentUrl;
+        allegatoNome = currentEditingAttachmentName || 'allegato';
+      } else {
+        const rawUrl = inputAllegatoUrl.value.trim();
+        if (rawUrl && !rawUrl.startsWith('[File allegato:')) {
+          allegatoUrl = rawUrl;
+          allegatoNome = 'Allegato evento';
+        }
+      }
+
+      const targetUsers = resolveTargetUsers(destinatariTipo, destinatariOrganicoIds);
+      const destinatariLabel = getFilterLabel(destinatariTipo, destinatariOrganicoIds);
+
+      const payload = {
+        nome,
+        tipologia,
+        destinatariTipo,
+        destinatariOrganicoId,
+        destinatariOrganicoIds,
+        destinatariLabel,
+        destinatariUid: targetUsers.map(u => u.uid),
+        inizio: inizioDate.toISOString(),
+        fine: fineDate.toISOString(),
+        luogo,
+        comune,
+        note,
+        allegatoUrl,
+        allegatoNome,
+        aggiornatoIl: serverTimestamp()
+      };
+
+      btnSalvaEvento.disabled = true;
+      setStatus(editingEventId ? 'Aggiornamento evento in corso...' : 'Salvataggio evento in corso...');
+
+      try {
+        if (editingEventId) {
+          await updateDoc(doc(db, "eventi", editingEventId), payload);
+          setStatus('Evento aggiornato con successo!');
+        } else {
+          payload.creatoIl = serverTimestamp();
+          await addDoc(collection(db, "eventi"), payload);
+          setStatus('Evento creato con successo!');
+        }
+        resetFormMode();
+        await loadEventiList();
+      } catch (err) {
+        console.error("Errore salvataggio evento:", err);
+        setStatus('Errore salvataggio: ' + err.message, true);
+      } finally {
+        btnSalvaEvento.disabled = false;
+      }
+    });
+
+    // Dettaglio partecipanti: chi ha accettato in ordine e chi deve ancora accettare
+    window.openPartecipantiModal = async (eventId) => {
+      const ev = eventiCache.find(x => x.id === eventId);
+      if (!ev) return;
+
+      partModalTitle.textContent = `PARTECIPANTI - ${String(ev.nome || 'EVENTO').toUpperCase()}`;
+      partModalBody.innerHTML = `<div style="padding:14px; text-align:center;">Caricamento elenco accettazioni...</div>`;
+      partModal.classList.add('active');
+
+      try {
+        await loadUtentiAll();
+        const partSnap = await getDocs(collection(db, "eventi", eventId, "partecipazioni"));
+        const partByUid = new Map();
+        partSnap.forEach(d => partByUid.set(d.id, d.data()));
+
+        const auto = isRiunioneTecnica(ev.tipologia);
+        const filterKey = ev.destinatariTipo || 'tutti';
+        const orgIds = Array.isArray(ev.destinatariOrganicoIds) && ev.destinatariOrganicoIds.length
+          ? ev.destinatariOrganicoIds
+          : (ev.destinatariOrganicoId ? [ev.destinatariOrganicoId] : []);
+        const platea = resolveTargetUsers(filterKey, orgIds);
+        const destLabel = getFilterLabel(filterKey, orgIds, ev.destinatariLabel || '');
+
+        const acceptedList = [];
+        const pendingList = [];
+
+        for (const u of platea) {
+          const p = partByUid.get(u.uid);
+          const codMecc = (p?.codMecc || u.codMecc || '-').trim();
+          const nomeCognome = `${(p?.nome || u.nome || '').trim()} ${(p?.cognome || u.cognome || '').trim()}`.trim() || u.email || u.uid;
+          const sezione = (p?.sezione || u.sezione || '-').trim();
+
+          if (p && p.stato === 'accettato') {
+            const accDate = parseDateObj(p.accettatoIl);
+            acceptedList.push({
+              codMecc,
+              nomeCognome,
+              sezione,
+              accettatoIl: accDate,
+              quandoStr: accDate ? formatDateTimeSec(accDate) : 'Registrato'
+            });
+          } else if (auto) {
+            acceptedList.push({
+              codMecc,
+              nomeCognome,
+              sezione,
+              accettatoIl: null,
+              quandoStr: 'Automatica (Obbligatoria)'
+            });
+          } else {
+            pendingList.push({
+              codMecc,
+              nomeCognome,
+              sezione
+            });
+          }
+        }
+
+        acceptedList.sort((a, b) => {
+          const ta = a.accettatoIl ? a.accettatoIl.getTime() : Number.MAX_SAFE_INTEGER;
+          const tb = b.accettatoIl ? b.accettatoIl.getTime() : Number.MAX_SAFE_INTEGER;
+          return ta - tb;
+        });
+
+        pendingList.sort((a, b) => a.nomeCognome.localeCompare(b.nomeCognome, 'it'));
+
+        const acceptedRowsHtml = acceptedList.length
+          ? acceptedList.map((item, idx) => `
+              <tr>
+                <td style="width:44px; text-align:center;">${idx + 1}</td>
+                <td style="width:110px;">${escapeHtml(item.codMecc)}</td>
+                <td><strong>${escapeHtml(item.nomeCognome)}</strong></td>
+                <td>${escapeHtml(item.sezione)}</td>
+                <td>${escapeHtml(item.quandoStr)}</td>
+              </tr>
+            `).join('')
+          : `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Nessuna accettazione registrata al momento.</td></tr>`;
+
+        const pendingRowsHtml = pendingList.length
+          ? pendingList.map((item, idx) => `
+              <tr>
+                <td style="width:44px; text-align:center;">${idx + 1}</td>
+                <td style="width:110px;">${escapeHtml(item.codMecc)}</td>
+                <td>${escapeHtml(item.nomeCognome)}</td>
+                <td>${escapeHtml(item.sezione)}</td>
+                <td><span class="badge-wait">In attesa di accettazione</span></td>
+              </tr>
+            `).join('')
+          : `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Tutti i destinatari hanno accettato.</td></tr>`;
+
+        partModalBody.innerHTML = `
+          <div class="part-summary-bar">
+            Tipologia: ${escapeHtml(ev.tipologia || '-')} &nbsp;|&nbsp;
+            Destinatari: ${escapeHtml(destLabel)} &nbsp;|&nbsp;
+            Accettati: ${acceptedList.length} &nbsp;|&nbsp;
+            In attesa: ${pendingList.length}
+          </div>
+
+          <div class="part-section-title">Hanno accettato (in ordine di accettazione)</div>
+          <table class="part-table">
+            <thead>
+              <tr>
+                <th style="width:44px; text-align:center;">#</th>
+                <th>Cod. Mecc.</th>
+                <th>Nominativo</th>
+                <th>Sezione</th>
+                <th>Data e Ora Accettazione</th>
+              </tr>
+            </thead>
+            <tbody>${acceptedRowsHtml}</tbody>
+          </table>
+
+          <div class="part-section-title">Devono ancora accettare</div>
+          <table class="part-table" style="margin-bottom:0;">
+            <thead>
+              <tr>
+                <th style="width:44px; text-align:center;">#</th>
+                <th>Cod. Mecc.</th>
+                <th>Nominativo</th>
+                <th>Sezione</th>
+                <th>Stato</th>
+              </tr>
+            </thead>
+            <tbody>${pendingRowsHtml}</tbody>
+          </table>
+        `;
+      } catch (err) {
+        console.error("Errore caricamento partecipanti:", err);
+        partModalBody.innerHTML = `<div style="color:var(--danger); padding:10px;">Errore nel caricamento dei partecipanti: ${escapeHtml(err.message)}</div>`;
+      }
+    };
+
+    function closePartModal() {
+      partModal.classList.remove('active');
+    }
+    partModalCloseX.addEventListener('click', closePartModal);
+    btnChiudiPartModal.addEventListener('click', closePartModal);
+    partModal.addEventListener('click', (e) => {
+      if (e.target === partModal) closePartModal();
+    });
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      try {
+        const userSnap = await getDoc(doc(db, "utenti", user.uid));
+        if (!userSnap.exists()) {
+          window.location.replace('home.html');
+          return;
+        }
+
+        const data = userSnap.data();
+        const ruolo = data.ruolo || 'utente';
+        if (ruolo !== 'admin') {
+          window.location.replace('home.html');
+          return;
+        }
+
+        const codMecc = (data.codMecc || '').trim();
+        const nome = (data.nome || '').trim();
+        const cognome = (data.cognome || '').trim();
+        const nomeCompleto = [nome, cognome].filter(Boolean).join(' ') || '-';
+
+        if (userCodMeccSpan) userCodMeccSpan.textContent = codMecc || '-';
+        if (userFullNameSpan) userFullNameSpan.textContent = nomeCompleto;
+
+        if (menuRuolo) {
+          const adminMenuHTML = `
+            <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+            <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+            <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+            <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+            <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+            <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>
+          `;
+          menuRuolo.insertAdjacentHTML('beforeend', adminMenuHTML);
+        }
+
+        await loadUtentiAll();
+        await loadOrganiciAll();
+        await loadEventiList();
+        document.body.classList.remove('auth-loading');
+      } catch (err) {
+        console.error("Errore accesso gestione eventi:", err);
+        window.location.replace('home.html');
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.replace('index.html');
+    });
+
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

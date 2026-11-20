@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section,
+    .sidebar li[style*="uppercase"] {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important;
+      padding: 3px 6px 3px 4px !important;
+      margin: 0 !important;
+      font-family: var(--font);
+      font-size: 20px !important;
+      font-weight: 700;
+      letter-spacing: .3px !important;
+      text-transform: none !important;
+      color: #000 !important;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon,
+    .sidebar li[style*="uppercase"]::before {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav,
+    .sub-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+/* icona cartella (categoria / voce standard) */
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url("icon075.gif") center / contain no-repeat;
+      flex-shrink: 0;
+    }
+
+    /* icona cartella chiusa (categoria con sottomenu non aperta) */
+    .sidebar-nav li.cat:not(.open) > a::before {
+      background: url("icon074.gif") center / contain no-repeat;
+    }
+    /* icona globo (sottocategoria) */
+    .sidebar-nav li a.globe::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+    }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }  
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar .page-title { display: none; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email {
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+    .role-badge::after { content: " -"; }
+    .btn-logout {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: url("icon_system_logout.png") center / contain no-repeat;
+      box-shadow: none;
+      font-size: 0;
+      cursor: pointer;
+    }
+    .btn-logout::before,
+    .btn-logout::after {
+      content: none;
+    }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+    .welcome-title {
+      margin: 0 0 12px;
+      padding-bottom: 0;
+      border-bottom: 2px solid #f0a03a;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+
+    /* ----- box ----- */
+    .box {
+      background: #d1d5df;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 0 12px;
+    }
+    .box-head,
+    .profile-card h2 {
+      margin: 0;
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+      border-radius: 8px 8px 0 0;
+    }
+    .box-body { padding: 5px 13px 6px; font-size: 14.5px; line-height: 1.2; }
+    .news-body { padding: 24px 13px 32px; min-height: 120px; }
+    .news-body .empty { color: #333; text-align: center; }
+
+    /* ----- profilo ----- */
+    .profile-card { background: #d1d5df; border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .profile-card .box-sub { margin: 0; padding: 6px 13px 0; color: #222; font-size: 14px; }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 14px;
+      padding: 8px 13px 13px;
+    }
+    .profile-item label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #222;
+      margin-bottom: 2px;
+    }
+    .profile-item span {
+      display: block;
+      min-height: 25px;
+      padding: 3px 7px;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      font-size: 14.5px;
+      color: #000;
+    }
+
+    
+    :root { --primary: #000000; }
+
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TITOLO PAGINA ========== */
+    .banca-dati-header {
+      margin: 0 0 12px;
+      border-bottom: 2px solid #f0a03a;
+    }
+    .banca-dati-header h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .elenco-title {
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+    }
+
+
+    /* ========== SCHEDA TECNICA ========== */
+    .st-body {
+      background: #efefef;
+      border: 1px solid #d9d9d9;
+      border-top: 0;
+      border-radius: 0 0 8px 8px;
+      padding: 6px 6px 14px;
+    }
+    .orange-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      min-height: 43px;
+      padding: 6px 5px 0;
+      background: linear-gradient(#fcbd56, #f5a22a);
+      border: 1px solid #e59a2e;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.45);
+    }
+    .sez-tab {
+      background: #ffffff;
+      color: #f29a1c;
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      padding: 8px 15px 9px;
+      border-radius: 5px 5px 0 0;
+    }
+    .tabs-bar { margin-top: 6px; }
+    .s4u-tab-btn {
+      background: #f3f6f8;
+      border: 0;
+      color: #1b8fc4;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      padding: 9px 16px;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+    }
+    .s4u-tab-btn:hover { background: #ffffff; }
+    .s4u-tab-btn.active { background: #ffffff; color: #f29a1c; }
+
+    /* tabella Associato / Sezione / Stagione / Scheda */
+    .info-table {
+      width: 100%;
+      margin: 14px 0 8px;
+      border-collapse: collapse;
+      background: #ffffff;
+      font-size: 14px;
+      color: #222;
+    }
+    .info-table th,
+    .info-table td {
+      border: 1px solid #c4c4c4;
+      padding: 5px 7px;
+      height: 30px;
+      text-align: left;
+    }
+    .info-table th {
+      background: #e8eaee;
+      color: #000;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+      padding: 5px 14px;
+    }
+    .info-table th.first { width: 115px; text-align: right; }
+    .info-table td.stagione { text-align: right; padding-right: 20px; }
+    .info-table td.up { text-transform: uppercase; }
+    .info-table select {
+      font-family: var(--font);
+      font-size: 14px;
+      height: 24px;
+      width: 112px;
+      padding: 0 4px;
+      background: #ffffff;
+      border: 1px solid #767676;
+      border-radius: 3px;
+    }
+    .ana-table th { width: 220px; text-align: right; }
+
+    /* contenuto delle schede */
+    .s4u-tab-content {
+      display: none;
+      background: #ececec;
+      border: 1px solid #dcdcdc;
+      border-top: 0;
+      border-radius: 0 0 6px 6px;
+      padding: 24px 6px 18px;
+      overflow-x: auto;
+    }
+    .s4u-tab-content.active { display: block; }
+
+    .s4u-table {
+      width: 100%;
+      min-width: 780px;
+      table-layout: fixed;
+      border-collapse: collapse;
+      background: #ffffff;
+      border: 2px solid #cfcfcf;
+      font-size: 14px;
+      color: #222;
+    }
+    .s4u-table th {
+      background: #e9edf0;
+      border: 1px solid #b4b4b4;
+      color: #000;
+      font-weight: 700;
+      text-align: center;
+      padding: 7px 4px;
+      line-height: 1.2;
+    }
+    .s4u-table td {
+      background: #ffffff;
+      border: 1px solid #b4b4b4;
+      padding: 5px 6px;
+      height: 40px;
+      vertical-align: middle;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+    .s4u-table td.c { text-align: center; }
+    .s4u-table td.r { text-align: right; }
+    .s4u-table td.up { text-transform: uppercase; }
+    .s4u-table td.vuoto { height: 28px; text-align: left; font-size: 13px; }
+
+    .btn-info {
+      border: 0 !important;
+      padding: 0 !important;
+      cursor: pointer;
+      width: 24px !important;
+      height: 24px !important;
+      border-radius: 0 !important;
+      background: url("icon_info.png") center / contain no-repeat !important;
+      color: transparent !important;
+      font-size: 0 !important;
+      line-height: 1;
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none !important;
+    }
+
+    /* pulsante STAMPA */
+    .btn-stampa-container { margin: 20px 10px 0 0; display: flex; justify-content: flex-end; }
+    .btn-stampa {
+      width: 105px;
+      height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: #f7f9fa;
+      border: 1px solid #d3dce2;
+      border-radius: 4px;
+      color: #1b8fc4;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn-stampa:hover { background: #ffffff; }
+.pdf-ico {
+      width: 24px;
+      height: 24px;
+      background: url("icon_ext_pdf.png") center / contain no-repeat;
+      font-size: 0;
+      color: transparent;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    /* ----- riquadro DATI GARA (al passaggio sulla "i") ----- */
+    .gara-tip {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 4000;
+      width: min(752px, calc(100vw - 20px));
+      background: #ffffff;
+      border: 3px solid #000000;
+      border-radius: 3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      font-size: 14px;
+      color: #222;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .08s;
+    }
+    .gara-tip.show { opacity: 1; }
+    .gara-tip .dg-title {
+      background: #e6edf1;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      padding: 7px 4px;
+      border-bottom: 1px solid #b9c3ca;
+    }
+    .gara-tip table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .gara-tip th,
+    .gara-tip td {
+      border: 1px solid #bdbdbd;
+      padding: 4px 8px;
+      height: 27px;
+      text-align: left;
+      background: #ffffff;
+      overflow-wrap: anywhere;
+    }
+    .gara-tip .dg-info th { background: #d9d9d9; width: 18%; }
+    .gara-tip .dg-des thead th { background: #d4d4d4; }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .profile-item[style] { grid-column: auto !important; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <!-- Header AIA -->
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li>
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li>
+             </ul>
+          </li>
+                    <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li>
+             </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li>                  
+             </ul>
+          </li>
+          </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <!-- Area Principale -->
+      <div class="main-content">
+        <header class="topbar">
+          <div class="page-title"><strong>Scheda Tecnica</strong></div>
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header">
+            <h3>Scheda Tecnica</h3>
+          </div>
+
+          <div class="box-wrap" style="margin-bottom:0;">
+            <div class="elenco-title">Scheda Tecnica</div>
+
+            <div class="st-body">
+              <div class="orange-bar"><span class="sez-tab" id="sez-tab">-</span></div>
+
+              <table class="info-table">
+                <tr>
+                  <th class="first">Associato</th>
+                  <td id="info-associato" class="up">-</td>
+                  <th>Sezione</th>
+                  <td id="info-sezione" class="up">-</td>
+                  <th>Stagione</th>
+                  <td class="stagione"><select id="stagione-select"><option>2026/2027</option></select></td>
+                  <th>Scheda</th>
+                  <td>Personale</td>
+                </tr>
+                <tr>
+                  <th class="first">Ind. Partenza</th>
+                  <td id="info-ind-partenza" class="up" colspan="7">-</td>
+                </tr>
+              </table>
+
+              <!-- SOTTO-TAB -->
+              <div class="orange-bar tabs-bar">
+                <button class="s4u-tab-btn active" onclick="switchSubTab('gare', this)">GARE</button>
+                <button class="s4u-tab-btn" onclick="switchSubTab('categoria', this)">GARE CATEGORIA</button>
+                <button class="s4u-tab-btn" onclick="switchSubTab('rimborsi', this)">RIMBORSI</button>
+                <button class="s4u-tab-btn" onclick="switchSubTab('voti', this)">VOTI</button>
+                <button class="s4u-tab-btn" onclick="switchSubTab('anagrafica', this)">ANAGRAFICA</button>
+                <button class="s4u-tab-btn" onclick="switchSubTab('confidenziali', this)">CONFIDENZIALI</button>
+              </div>
+
+              <!-- TAB 1: GARE -->
+              <div id="subtab-gare" class="s4u-tab-content active">
+                <table class="s4u-table">
+                  <colgroup>
+                    <col style="width:4%"><col style="width:5.5%"><col style="width:9.7%"><col style="width:13.2%"><col style="width:6.6%">
+                    <col style="width:14%"><col style="width:13.7%"><col style="width:5.6%"><col style="width:10.5%"><col style="width:17.2%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Att.</th>
+                      <th>Data</th>
+                      <th>Categoria</th>
+                      <th>Giorn.</th>
+                      <th>Squadra Locale</th>
+                      <th>Squadra Ospite</th>
+                      <th>Ris.</th>
+                      <th>Comitato</th>
+                      <th>Stato</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body-gare">
+                    <tr><td colspan="10" class="vuoto">Caricamento gare in corso...</td></tr>
+                  </tbody>
+                </table>
+                <div class="btn-stampa-container">
+                  <button type="button" class="btn-stampa" onclick="window.print()"><span class="pdf-ico">PDF</span>STAMPA</button>
+                </div>
+              </div>
+
+              <!-- TAB 2: GARE CATEGORIA -->
+              <div id="subtab-categoria" class="s4u-tab-content">
+                <table class="s4u-table">
+                  <colgroup>
+                    <col style="width:8%"><col style="width:4.2%"><col style="width:16.8%"><col style="width:8.8%"><col style="width:11%">
+                    <col style="width:13.4%"><col style="width:12.6%"><col style="width:13%"><col style="width:12.2%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>OT</th>
+                      <th>Att.</th>
+                      <th>Categoria</th>
+                      <th>Num. Gare Totali</th>
+                      <th>Num. Gare Stagione</th>
+                      <th>Media Calciatori Ammoniti</th>
+                      <th>Media Calciatori Espulsi</th>
+                      <th>Media Dirigenti Ammoniti</th>
+                      <th>Media Dirigenti Espulsi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body-categoria">
+                    <tr><td colspan="9" class="vuoto">Caricamento riepilogo...</td></tr>
+                  </tbody>
+                </table>
+                <div class="btn-stampa-container">
+                  <button type="button" class="btn-stampa" onclick="window.print()"><span class="pdf-ico">PDF</span>STAMPA</button>
+                </div>
+              </div>
+
+              <!-- TAB 3: RIMBORSI -->
+              <div id="subtab-rimborsi" class="s4u-tab-content">
+                <table class="s4u-table">
+                  <colgroup>
+                    <col style="width:7.6%"><col style="width:4.9%"><col style="width:13.2%"><col style="width:5.6%"><col style="width:13.4%"><col style="width:11.6%">
+                    <col style="width:7.7%"><col style="width:7.6%"><col style="width:4.5%"><col style="width:5.6%"><col style="width:18.3%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Att.</th>
+                      <th>Categoria</th>
+                      <th>Gior</th>
+                      <th>Squadra Locale</th>
+                      <th>Squadra Ospite</th>
+                      <th>N°Gara</th>
+                      <th>Omolog.</th>
+                      <th>Km</th>
+                      <th>Rimb</th>
+                      <th>Stato</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body-rimborsi">
+                    <tr><td colspan="11" class="vuoto">Caricamento rimborsi...</td></tr>
+                  </tbody>
+                </table>
+                <div class="btn-stampa-container">
+                  <button type="button" class="btn-stampa" onclick="window.print()"><span class="pdf-ico">PDF</span>STAMPA</button>
+                </div>
+              </div>
+
+              <!-- TAB 4: VOTI -->
+              <div id="subtab-voti" class="s4u-tab-content">
+                <table class="s4u-table">
+                  <thead>
+                    <tr>
+                      <th>Att.</th>
+                      <th>Data</th>
+                      <th>Categoria</th>
+                      <th>Giorn.</th>
+                      <th>Squadra Locale</th>
+                      <th>Squadra Ospite</th>
+                      <th>Voto OA</th>
+                      <th>Voto OT</th>
+                      <th>Nominativi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body-voti">
+                    <tr><td colspan="9" class="vuoto">Nessuna valutazione registrata.</td></tr>
+                  </tbody>
+                </table>
+                <div class="btn-stampa-container">
+                  <button type="button" class="btn-stampa" onclick="window.print()"><span class="pdf-ico">PDF</span>STAMPA</button>
+                </div>
+              </div>
+
+              <!-- TAB 5: ANAGRAFICA -->
+              <div id="subtab-anagrafica" class="s4u-tab-content">
+                <table class="info-table ana-table" style="margin-top:0;">
+                  <tr><th>Nominativo</th><td id="ana-nome" class="up">-</td></tr>
+                  <tr><th>Sezione di Appartenenza</th><td id="ana-sezione" class="up">-</td></tr>
+                  <tr><th>Qualifica</th><td>Arbitro Effettivo (AE)</td></tr>
+                  <tr><th>Indirizzo di Residenza</th><td id="ana-ind" class="up">-</td></tr>
+                </table>
+              </div>
+
+              <!-- TAB 6: CONFIDENZIALI -->
+              <div id="subtab-confidenziali" class="s4u-tab-content">
+                <table class="s4u-table">
+                  <colgroup>
+                    <col style="width:15%"><col style="width:22.3%"><col style="width:44.6%"><col style="width:15%"><col style="width:3.1%">
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <th style="text-align:left;">Data Gara</th>
+                      <th style="text-align:left;">Categoria</th>
+                      <th style="text-align:left;">Gara</th>
+                      <th style="text-align:left;">Data Confidenziale</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="table-body-confidenziali">
+                    <tr><td colspan="5" class="vuoto">Nessuna Confidenziale trovata</td></tr>
+                  </tbody>
+                </table>
+                <div class="btn-stampa-container">
+                  <button type="button" class="btn-stampa" onclick="window.print()"><span class="pdf-ico">PDF</span>STAMPA</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIQUADRO DATI GARA (compare passando sulla "i") -->
+  <div id="gara-tip" class="gara-tip"></div>
+
+  <!-- Footer -->
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE03</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script>
+    function switchSubTab(tabId, btnElement) {
+      document.querySelectorAll('.s4u-tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.s4u-tab-btn').forEach(b => b.classList.remove('active'));
+
+      document.getElementById('subtab-' + tabId).classList.add('active');
+      btnElement.classList.add('active');
+    }
+  </script>
+
+<script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const NO_ADDR = 'INDIRIZZO NON TROVATO';
+
+    const userCodMeccSpan = document.getElementById('user-codmecc');
+    const userFullNameSpan = document.getElementById('user-fullname');
+    const adminMenuContainer = document.getElementById('admin-menu-container');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const tableBodyGare = document.getElementById('table-body-gare');
+    const tableBodyCategoria = document.getElementById('table-body-categoria');
+    const tableBodyRimborsi = document.getElementById('table-body-rimborsi');
+    const infoAssociato = document.getElementById('info-associato');
+    const infoSezione = document.getElementById('info-sezione');
+    const sezTab = document.getElementById('sez-tab');
+    const infoIndPartenza = document.getElementById('info-ind-partenza');
+    const anaNome = document.getElementById('ana-nome');
+    const anaSezione = document.getElementById('ana-sezione');
+    const anaInd = document.getElementById('ana-ind');
+    const garaTip = document.getElementById('gara-tip');
+
+    let currentUser = null;
+    let userProfile = null;
+    let userGareList = [];
+    let utentiList = [];
+    let utentiLoaded = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+      currentUser = user;
+
+      try {
+        const snap = await getDoc(doc(db, "utenti", user.uid));
+        if (snap.exists()) {
+          userProfile = snap.data();
+          const ruolo = userProfile.ruolo || 'utente';
+
+          const codMecc = (userProfile.codMecc || '').trim();
+          const nome = (userProfile.nome || '').trim();
+          const cognome = (userProfile.cognome || '').trim();
+          const nomeCompleto = [nome, cognome].filter(Boolean).join(' ') || '-';
+
+          if (userCodMeccSpan) userCodMeccSpan.textContent = codMecc || '-';
+          if (userFullNameSpan) userFullNameSpan.textContent = nomeCompleto;
+
+          if (ruolo === 'admin' && adminMenuContainer) {
+            adminMenuContainer.innerHTML = `
+              <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+              <li><a href="admin.html">Gestione Anagrafiche</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+              <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+              <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+              <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+              <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>
+            `;
+          }
+
+          const fullName = `${cognome} ${nome}`.trim();
+          if (fullName) {
+            if (infoAssociato) infoAssociato.textContent = fullName.toUpperCase();
+            if (anaNome) anaNome.textContent = fullName.toUpperCase();
+          }
+        } else {
+          if (userCodMeccSpan) userCodMeccSpan.textContent = '-';
+          if (userFullNameSpan) userFullNameSpan.textContent = '-';
+        }
+      } catch (e) {
+        console.error("Errore caricamento profilo utente:", e);
+        if (userCodMeccSpan) userCodMeccSpan.textContent = '-';
+        if (userFullNameSpan) userFullNameSpan.textContent = '-';
+      }
+            
+            
+      // Sezione e indirizzo di partenza dal database
+      const sezione = String((userProfile && userProfile.sezione) || '').trim().toUpperCase() || '-';
+      sezTab.textContent = sezione;
+      infoSezione.textContent = sezione;
+      anaSezione.textContent = sezione;
+
+      const indirizzo = String((userProfile && userProfile.indPartenza) || '').trim() || NO_ADDR;
+      infoIndPartenza.textContent = indirizzo;
+      anaInd.textContent = indirizzo;
+
+      await loadUserGare(user);
+      document.body.classList.remove('auth-loading');
+    });
+
+    // ---------- Utilità ----------
+
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // Timestamp della gara (data + ora) per l'ordinamento. Accetta gg/mm/aaaa oppure aaaa-mm-gg.
+    function garaTimestamp(g) {
+      const s = (g.dataGara || '').trim();
+      let y = 0, m = 0, d = 0;
+      let mt = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+      if (mt) { d = +mt[1]; m = +mt[2]; y = +mt[3]; }
+      else {
+        mt = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (mt) { y = +mt[1]; m = +mt[2]; d = +mt[3]; }
+      }
+      if (!y) return 0;
+      const parts = (g.oraGara || '00:00').split(/[:.]/).map(n => parseInt(n, 10) || 0);
+      return new Date(y, m - 1, d, parts[0] || 0, parts[1] || 0).getTime();
+    }
+
+    // "10 and." -> "10 A"  /  "3 rit." -> "3 R"
+    function fmtGiornata(v) {
+      const s = String(v || '').trim();
+      if (!s) return '-';
+      return s.replace(/\s*and\.?/i, ' A').replace(/\s*rit\.?/i, ' R').trim();
+    }
+
+    // "RUSSO CRISTIAN (SEZ. SIENA)" -> "RUSSO CRISTIAN"
+    function nomeSenzaSezione(nominativo) {
+      return (nominativo || '').replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    // "RUSSO CRISTIAN (SEZ. SIENA)" -> "Sez. SIENA"
+    function sezioneDa(nominativo) {
+      const m = (nominativo || '').match(/\(([^)]*)\)/);
+      if (!m) return '';
+      const t = m[1].trim();
+      const r = t.match(/^SEZ\.?\s*(.*)$/i);
+      return r ? `Sez. ${r[1].trim().toUpperCase()}` : t;
+    }
+
+    // Chiave di confronto indipendente dall'ordine nome/cognome
+    function chiaveNome(s) {
+      return (s || '')
+        .replace(/\([^)]*\)/g, ' ')
+        .toUpperCase()
+        .replace(/[^A-ZÀ-Ü0-9\s']/g, ' ')
+        .split(/\s+/)
+        .filter(Boolean)
+        .sort()
+        .join(' ');
+    }
+
+    async function loadUtenti() {
+      if (utentiLoaded) return;
+      utentiLoaded = true;
+      try {
+        const snap = await getDocs(collection(db, "utenti"));
+        utentiList = snap.docs.map(d => d.data());
+      } catch (e) {
+        console.warn("Elenco utenti non leggibile: telefoni dei colleghi non disponibili.", e);
+      }
+    }
+
+    const telefonoDa = (u) => (u && (u.cellulare || u.telefono || u.cell || u.tel || u.phone)) || '';
+
+    function findTelefono(nominativo) {
+      const key = chiaveNome(nominativo);
+      if (!key) return '';
+      const u = utentiList.find(x => chiaveNome(`${x.nome || ''} ${x.cognome || ''}`) === key);
+      return telefonoDa(u);
+    }
+
+    // ---------- Ruolo dell'utente nella gara ----------
+    // Un'unica funzione decide sia se la gara è dell'utente sia con quale ruolo:
+    // il ruolo è sempre quello del campo (ae / aa1 / aa2 / qu) in cui compare il suo nome.
+    const RUOLI = [
+      { campo: 'ae',  codice: 'AR',  label: 'Arbitro' },
+      { campo: 'aa1', codice: 'AA1', label: '1° Assistente' },
+      { campo: 'aa2', codice: 'AA2', label: '2° Assistente' },
+      { campo: 'qu',  codice: 'QU',  label: 'Quarto Ufficiale' }
+    ];
+
+    function getRuoloUtenteInGara(des, user, profile) {
+      const myFullName = `${profile?.cognome || ''} ${profile?.nome || ''}`.trim().toUpperCase();
+      const myNameRev = `${profile?.nome || ''} ${profile?.cognome || ''}`.trim().toUpperCase();
+      const myEmail = (user.email || '').toLowerCase();
+
+      const match = (val) => {
+        if (!val) return false;
+        const u = String(val).toUpperCase();
+        const l = String(val).toLowerCase();
+        return (myFullName && u.includes(myFullName)) || (myNameRev && u.includes(myNameRev)) || (myEmail && l.includes(myEmail));
+      };
+
+      for (const r of RUOLI) {
+        if (match(des[r.campo])) return r;
+      }
+      return null;
+    }
+
+    async function loadUserGare(user) {
+      try {
+        await loadUtenti();
+        const snap = await getDocs(collection(db, "gare_programmate"));
+        userGareList = [];
+
+        snap.forEach(d => {
+          const g = { id: d.id, ...d.data() };
+          const des = g.designazione;
+
+          if (des) {
+            const ruolo = getRuoloUtenteInGara(des, user, userProfile);
+            if (ruolo) {
+              g._ruoloInfo = ruolo;
+              userGareList.push(g);
+            }
+          }
+        });
+
+        // Dalla gara più recente alla più datata
+        userGareList.sort((a, b) => garaTimestamp(b) - garaTimestamp(a));
+
+        renderAllTables(userGareList);
+      } catch (err) {
+        console.error("Errore caricamento gare:", err);
+        tableBodyGare.innerHTML = `<tr><td colspan="10" class="vuoto" style="color:#b00000;">Errore di caricamento dati.</td></tr>`;
+      }
+    }
+
+    // ---------- Tabelle ----------
+
+    const fmtMedia = (n, tot) => (tot > 0 && n > 0) ? (n / tot).toFixed(2).replace('.', ',') : '';
+
+    function renderAllTables(gare) {
+      if (gare.length === 0) {
+        tableBodyGare.innerHTML = `<tr><td colspan="10" class="vuoto">Nessuna gara registrata nella scheda tecnica.</td></tr>`;
+        tableBodyCategoria.innerHTML = `<tr><td colspan="9" class="vuoto">Nessun dato categoria disponibile.</td></tr>`;
+        tableBodyRimborsi.innerHTML = `<tr><td colspan="11" class="vuoto">Nessun rimborso disponibile.</td></tr>`;
+        return;
+      }
+
+      // 1. Tabella GARE
+      tableBodyGare.innerHTML = gare.map(g => {
+        const ref = g.referto || {};
+        let statoHtml = '';
+        if (ref.consegnato) {
+          statoHtml = 'Omologata';
+        } else if (ref.aperto) {
+          statoHtml = '';
+        } else {
+          statoHtml = '';
+        }
+
+        const risText = g.risultato || ref.risultato || '';
+
+        return `
+          <tr>
+            <td class="c"><button type="button" class="btn-info" data-id="${esc(g.id)}" aria-label="Dati gara">i</button></td>
+            <td class="c">${esc(g._ruoloInfo.codice)}</td>
+            <td class="c">${esc(g.dataGara || '-')}<br>${esc(g.oraGara || '')}</td>
+            <td class="c up">${esc(g.categoria || '-')}${g.girone ? ` (${esc(g.girone)})` : ''}</td>
+            <td class="c">${esc(fmtGiornata(g.giornata))}</td>
+            <td class="up">${esc(g.squadraCasa || '-')}</td>
+            <td class="up">${esc(g.squadraOspite || '-')}</td>
+            <td class="c">${esc(risText)}</td>
+            <td class="up">${esc(g.comitato || 'TOSCANA')}</td>
+            <td>${statoHtml}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // 2. Tabella GARE CATEGORIA: una riga per categoria E per ruolo (AR / AA1 / AA2 / QU)
+      const categoriaMap = {};
+      gare.forEach(g => {
+        const catName = (g.categoria || 'NON DEFINITA').toUpperCase();
+        const att = g._ruoloInfo.codice;
+        const key = `${catName}|${att}`;
+        if (!categoriaMap[key]) {
+          categoriaMap[key] = { cat: catName, att, total: 0, amm: 0, esp: 0 };
+        }
+        categoriaMap[key].total++;
+
+        const ref = g.referto || {};
+        const provsCasa = ref.disciplinaCasa || [];
+        const provsFuori = ref.disciplinaFuori || [];
+        [...provsCasa, ...provsFuori].forEach(p => {
+          if (p.tipo === 'ammonizione') categoriaMap[key].amm++;
+          if (p.tipo === 'espulsione') categoriaMap[key].esp++;
+        });
+      });
+
+      tableBodyCategoria.innerHTML = Object.values(categoriaMap)
+        .sort((a, b) => b.total - a.total || a.cat.localeCompare(b.cat))
+        .map(data => `
+          <tr>
+            <td class="c">TOSCANA</td>
+            <td class="c">${esc(data.att)}</td>
+            <td class="c up">${esc(data.cat)}</td>
+            <td class="c">${data.total}</td>
+            <td class="c">${data.total}</td>
+            <td class="c">${fmtMedia(data.amm, data.total)}</td>
+            <td class="c">${fmtMedia(data.esp, data.total)}</td>
+            <td class="c"></td>
+            <td class="c"></td>
+          </tr>
+        `).join('');
+
+      // 3. Tabella RIMBORSI
+      tableBodyRimborsi.innerHTML = gare.map(g => {
+        const cleanKm = String(g.km || '0').replace(/km/gi, '').trim();
+        const ref = g.referto || {};
+        const omologText = ref.consegnato ? 'Omologata' : '';
+        return `
+          <tr>
+            <td class="c">${esc(g.dataGara || '-')}<br>${esc(g.oraGara || '')}</td>
+            <td class="c">${esc(g._ruoloInfo.codice)}</td>
+            <td class="c up">${esc(g.categoria || '-')}${g.girone ? ` (${esc(g.girone)})` : ''}</td>
+            <td class="c">${esc(fmtGiornata(g.giornata))}</td>
+            <td class="up">${esc(g.squadraCasa || '-')}</td>
+            <td class="up">${esc(g.squadraOspite || '-')}</td>
+            <td class="r">${esc(g.numeroGara || '-')}</td>
+            <td class="c">${omologText}</td>
+            <td class="r">${esc(cleanKm)}</td>
+            <td class="r">${esc(g.rimborso || '0 €')}</td>
+            <td>Non inserita nel pacco</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ---------- Riquadro DATI GARA al passaggio sulla "i" ----------
+
+    function buildGaraTip(g) {
+      const des = g.designazione || {};
+      const miaSezione = String((userProfile && userProfile.sezione) || '').trim().toUpperCase();
+
+      const qualifiche = [
+        ['ae',  'Arbitro'],
+        ['aa1', "Assistente dell'arbitro n°1"],
+        ['aa2', "Assistente dell'arbitro n°2"],
+        ['qu',  'Quarto Ufficiale']
+      ];
+
+      const righe = qualifiche.filter(([k]) => des[k]).map(([k, label]) => {
+        const nominativo = des[k];
+        const sonoIo = g._ruoloInfo && g._ruoloInfo.campo === k;
+        let sezione = sezioneDa(nominativo);
+        if (!sezione && sonoIo && miaSezione) sezione = `Sez. ${miaSezione}`;
+        let tel = findTelefono(nominativo);
+        if (!tel && sonoIo) tel = telefonoDa(userProfile);
+        return `
+          <tr>
+            <td>${esc(label)}</td>
+            <td class="up">${esc(nomeSenzaSezione(nominativo))}</td>
+            <td>${esc(sezione)}</td>
+            <td>${esc(tel)}</td>
+          </tr>`;
+      }).join('');
+
+      return `
+        <div class="dg-title">Dati Gara</div>
+        <table class="dg-info">
+          <tr><th>Categoria</th><td>${esc(g.categoria || '')}</td></tr>
+          <tr><th>N° Gara</th><td>${esc(g.numeroGara || '')}</td></tr>
+          <tr><th>Localita</th><td>${esc(g.localita || '')}</td></tr>
+          <tr><th>Impianto</th><td>${esc(g.impianto || '')}</td></tr>
+        </table>
+        <div class="dg-title" style="border-top:1px solid #b9c3ca;">Designazioni Correlate</div>
+        <table class="dg-des">
+          <colgroup><col style="width:31%"><col style="width:27%"><col style="width:18%"><col style="width:24%"></colgroup>
+          <thead><tr><th>Qualifica</th><th>Associato</th><th>Sezione</th><th>Telefono</th></tr></thead>
+          <tbody>${righe}</tbody>
+        </table>
+      `;
+    }
+
+    function showGaraTip(btn) {
+      const g = userGareList.find(item => item.id === btn.dataset.id);
+      if (!g) return;
+      garaTip.innerHTML = buildGaraTip(g);
+
+      const r = btn.getBoundingClientRect();
+      const tw = garaTip.offsetWidth;
+      const th = garaTip.offsetHeight;
+      let x = r.right + 14;
+      if (x + tw > window.innerWidth - 8) x = Math.max(8, window.innerWidth - tw - 8);
+      let y = r.top - 9;
+      if (y + th > window.innerHeight - 8) y = window.innerHeight - th - 8;
+      if (y < 8) y = 8;
+      garaTip.style.left = x + 'px';
+      garaTip.style.top = y + 'px';
+      garaTip.classList.add('show');
+    }
+    function hideGaraTip() { garaTip.classList.remove('show'); }
+
+    document.addEventListener('mouseover', (e) => {
+      const btn = e.target.closest ? e.target.closest('.btn-info') : null;
+      if (btn) showGaraTip(btn);
+    });
+    document.addEventListener('mouseout', (e) => {
+      const btn = e.target.closest ? e.target.closest('.btn-info') : null;
+      if (btn && !btn.contains(e.relatedTarget)) hideGaraTip();
+    });
+    // Schermi touch (senza "hover"): tocco sulla "i" per aprire, tocco altrove per chiudere
+    document.addEventListener('click', (e) => {
+      if (!window.matchMedia('(hover: none)').matches) return;
+      const btn = e.target.closest ? e.target.closest('.btn-info') : null;
+      if (btn) showGaraTip(btn); else hideGaraTip();
+    });
+    window.addEventListener('scroll', hideGaraTip, true);
+
+    // ---------- Logout e menu ----------
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.replace('index.html');
+      } catch (error) {
+        console.error("Errore durante il logout:", error);
+      }
+    });
+
+    // Menu: apre/chiude le sottocategorie cliccando sulla cartella
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

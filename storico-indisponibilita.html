@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --blue: #2a8ac4;
+      --orange: #f29a1c;
+      --text-muted: #444444;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative; height: 77px; background: #fff; border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45); display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-end; padding: 0 18px 0 130px; z-index: 5;
+    }
+    .aia-header img.aia-logo { position: absolute; left: 12px; top: 2px; height: 100px; width: auto; }
+    .aia-header .fig { font-weight: 700; font-size: 19px; color: #d2b66f; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.15; }
+    .aia-header .aia { font-weight: 700; font-size: 26px; letter-spacing: -.5px; color: #1d5fa6; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.1; }
+
+    /* ========== LAYOUT / SIDEBAR ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+    .sidebar { width: 251px; flex-shrink: 0; background: #d1d5df; border-radius: 8px 8px 10px 10px; padding: 23px 0 42px; overflow: hidden; }
+    .side-section, .sidebar li[style*="uppercase"] {
+      display: flex !important; align-items: center; gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important; padding: 3px 6px 3px 4px !important; margin: 0 !important;
+      font-family: var(--font); font-size: 20px !important; font-weight: 700; letter-spacing: .3px !important;
+      text-transform: none !important; color: #000 !important; text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon, .sidebar li[style*="uppercase"]::before {
+      content: ""; width: 21px; height: 28px; border-radius: 3px; background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5); flex-shrink: 0;
+    }
+    .sidebar-nav, .sub-nav { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 15px; height: 22.5px; font-size: 14.5px; color: #0d0d0d; text-decoration: none; white-space: nowrap; }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+    .sidebar-nav li a::before { content: ""; width: 20px; height: 20px; background: url("icon075.gif") center / contain no-repeat; flex-shrink: 0; }
+    .sidebar-nav li.cat:not(.open) > a::before { background: url("icon074.gif") center / contain no-repeat; }
+    .sidebar-nav li a.globe::before { content: ""; width: 20px; height: 20px; margin: 0 1px; border: none; border-radius: 0; background: url("icon073.gif") center / contain no-repeat; box-shadow: none; }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TOPBAR / MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; background: #d1d5df; border-radius: 8px; height: 50px; padding: 0 12px 0 13px; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email { font-weight: 700; font-size: 19px; letter-spacing: -.3px; color: #000; text-shadow: 1px 1px 2px rgba(0,0,0,.35); }
+    .role-badge::after { content: " -"; }
+    .btn-logout { width: 28px; height: 28px; padding: 0; border: 0; background: url("icon_system_logout.png") center / contain no-repeat; font-size: 0; cursor: pointer; }
+    .dashboard-body { background: #fff; border-radius: 0 0 8px 8px; margin: 11px 0 0 3px; padding: 7px 6px 18px; }
+    .banca-dati-header { margin: 0 0 12px; border-bottom: 2px solid #f0a03a; }
+    .banca-dati-header h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.3px; color: var(--orange); text-shadow: 1px 1px 2px rgba(0,0,0,.35); line-height: 1.2; }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .elenco-title { background: var(--teal); color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.2px; padding: 3px 13px 4px; }
+
+    /* ========== STORICO TABELLA ========== */
+    .storico-container { background: #d1d5df; padding: 12px 12px 16px; }
+    .table-scroll { width: 100%; overflow-x: auto; background: #fff; border: 1px solid #c4c4c4; }
+    .storico-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 12.5px; color: #111; }
+    .storico-table th {
+      background: linear-gradient(#f5f6f9, #dce0e9);
+      border: 1px solid #c4c4c4;
+      padding: 5px 7px;
+      font-weight: 700;
+      text-align: left;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .storico-table th.sortable { cursor: pointer; }
+    .storico-table th.sortable:hover { background: linear-gradient(#fff, #e5e9f0); }
+    .storico-table th.center-col { text-align: center; }
+    .storico-table td {
+      border: 1px solid #c4c4c4;
+      padding: 4px 7px;
+      height: 28px;
+      vertical-align: middle;
+      font-size: 12.5px;
+    }
+    .storico-table td.nowrap { white-space: nowrap; }
+    .storico-table td.center-col { text-align: center; white-space: nowrap; }
+    .storico-table tr:hover td { background: #f8fafc; }
+    .storico-table tfoot td {
+      background: #e8eeee;
+      font-weight: 700;
+      padding: 5px 8px;
+      color: #111;
+    }
+    .status-icon { width: 16px; height: 16px; vertical-align: middle; display: inline-block; }
+    .attach-icon { width: 15px; height: 15px; vertical-align: middle; display: inline-block; }
+    .attach-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+    .action-btn {
+      background: none;
+      border: none;
+      padding: 1px 3px;
+      margin: 0 2px;
+      cursor: pointer;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .action-btn img { width: 16px; height: 16px; display: block; }
+    .action-btn:hover { opacity: .78; }
+
+    .pagination-bar {
+      background: #fff;
+      border: 1px solid #c4c4c4;
+      border-top: none;
+      padding: 6px 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .page-btn {
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      background: linear-gradient(#fdfdfd, #e6e9ef);
+      color: #222;
+      border: 1px solid #b5bcc8;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .page-btn.active { color: #ff9900; border-color: #d99b38; background: #fff; }
+    .page-btn:hover { background: #f3f6fa; }
+
+    .desc-text {
+      background: #fff;
+      border: 1px solid #c4c4c4;
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #222;
+    }
+
+    /* ========== POPUP / DIALOG ========== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; align-items: center; justify-content: center; padding: 16px;
+      background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px), rgba(42, 80, 99, .72);
+      z-index: 3600;
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative; width: 100%; max-width: 440px; background: #f4f4f4; border: 1px solid #cfcfcf;
+      border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.5); overflow: hidden; display: flex;
+      flex-direction: column; max-height: calc(100vh - 32px); padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f); border: 1px solid #e58f14; border-radius: 4px;
+      color: #fff; padding: 7px 14px 7px 16px; font-weight: 700; font-size: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .designation-header-bar button {
+      background: none; border: none; color: #fff; font-size: 22px; font-weight: 700; cursor: pointer; line-height: 1; padding: 0;
+    }
+    .designation-body-content {
+      padding: 15px 16px 14px; overflow-y: auto; background: linear-gradient(#fdfdfd, #f2f2f2);
+      font-size: 13.5px; line-height: 20px; color: #000;
+    }
+    .dialog-form-table { width: 100%; border-collapse: collapse; margin-top: 8px; background: #fff; }
+    .dialog-form-table td { border: 1px solid #c4c4c4; padding: 5px 8px; font-size: 13px; }
+    .dialog-form-table td.dlbl { background: #e8eeee; font-weight: 700; white-space: nowrap; width: 115px; }
+    .dialog-form-table input[type="text"] {
+      font-family: var(--font); font-size: 13px; height: 24px; width: 150px;
+      border: 1px solid #666; padding: 2px 6px; color: #111; background: #fff;
+    }
+    .dialog-form-table input[type="text"]:disabled {
+      background: #e3e6ec; color: #333; border-color: #9aa2b0;
+    }
+    .designation-footer-bar {
+      padding: 10px 16px; background: #f4f4f4; border-top: 1px solid #dcdcdc;
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .btn-secondary, .btn-success, .btn-danger-s4y {
+      font-family: var(--font); font-size: 14px; font-weight: 700; border-radius: 4px; cursor: pointer; padding: 6px 14px;
+    }
+    .btn-secondary { background: #fff; color: var(--blue); border: 1px solid #d3dbe3; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .btn-secondary:hover { background: #f1f7fb; }
+    .btn-success { background: #3f9a2a; color: #fff; border: 1px solid #2f7a1d; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+    .btn-danger-s4y { background: #c0392b; color: #fff; border: 1px solid #96281b; }
+    .btn-danger-s4y:disabled { opacity: .6; cursor: default; }
+
+    /* ========== TOAST / FOOTER ========== */
+    .toast {
+      position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px);
+      background: #244658; color: #fff; font-size: 15px; padding: 10px 20px; border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 5000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .aia-footer {
+      position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: calc(100% - 16px); max-width: 1250px;
+      background: #333; border-radius: 9px 9px 0 0; box-shadow: 0 -1px 5px rgba(0,0,0,.5); padding: 7px 12px 6px;
+      display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex; align-items: center; gap: 4px; background: #f4f4f4; color: #666;
+      font-family: Arial, Helvetica, sans-serif; font-size: 22px; padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px; height: 28px; border-radius: 50%; background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative; display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: ""; position: absolute; inset: 7px; background: #4285f4; border: 2px solid #fff; border-radius: 50%;
+    }
+
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li></ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat open">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav"><li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav"><li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li></ul>
+          </li>
+        </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header"><h3>Indisponibilità</h3></div>
+
+          <!-- Box Storico Indisponibilità -->
+          <div class="box-wrap">
+            <div class="elenco-title">Storico Indisponibilità</div>
+            <div class="storico-container">
+              <div class="table-scroll">
+                <table class="storico-table" id="storico-indisp-table">
+                  <thead>
+                    <tr>
+                      <th class="sortable" data-sort="tipo">Tipo</th>
+                      <th class="sortable" data-sort="inizio">Inizio</th>
+                      <th class="sortable" data-sort="fine">Fine</th>
+                      <th class="sortable" data-sort="motivo">Motivo</th>
+                      <th class="sortable" data-sort="note">Note</th>
+                      <th class="center-col sortable" data-sort="allegato">Allegato</th>
+                      <th class="center-col sortable" data-sort="stato">Stato</th>
+                      <th class="center-col">Azioni</th>
+                    </tr>
+                  </thead>
+                  <tbody id="storico-indisp-tbody">
+                    <tr>
+                      <td colspan="8" style="text-align:center; padding:12px;">Caricamento storico indisponibilità...</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="8" id="storico-totali-cell">INDISPONIBILITA' TOTALI : 0</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div id="pagination-bar" class="pagination-bar"></div>
+            </div>
+          </div>
+
+          <!-- Box L'Indisponibilità -->
+          <div class="box-wrap">
+            <div class="elenco-title">L'Indisponibilità</div>
+            <div class="storico-container" style="padding:10px 12px 12px;">
+              <div class="desc-text">
+                L'<b>Indisponibilità</b> è la richiesta di esenzione temporanea, per un <b>massimo di 14 giorni</b>, dallo svolgimento di attività tecniche.<br>
+                Tale richiesta deve essere inoltrata dall'Associato all'Organo Tecnico di appartenenza con congruo anticipo.<br>
+                Possono essere inserite più richieste di indisponibilità per giorni o periodi diversi; l’indisponibilità si indica specificando la data di inizio e la data di fine; se l’indisponibilità è di un giorno, la data di inizio è uguale alla data di fine.
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: VARIAZIONE INDISPONIBILITÀ (MATITA icon_mod.png) -->
+  <div id="modal-variazione" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>ATTENZIONE</span>
+        <button type="button" onclick="chiudiModal('modal-variazione')">&times;</button>
+      </div>
+      <div class="designation-body-content">
+        <div>Inserire la nuova Data Fine:</div>
+        <table class="dialog-form-table">
+          <tr>
+            <td class="dlbl">Data Inizio :</td>
+            <td><input type="text" id="edit-data-inizio" value="" maxlength="10" disabled></td>
+          </tr>
+          <tr>
+            <td class="dlbl">Data Fine :</td>
+            <td><input type="text" id="edit-data-fine" value="" maxlength="10" placeholder="gg/mm/aaaa" autocomplete="off"></td>
+          </tr>
+        </table>
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-variazione')">Annulla</button>
+        <button type="button" class="btn-success" id="btn-salva-variazione" onclick="salvaVariazioneIndisponibilita()">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: CONFERMA CANCELLAZIONE (X icon_del.png) -->
+  <div id="modal-elimina" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>ATTENZIONE</span>
+        <button type="button" onclick="chiudiModal('modal-elimina')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="elimina-body-text">
+        Sei sicuro di voler eliminare l'indisponibilità?
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-elimina')">Annulla</button>
+        <button type="button" class="btn-danger-s4y" id="btn-conferma-elimina" onclick="confermaEliminaIndisponibilita()">Conferma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: MESSAGGIO / CONFERMA MODIFICA -->
+  <div id="modal-msg" class="modal-overlay" style="z-index:3700;">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span id="msg-title">Informazione</span>
+        <button type="button" onclick="chiudiModal('modal-msg')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="msg-text" style="min-height:65px;"></div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-msg')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE01</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+<script type="module">
+  import { auth, db } from './firebase-config.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { collection, query, where, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const PAGE_SIZE = 50;
+  let currentUser = null;
+  let currentUserProfile = null;
+  let records = [];
+  let currentPage = 1;
+  let sortCol = 'fine';
+  let sortDir = -1; // -1 = dalla data più recente/successiva alla più datata
+  let activeEditId = null;
+  let activeDeleteId = null;
+
+  function parseDateIT(s) {
+    const m = String(s || '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return (d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1]) ? d : null;
+  }
+
+  function formatDateIT(d) {
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  function dateValue(str) {
+    const d = parseDateIT(str);
+    return d ? Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) : Number.NEGATIVE_INFINITY;
+  }
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  window.chiudiModal = (id) => $(id).classList.remove('active');
+
+  function showMsg(titolo, html) {
+    $('msg-title').textContent = titolo;
+    $('msg-text').innerHTML = html;
+    $('modal-msg').classList.add('active');
+  }
+
+  function normalizzaStato(statoRaw) {
+    const s = String(statoRaw || '').trim().toLowerCase();
+    if (s === 'approvata' || s === 'approvato' || s === 'attivo' || s === 'green') {
+      return {
+        code: 'approvata',
+        icon: 'light_green.png',
+        title: 'DATO APPROVATO - ATTIVO',
+        editable: false
+      };
+    }
+    if (s === 'annullata' || s === 'annullato' || s === 'rifiutata' || s === 'rifiutato' || s === 'non_approvato' || s === 'red') {
+      return {
+        code: 'annullata',
+        icon: 'light_red.png',
+        title: 'MODIFICA/DATO NON APPROVATO',
+        editable: false
+      };
+    }
+    return {
+      code: 'in_attesa',
+      icon: 'light_yellow.png',
+      title: 'DATO IN APPROVAZIONE',
+      editable: true
+    };
+  }
+
+  function compareRecords(a, b) {
+    let cmp = 0;
+    if (sortCol === 'inizio') {
+      cmp = dateValue(a.dataInizio) - dateValue(b.dataInizio);
+      if (cmp === 0) cmp = dateValue(a.dataFine) - dateValue(b.dataFine);
+    } else if (sortCol === 'fine') {
+      cmp = dateValue(a.dataFine) - dateValue(b.dataFine);
+      if (cmp === 0) cmp = dateValue(a.dataInizio) - dateValue(b.dataInizio);
+    } else if (sortCol === 'allegato') {
+      cmp = (a.allegato ? 1 : 0) - (b.allegato ? 1 : 0);
+    } else if (sortCol === 'stato') {
+      cmp = normalizzaStato(a.stato).code.localeCompare(normalizzaStato(b.stato).code, 'it');
+    } else {
+      const va = String(a[sortCol] ?? '').toLowerCase();
+      const vb = String(b[sortCol] ?? '').toLowerCase();
+      cmp = va.localeCompare(vb, 'it');
+    }
+
+    if (cmp === 0) {
+      const fineDiff = dateValue(b.dataFine) - dateValue(a.dataFine);
+      if (fineDiff !== 0) return fineDiff;
+      return dateValue(b.dataInizio) - dateValue(a.dataInizio);
+    }
+    return cmp * sortDir;
+  }
+
+  function renderAllegato(allegato) {
+    if (!allegato || !allegato.dataUrl) {
+      return `<img src="icon_noattach.png" alt="NESSUN ALLEGATO" title="NESSUN ALLEGATO" class="attach-icon">`;
+    }
+    const nome = esc(allegato.nomeFile || 'allegato');
+    return `<a href="${esc(allegato.dataUrl)}" download="${nome}" class="attach-link" title="Scarica allegato: ${nome}">
+      <img src="icon_attach.png" alt="ALLEGATO PRESENTE" title="ALLEGATO: ${nome}" class="attach-icon" onerror="this.src='icon_noattach.png'">
+    </a>`;
+  }
+
+  function renderAzioni(item) {
+    const st = normalizzaStato(item.stato);
+    if (!st.editable) return '';
+    return `
+      <button type="button" class="action-btn" title="Modifica Data Fine" onclick="apriModificaIndisp('${esc(item.id)}')">
+        <img src="icon_mod.png" alt="Modifica">
+      </button>
+      <button type="button" class="action-btn" title="Elimina Indisponibilità" onclick="apriEliminaIndisp('${esc(item.id)}')">
+        <img src="icon_del.png" alt="Elimina">
+      </button>`;
+  }
+
+  function renderPagination(totalCount) {
+    const bar = $('pagination-bar');
+    if (totalCount === 0) {
+      bar.style.display = 'none';
+      bar.innerHTML = '';
+      return;
+    }
+    bar.style.display = 'flex';
+    const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    let html = '';
+    for (let p = 1; p <= totalPages; p++) {
+      const startIdx = (p - 1) * PAGE_SIZE + 1;
+      const endIdx = Math.min(p * PAGE_SIZE, totalCount);
+      html += `<button type="button" class="page-btn ${p === currentPage ? 'active' : ''}" onclick="vaiAPagina(${p})">Indisponibilità da ${startIdx} a ${endIdx}</button>`;
+    }
+    bar.innerHTML = html;
+  }
+
+  window.vaiAPagina = (p) => {
+    currentPage = p;
+    renderTable();
+  };
+
+  function renderTable() {
+    const tbody = $('storico-indisp-tbody');
+    const sorted = [...records].sort(compareRecords);
+    const totalCount = sorted.length;
+
+    $('storico-totali-cell').textContent = `INDISPONIBILITA' TOTALI : ${totalCount}`;
+
+    if (totalCount === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px;">Nessuna indisponibilità presente nello storico.</td></tr>`;
+      renderPagination(0);
+      return;
+    }
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pageItems = sorted.slice(start, start + PAGE_SIZE);
+
+    tbody.innerHTML = pageItems.map((item) => {
+      const st = normalizzaStato(item.stato);
+      const tipo = esc(item.tipoLabel || item.tipoCodice || 'TOTALE');
+      const inizio = esc(item.dataInizio || '');
+      const fine = esc(item.dataFine || '');
+      const motivo = esc(item.motivoLabel || item.motivoCodice || '');
+      const note = esc(item.note || '');
+
+      return `
+        <tr id="row_${esc(item.id)}">
+          <td class="nowrap">${tipo}</td>
+          <td class="nowrap">${inizio}</td>
+          <td class="nowrap">${fine}</td>
+          <td class="nowrap">${motivo}</td>
+          <td>${note}</td>
+          <td class="center-col">${renderAllegato(item.allegato)}</td>
+          <td class="center-col">
+            <img src="${st.icon}" alt="${esc(st.title)}" title="${esc(st.title)}" class="status-icon">
+          </td>
+          <td class="center-col">${renderAzioni(item)}</td>
+        </tr>`;
+    }).join('');
+
+    renderPagination(totalCount);
+  }
+
+  async function caricaStorico() {
+    if (!currentUser) return;
+    try {
+      const q = query(collection(db, 'richieste_indisponibilita'), where('uid', '==', currentUser.uid));
+      const snap = await getDocs(q);
+      records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTable();
+    } catch (err) {
+      console.error('Errore caricamento storico indisponibilità:', err);
+      $('storico-indisp-tbody').innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px; color:#b00000;">Errore durante il caricamento dello storico.</td></tr>`;
+    }
+  }
+
+  window.apriModificaIndisp = (id) => {
+    const item = records.find(r => r.id === id);
+    if (!item) return;
+    if (!normalizzaStato(item.stato).editable) return;
+
+    activeEditId = id;
+    $('edit-data-inizio').value = item.dataInizio || '';
+    $('edit-data-fine').value = item.dataFine || '';
+    $('btn-salva-variazione').disabled = false;
+    $('modal-variazione').classList.add('active');
+    setTimeout(() => $('edit-data-fine').focus(), 40);
+  };
+
+  window.salvaVariazioneIndisponibilita = async () => {
+    if (!activeEditId) return;
+    const item = records.find(r => r.id === activeEditId);
+    if (!item) return;
+
+    const dIni = parseDateIT(item.dataInizio);
+    const dFin = parseDateIT($('edit-data-fine').value.trim());
+
+    if (!dIni) {
+      showMsg('ATTENZIONE', 'Data Inizio non valida.');
+      return;
+    }
+    if (!dFin) {
+      showMsg('ATTENZIONE', 'Inserisci una <b>Data Fine</b> valida nel formato <b>gg/mm/aaaa</b>.');
+      return;
+    }
+
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const utcIni = Date.UTC(dIni.getFullYear(), dIni.getMonth(), dIni.getDate());
+    const utcFin = Date.UTC(dFin.getFullYear(), dFin.getMonth(), dFin.getDate());
+    const diffGiorni = Math.round((utcFin - utcIni) / msPerDay);
+
+    if (diffGiorni < 0) {
+      showMsg('ATTENZIONE', 'La <b>Data Fine</b> non può essere precedente alla <b>Data Inizio</b>.');
+      return;
+    }
+    if (diffGiorni > 14) {
+      showMsg('ATTENZIONE', "L'indisponibilità può coprire un <b>massimo di 14 giorni</b>.");
+      return;
+    }
+
+    const nuovaDataFine = formatDateIT(dFin);
+    const nuoviGiorni = diffGiorni + 1;
+    const btn = $('btn-salva-variazione');
+
+    try {
+      btn.disabled = true;
+      await updateDoc(doc(db, 'richieste_indisponibilita', activeEditId), {
+        dataFine: nuovaDataFine,
+        giorni: nuoviGiorni,
+        modificatoIl: serverTimestamp()
+      });
+
+      item.dataFine = nuovaDataFine;
+      item.giorni = nuoviGiorni;
+      activeEditId = null;
+      chiudiModal('modal-variazione');
+      renderTable();
+      showMsg('CONFERMA', 'Modifica indisponibilità effettuata con successo.');
+      showToast('Data fine aggiornata con successo!');
+    } catch (err) {
+      console.error('Errore modifica indisponibilità:', err);
+      btn.disabled = false;
+      chiudiModal('modal-variazione');
+      showMsg('ATTENZIONE', 'Impossibile salvare la modifica: ' + esc(err.message));
+    }
+  };
+
+  window.apriEliminaIndisp = (id) => {
+    const item = records.find(r => r.id === id);
+    if (!item) return;
+    if (!normalizzaStato(item.stato).editable) return;
+
+    activeDeleteId = id;
+    $('elimina-body-text').innerHTML = `Sei sicuro di voler eliminare l'indisponibilità dal <b>${esc(item.dataInizio)}</b> al <b>${esc(item.dataFine)}</b>?`;
+    $('btn-conferma-elimina').disabled = false;
+    $('modal-elimina').classList.add('active');
+  };
+
+  window.confermaEliminaIndisponibilita = async () => {
+    if (!activeDeleteId) return;
+    const item = records.find(r => r.id === activeDeleteId);
+    if (!item) return;
+
+    const btn = $('btn-conferma-elimina');
+    try {
+      btn.disabled = true;
+      await updateDoc(doc(db, 'richieste_indisponibilita', activeDeleteId), {
+        stato: 'annullata',
+        esitoLabel: 'Modifica/Dato non approvato',
+        annullataIl: serverTimestamp()
+      });
+
+      item.stato = 'annullata';
+      item.esitoLabel = 'Modifica/Dato non approvato';
+      activeDeleteId = null;
+      chiudiModal('modal-elimina');
+      renderTable();
+      showToast('Indisponibilità annullata.');
+    } catch (err) {
+      console.error('Errore annullamento indisponibilità:', err);
+      btn.disabled = false;
+      chiudiModal('modal-elimina');
+      showMsg('ATTENZIONE', "Impossibile completare l'operazione: " + esc(err.message));
+    }
+  };
+
+  document.querySelectorAll('#storico-indisp-table th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.getAttribute('data-sort');
+      if (sortCol === col) {
+        sortDir = -sortDir;
+      } else {
+        sortCol = col;
+        sortDir = (col === 'inizio' || col === 'fine') ? -1 : 1;
+      }
+      currentPage = 1;
+      renderTable();
+    });
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.replace('index.html');
+      return;
+    }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db, 'utenti', user.uid));
+      if (snap.exists()) {
+        currentUserProfile = snap.data();
+        const ruolo = currentUserProfile.ruolo || 'utente';
+        $('user-codmecc').textContent = (currentUserProfile.codMecc || '').trim() || '-';
+        $('user-fullname').textContent = [currentUserProfile.nome, currentUserProfile.cognome].filter(Boolean).join(' ').toUpperCase() || '-';
+        if (ruolo === 'admin') {
+          $('admin-menu-container').innerHTML = `
+            <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+            <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+            <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+            <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+            <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>`;
+        }
+      } else {
+        $('user-codmecc').textContent = '-';
+        $('user-fullname').textContent = '-';
+      }
+    } catch (e) {
+      console.error('Errore profilo utente:', e);
+      $('user-fullname').textContent = '-';
+    } finally {
+      document.body.classList.remove('auth-loading');
+      await caricaStorico();
+    }
+  });
+
+  $('logout-btn').addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      window.location.replace('index.html');
+    } catch (e) {
+      console.error('Errore durante il logout:', e);
+    }
+  });
+
+  document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      link.parentElement.classList.toggle('open');
+    });
+  });
+</script>
+</body>
+</html>

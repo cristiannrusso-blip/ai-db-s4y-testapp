@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Rapporti - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --blue: #2a8ac4;
+      --orange: #f29a1c;
+      --text-muted: #444444;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative; height: 77px; background: #fff; border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45); display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-end; padding: 0 18px 0 130px; z-index: 5;
+    }
+    .aia-header img.aia-logo { position: absolute; left: 12px; top: 2px; height: 100px; width: auto; }
+    .aia-header .fig { font-weight: 700; font-size: 19px; color: #d2b66f; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.15; }
+    .aia-header .aia { font-weight: 700; font-size: 26px; letter-spacing: -.5px; color: #1d5fa6; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.1; }
+
+    /* ========== LAYOUT / SIDEBAR ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+    .sidebar { width: 251px; flex-shrink: 0; background: #d1d5df; border-radius: 8px 8px 10px 10px; padding: 23px 0 42px; overflow: hidden; }
+    .side-section, .sidebar li[style*="uppercase"] {
+      display: flex !important; align-items: center; gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important; padding: 3px 6px 3px 4px !important; margin: 0 !important;
+      font-family: var(--font); font-size: 20px !important; font-weight: 700; letter-spacing: .3px !important;
+      text-transform: none !important; color: #000 !important; text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon, .sidebar li[style*="uppercase"]::before {
+      content: ""; width: 21px; height: 28px; border-radius: 3px; background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5); flex-shrink: 0;
+    }
+    .sidebar-nav, .sub-nav { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 15px; height: 22.5px; font-size: 14.5px; color: #0d0d0d; text-decoration: none; white-space: nowrap; }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+    .sidebar-nav li a::before { content: ""; width: 20px; height: 20px; background: url("icon075.gif") center / contain no-repeat; flex-shrink: 0; }
+    .sidebar-nav li.cat:not(.open) > a::before { background: url("icon074.gif") center / contain no-repeat; }
+    .sidebar-nav li a.globe::before { content: ""; width: 20px; height: 20px; margin: 0 1px; border: none; border-radius: 0; background: url("icon073.gif") center / contain no-repeat; box-shadow: none; }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TOPBAR / MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; background: #d1d5df; border-radius: 8px; height: 50px; padding: 0 12px 0 13px; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email { font-weight: 700; font-size: 19px; letter-spacing: -.3px; color: #000; text-shadow: 1px 1px 2px rgba(0,0,0,.35); }
+    .role-badge::after { content: " -"; }
+    .btn-logout { width: 28px; height: 28px; padding: 0; border: 0; background: url("icon_system_logout.png") center / contain no-repeat; font-size: 0; cursor: pointer; }
+    .dashboard-body { background: #fff; border-radius: 0 0 8px 8px; margin: 11px 0 0 3px; padding: 7px 6px 18px; }
+    .banca-dati-header { margin: 0 0 12px; border-bottom: 2px solid #f0a03a; }
+    .banca-dati-header h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.3px; color: var(--orange); text-shadow: 1px 1px 2px rgba(0,0,0,.35); line-height: 1.2; }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .elenco-title { background: var(--teal); color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.2px; padding: 3px 13px 4px; }
+
+    /* ========== TABELLA & FILTRI ========== */
+    .table-container { background: #d1d5df; padding: 15px 13px 20px; overflow-x: auto; }
+    .filtro-table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 14px; }
+    .filtro-table td { border: 1px solid #c4c4c4; padding: 3px 6px; height: 36px; font-size: 13.5px; color: #333; }
+    .filtro-table td.lbl { background: #e8eeee; white-space: nowrap; }
+    .filtro-table input, .filtro-table select {
+      width: 100%; height: 27px; border: 1px solid #666; padding: 0 5px;
+      font-family: var(--font); font-size: 14px; background: #fff; color: #111;
+    }
+    .btn-filtra {
+      display: block; margin: 0 auto; padding: 3px 8px;
+      background: linear-gradient(#fdfdfd, #eef2f5); color: var(--blue);
+      border: 1px solid #c6d2dc; border-radius: 4px; font-family: var(--font);
+      font-weight: 700; font-size: 13.5px; cursor: pointer; white-space: nowrap;
+    }
+    .btn-filtra:hover { background: #fff; }
+    .yellow-bar { background: #fff3a8; border: 1px solid #efd060; padding: 2px 5px; font-size: 12px; font-weight: 700; color: #222; }
+    .yellow-bar.center { text-align: center; padding: 4px 6px; margin-bottom: 12px; }
+
+    .legenda-stati {
+      display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center;
+      background: #fff; border: 1px solid #c4c4c4; padding: 6px 10px; margin-bottom: 12px;
+      font-size: 12px; font-weight: 700;
+    }
+    .legenda-item { display: inline-flex; align-items: center; gap: 5px; }
+    .legenda-item img { width: 16px; height: 16px; }
+
+    .ref-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; color: #333; }
+    .ref-table thead th {
+      background: #e8eeee; border: 1px solid #aab0bc; color: #000; font-weight: 700;
+      padding: 6px 22px 7px 7px; text-align: center; position: relative; cursor: pointer;
+      user-select: none; white-space: nowrap;
+    }
+    .ref-table thead th .si {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; font-size: 7px; line-height: 7px; color: #444;
+    }
+    .ref-table thead th.on .si { color: #d97706; }
+    .ref-table tbody td {
+      border: 1px solid #b6bbc6; padding: 5px 7px; vertical-align: top;
+      line-height: 1.25; background: #fff;
+    }
+    .ref-table tbody td.mid { vertical-align: middle; text-align: center; }
+    .ref-table tbody td.vuoto { text-align: center; color: #555; height: 34px; vertical-align: middle; }
+
+    .stato-cell { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+    .stato-cell img.semaforo { width: 18px; height: 18px; display: block; }
+    .stato-lbl { font-size: 11px; font-weight: 700; line-height: 1.1; }
+    .stato-lbl.verde { color: #197a26; }
+    .stato-lbl.giallo { color: #a8660a; }
+    .stato-lbl.rosso { color: #b00000; }
+
+    .acts { display: inline-flex; gap: 3px; align-items: center; justify-content: center; }
+    .ibtn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 33px; height: 31px; padding: 2px 4px;
+      background: linear-gradient(#fdfdfd, #eceff2); border: 1px solid #c2cad2;
+      border-radius: 4px; cursor: pointer;
+    }
+    .ibtn:hover { background: #fff; }
+    .ibtn img { width: 22px; height: 22px; display: block; }
+
+    /* ========== POPUP ========== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; align-items: center; justify-content: center;
+      padding: 16px;
+      background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px), rgba(42, 80, 99, .72);
+      z-index: 3500;
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative; width: 100%; max-width: 884px; background: #f4f4f4;
+      border: 1px solid #cfcfcf; border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      overflow: hidden; display: flex; flex-direction: column; max-height: calc(100vh - 32px);
+      padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f); border: 1px solid #e58f14;
+      border-radius: 4px; color: #fff; padding: 7px 16px 7px 18px;
+      font-weight: 700; font-size: 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .designation-header-bar button {
+      background: none; border: none; color: #fff; font-size: 22px;
+      font-weight: 700; cursor: pointer; line-height: 1; padding: 0;
+    }
+    .designation-body-content {
+      padding: 16px 18px 12px; overflow-y: auto;
+      background: linear-gradient(#fdfdfd, #f2f2f2); font-size: 14px; line-height: 21px; color: #000;
+    }
+    .designation-footer-bar {
+      padding: 12px 24px 12px; background: #f4f4f4; border-top: 1px solid #dcdcdc;
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .btn-secondary, .btn-success, .btn-danger {
+      font-family: var(--font); font-size: 15px; font-weight: 700;
+      border-radius: 4px; cursor: pointer; padding: 7px 16px;
+    }
+    .btn-secondary { background: #fff; color: var(--blue); border: 1px solid #d3dbe3; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .btn-secondary:hover { background: #f1f7fb; }
+    .btn-success { background: #3f9a2a; color: #fff; border: 1px solid #2f7a1d; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+    .btn-danger { background: #c0281d; color: #fff; border: 1px solid #8f1a12; }
+    .btn-danger:disabled { opacity: .6; cursor: default; }
+    .designation-modal-card.resizable::after {
+      content: ""; position: absolute; right: 4px; bottom: 4px; width: 12px; height: 12px;
+      background: linear-gradient(135deg, transparent 0 45%, #8a8a8a 45% 55%, transparent 55% 70%, #8a8a8a 70% 80%, transparent 80%);
+      pointer-events: none;
+    }
+    .m-narrow { max-width: 480px; }
+    .m-wide { max-width: 920px; }
+    .popup-body .pt {
+      background: #e4eeee; font-size: 17px; font-weight: 700;
+      padding: 5px 6px; border: 1px solid #d3dede; margin: 8px 0 0;
+    }
+    .popup-body .pt:first-child { margin-top: 0; }
+    .popup-body table { width: 100%; border-collapse: collapse; background: #fff; font-size: 12px; }
+    .popup-body td, .popup-body th { border: 1px solid #c8c8c8; padding: 3px 6px; height: 24px; text-align: left; vertical-align: top; }
+    .popup-body th { background: #eef4f4; font-weight: 700; width: 165px; }
+    .popup-body .note-box { background: #fff; border: 1px solid #c8c8c8; padding: 6px 8px; font-size: 12px; white-space: pre-wrap; min-height: 36px; }
+
+    /* ========== TOAST / FOOTER ========== */
+    .toast {
+      position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px);
+      background: #244658; color: #fff; font-size: 15px; padding: 10px 20px;
+      border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.4); opacity: 0;
+      pointer-events: none; transition: opacity .25s, transform .25s; z-index: 5000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .aia-footer {
+      position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
+      width: calc(100% - 16px); max-width: 1250px; background: #333;
+      border-radius: 9px 9px 0 0; box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px; display: flex; justify-content: space-between;
+      align-items: center; color: #fff; z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge { display: flex; align-items: center; gap: 4px; background: #f4f4f4; color: #666; font-family: Arial, Helvetica, sans-serif; font-size: 22px; padding: 2px 8px 2px 4px; }
+    .aia-footer .chrome-badge i { width: 28px; height: 28px; border-radius: 50%; background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0); position: relative; display: inline-block; }
+    .aia-footer .chrome-badge i::after { content: ""; position: absolute; inset: 7px; background: #4285f4; border: 2px solid #fff; border-radius: 50%; }
+
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li></ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav"><li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav"><li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li></ul>
+          </li>
+        </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header"><h3>Gestione Rapporti</h3></div>
+
+          <div class="box-wrap">
+            <div class="elenco-title">Elenco Gare e Stato Referti</div>
+            <div class="table-container">
+              <table class="filtro-table">
+                <tr>
+                  <td class="lbl" style="width:78px;"><b>FILTRO</b></td>
+                  <td class="lbl" style="width:95px;">Categoria:</td>
+                  <td style="width:230px;">
+                    <select id="filtro-categoria" onchange="renderRapporti()">
+                      <option value="">Tutte le categorie</option>
+                    </select>
+                  </td>
+                  <td class="lbl" style="width:85px;">Stato:</td>
+                  <td style="width:185px;">
+                    <select id="filtro-stato" onchange="renderRapporti()">
+                      <option value="">Tutti gli stati</option>
+                      <option value="verde">Consegnato (Verde)</option>
+                      <option value="giallo">Aperto / Non Consegnato (Giallo)</option>
+                      <option value="rosso">Non Aperto (Rosso)</option>
+                    </select>
+                  </td>
+                  <td style="width:90px;"><button type="button" class="btn-filtra" onclick="renderRapporti()">FILTRA</button></td>
+                </tr>
+                <tr>
+                  <td class="lbl"><b>PERIODO</b></td>
+                  <td class="lbl">Da Data:</td>
+                  <td><input type="text" id="filtro-da" maxlength="10" placeholder="gg/mm/aaaa"></td>
+                  <td class="lbl">A Data:</td>
+                  <td><input type="text" id="filtro-a" maxlength="10" placeholder="gg/mm/aaaa"></td>
+                  <td><button type="button" class="btn-filtra" onclick="resetFiltri()">RESET</button></td>
+                </tr>
+                <tr>
+                  <td class="lbl"><b>RICERCA</b></td>
+                  <td colspan="4"><input type="text" id="filtro-testo" placeholder="Cerca gara, squadra, numero gara, impianto o ufficiale..." oninput="renderRapporti()"></td>
+                  <td><button type="button" class="btn-filtra" onclick="caricaGare(true)">AGGIORNA</button></td>
+                </tr>
+              </table>
+
+              <div class="legenda-stati">
+                <span class="legenda-item"><img src="light_green.png" alt="Verde"> Referto CONSEGNATO</span>
+                <span class="legenda-item"><img src="light_yellow.png" alt="Giallo"> Referto APERTO ma NON ancora CONSEGNATO</span>
+                <span class="legenda-item"><img src="light_red.png" alt="Rosso"> Referto NON ancora APERTO</span>
+              </div>
+
+              <div class="yellow-bar center" id="conteggio-bar">Caricamento gare in corso...</div>
+
+              <table class="ref-table">
+                <thead>
+                  <tr id="rap-head">
+                    <th data-col="cat" style="width:16%;">Categoria<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="data" style="width:13%;">Data e Ora<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="gara">Partita<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="stato" style="width:15%;">Stato Referto<span class="si"><i>▲</i><i>▼</i></span></th>
+                    <th data-col="azioni" style="width:16%;">Azioni<span class="si"><i>▲</i><i>▼</i></span></th>
+                  </tr>
+                </thead>
+                <tbody id="table-rapporti-body">
+                  <tr><td colspan="5" class="vuoto">Caricamento gare...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: DETTAGLIO COMPLETO REFERTO ("i") -->
+  <div id="modal-dettaglio" class="modal-overlay">
+    <div class="designation-modal-card m-wide resizable">
+      <div class="designation-header-bar">
+        <span id="modal-dettaglio-title">Dettaglio Referto</span>
+        <button type="button" onclick="chiudiModal('modal-dettaglio')">&times;</button>
+      </div>
+      <div class="designation-body-content popup-body" id="modal-dettaglio-body" style="min-height:320px;"></div>
+      <div class="designation-footer-bar" id="modal-dettaglio-footer">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-dettaglio')">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: CONFERMA RIAPERTURA / ELIMINAZIONE -->
+  <div id="modal-conferma" class="modal-overlay" style="z-index:3600;">
+    <div class="designation-modal-card m-narrow">
+      <div class="designation-header-bar">
+        <span id="modal-conferma-title">Conferma Operazione</span>
+        <button type="button" onclick="chiudiModal('modal-conferma')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="modal-conferma-body"></div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-success" id="btn-conferma-azione">Conferma</button>
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-conferma')">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP: MESSAGGIO -->
+  <div id="modal-msg" class="modal-overlay" style="z-index:3700;">
+    <div class="designation-modal-card m-narrow">
+      <div class="designation-header-bar">
+        <span id="msg-title">Informazione</span>
+        <button type="button" onclick="chiudiModal('modal-msg')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="msg-text" style="min-height:70px;"></div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-msg')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE01</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+<script type="module">
+  import { auth, db } from './firebase-config.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { collection, getDocs, doc, getDoc, updateDoc, deleteField, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const ORDINE_LABEL = {
+    adeguate_con: 'Adeguate con Forza Pubblica',
+    adeguate_senza: 'Adeguate senza Forza Pubblica',
+    non_adeguate_con: 'Inadeguate con Forza Pubblica',
+    non_adeguate_senza: 'Inadeguate senza Forza Pubblica'
+  };
+  const AMBUL_LABEL = {
+    presente: 'Presente',
+    non_presente: 'NON Presente'
+  };
+
+  let currentUser = null;
+  let currentUserProfile = null;
+  let isAdmin = false;
+  let gareList = [];
+  let sortState = { col: 'data', dir: -1 };
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  window.chiudiModal = (id) => $(id).classList.remove('active');
+  function showMsg(titolo, html, onClose = null) {
+    $('msg-title').textContent = titolo;
+    $('msg-text').innerHTML = html;
+    $('modal-msg').dataset.onClose = onClose ? '1' : '';
+    window._msgCallback = onClose;
+    $('modal-msg').classList.add('active');
+  }
+
+  function parseDateIT(s) {
+    const m = String(s || '').trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return (d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1]) ? d : null;
+  }
+
+  function garaTimestamp(g) {
+    const s = (g.dataGara || '').trim();
+    let y = 0, m = 0, d = 0;
+    let mt = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (mt) { d = +mt[1]; m = +mt[2]; y = +mt[3]; }
+    else { mt = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (mt) { y = +mt[1]; m = +mt[2]; d = +mt[3]; } }
+    if (!y) return 0;
+    const p = (g.oraGara || '00:00').split(/[:.]/).map(n => parseInt(n, 10) || 0);
+    return new Date(y, m - 1, d, p[0] || 0, p[1] || 0).getTime();
+  }
+
+  function fmtGiornata(v) {
+    const s = String(v || '').trim();
+    if (!s) return '';
+    return s.replace(/\s*and\.?/i, ' A').replace(/\s*rit\.?/i, ' R').trim();
+  }
+
+  function statoRefertoGara(g) {
+    const r = g.referto;
+    if (!r || typeof r !== 'object') {
+      return { code: 'rosso', rank: 1, icon: 'light_red.png', label: 'Non Aperto' };
+    }
+    if (r.consegnato === true) {
+      return { code: 'verde', rank: 3, icon: 'light_green.png', label: 'Consegnato' };
+    }
+    const haAttivita = r.aperto === true ||
+      Boolean(r.svolgimento) ||
+      Boolean(r.noteSvolgimento) ||
+      Boolean(r.noteSicurezza) ||
+      Boolean(r.notePubblico) ||
+      Boolean(r.noteVarie) ||
+      (Array.isArray(r.reti) && r.reti.length > 0) ||
+      (Array.isArray(r.disciplinaCasa) && r.disciplinaCasa.length > 0) ||
+      (Array.isArray(r.disciplinaFuori) && r.disciplinaFuori.length > 0) ||
+      (Array.isArray(r.allegati) && r.allegati.length > 0) ||
+      Object.keys(r.assistentiStatus || {}).length > 0 ||
+      Object.keys(r.schedeSalvate || {}).length > 0;
+
+    if (haAttivita) {
+      return { code: 'giallo', rank: 2, icon: 'light_yellow.png', label: 'Aperto / Non Consegnato' };
+    }
+    return { code: 'rosso', rank: 1, icon: 'light_red.png', label: 'Non Aperto' };
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.replace('index.html');
+      return;
+    }
+    currentUser = user;
+    try {
+      const snap = await getDoc(doc(db, "utenti", user.uid));
+      if (snap.exists()) {
+        currentUserProfile = snap.data();
+        const ruolo = currentUserProfile.ruolo || 'utente';
+        isAdmin = (ruolo === 'admin');
+        $('user-codmecc').textContent = (currentUserProfile.codMecc || '').trim() || '-';
+        $('user-fullname').textContent = [currentUserProfile.nome, currentUserProfile.cognome].filter(Boolean).join(' ').toUpperCase() || '-';
+        if (isAdmin) {
+          $('admin-menu-container').innerHTML = `
+            <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+            <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+            <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+            <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+            <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+            <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>`;
+        }
+      } else {
+        $('user-codmecc').textContent = '-';
+        $('user-fullname').textContent = '-';
+      }
+    } catch (e) {
+      console.error("Errore lettura profilo:", e);
+    }
+
+    document.body.classList.remove('auth-loading');
+
+    if (!isAdmin) {
+      showMsg('Accesso Riservato', 'La pagina <b>Gestione Rapporti</b> è riservata agli utenti con ruolo <b>Amministratore</b>.', () => {
+        window.location.replace('gestione-referti.html');
+      });
+      return;
+    }
+
+    await caricaGare(false);
+  });
+
+  function popolaCategorie() {
+    const sel = $('filtro-categoria');
+    const prev = sel.value;
+    const setCat = new Set();
+    gareList.forEach(g => {
+      const c = String(g.categoria || '').trim();
+      if (c) setCat.add(c);
+    });
+    const sorted = Array.from(setCat).sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
+    sel.innerHTML = `<option value="">Tutte le categorie (${sorted.length})</option>` +
+      sorted.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    if (prev && sorted.includes(prev)) sel.value = prev;
+  }
+
+  window.caricaGare = async (feedback = false) => {
+    const tbody = $('table-rapporti-body');
+    tbody.innerHTML = `<tr><td colspan="5" class="vuoto">Caricamento gare da archivio...</td></tr>`;
+    try {
+      const snap = await getDocs(collection(db, "gare_programmate"));
+      gareList = [];
+      snap.forEach(d => gareList.push({ id: d.id, ...d.data() }));
+      popolaCategorie();
+      renderRapporti();
+      if (feedback) showToast('Elenco gare aggiornato');
+    } catch (err) {
+      console.error("Errore caricamento gare:", err);
+      tbody.innerHTML = `<tr><td colspan="5" class="vuoto" style="color:#b00000;">Errore durante il caricamento delle gare: ${esc(err.message)}</td></tr>`;
+    }
+  };
+
+  window.resetFiltri = () => {
+    $('filtro-categoria').value = '';
+    $('filtro-stato').value = '';
+    $('filtro-da').value = '';
+    $('filtro-a').value = '';
+    $('filtro-testo').value = '';
+    renderRapporti();
+  };
+
+  function azioniHtml(g) {
+    const id = esc(g.id);
+    const consegnato = g.referto?.consegnato === true;
+    const hasReferto = Boolean(g.referto && typeof g.referto === 'object');
+    const btn = (icon, title, fn) => `<button type="button" class="ibtn" title="${esc(title)}" onclick="${fn}"><img src="${icon}" alt="${esc(title)}"></button>`;
+
+    let html = btn('icon_info.png', 'Dettaglio Referto', `apriDettaglio('${id}')`);
+    if (consegnato) {
+      html += btn('icon_mod.png', 'Riapri Referto in Modifica per Arbitro e Assistenti', `chiediRiapertura('${id}')`);
+    }
+    if (hasReferto) {
+      html += btn('icon_del.png', 'Elimina e Ripristina Referto (Come Mai Aperto)', `chiediEliminazione('${id}')`);
+    }
+    return `<span class="acts">${html}</span>`;
+  }
+
+  window.renderRapporti = () => {
+    const tbody = $('table-rapporti-body');
+    const catSel = $('filtro-categoria').value.trim();
+    const statoSel = $('filtro-stato').value.trim();
+    const daRaw = $('filtro-da').value.trim();
+    const aRaw = $('filtro-a').value.trim();
+    const testo = $('filtro-testo').value.trim().toUpperCase();
+
+    const da = daRaw ? parseDateIT(daRaw) : null;
+    const a = aRaw ? parseDateIT(aRaw) : null;
+    if (daRaw && !da) { showMsg('Filtro Date', 'Inserisci "Da Data" nel formato <b>gg/mm/aaaa</b>.'); return; }
+    if (aRaw && !a) { showMsg('Filtro Date', 'Inserisci "A Data" nel formato <b>gg/mm/aaaa</b>.'); return; }
+
+    const t0 = da ? da.getTime() : -Infinity;
+    const t1 = a ? a.getTime() + 86400000 - 1 : Infinity;
+
+    let rows = gareList.map(g => ({ g, st: statoRefertoGara(g) })).filter(({ g, st }) => {
+      if (catSel && String(g.categoria || '').trim() !== catSel) return false;
+      if (statoSel && st.code !== statoSel) return false;
+      const ts = garaTimestamp(g);
+      if (ts < t0 || ts > t1) return false;
+      if (testo) {
+        const des = g.designazione || {};
+        const blob = [
+          g.categoria, g.girone, g.giornata, g.squadraCasa, g.squadraOspite,
+          g.numeroGara, g.localita, g.impianto, des.ae, des.aa1, des.aa2, des.qu
+        ].map(x => String(x || '')).join(' ').toUpperCase();
+        if (!blob.includes(testo)) return false;
+      }
+      return true;
+    });
+
+    const keyFn = {
+      cat: x => `${x.g.categoria || ''} ${x.g.girone || ''}`,
+      data: x => garaTimestamp(x.g),
+      gara: x => `${x.g.squadraCasa || ''} ${x.g.squadraOspite || ''}`,
+      stato: x => x.st.rank,
+      azioni: x => x.st.rank
+    }[sortState.col] || (x => garaTimestamp(x.g));
+
+    rows.sort((x, y) => {
+      const a1 = keyFn(x), b1 = keyFn(y);
+      return (a1 > b1 ? 1 : a1 < b1 ? -1 : 0) * sortState.dir;
+    });
+
+    document.querySelectorAll('#rap-head th').forEach(th => th.classList.toggle('on', th.dataset.col === sortState.col));
+
+    const nVerde = rows.filter(x => x.st.code === 'verde').length;
+    const nGiallo = rows.filter(x => x.st.code === 'giallo').length;
+    const nRosso = rows.filter(x => x.st.code === 'rosso').length;
+    $('conteggio-bar').innerHTML =
+      `Gare visualizzate: <b>${rows.length}</b> &nbsp;|&nbsp; ` +
+      `<span style="color:#197a26;">Consegnati: <b>${nVerde}</b></span> &nbsp;|&nbsp; ` +
+      `<span style="color:#a8660a;">Aperti / Non consegnati: <b>${nGiallo}</b></span> &nbsp;|&nbsp; ` +
+      `<span style="color:#b00000;">Non aperti: <b>${nRosso}</b></span>`;
+
+    if (rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="vuoto">Nessuna gara trovata con i filtri selezionati.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(({ g, st }) => {
+      const ris = g.risultato ? ` <span style="font-size:12px; color:#28506a;">(${esc(g.risultato)})</span>` : '';
+      const numGara = g.numeroGara ? `<div style="font-size:11.5px; color:#555;">Gara n. ${esc(g.numeroGara)}</div>` : '';
+      const imp = g.impianto ? `<div style="font-size:11.5px; color:#555;">${esc(g.impianto)}${g.localita ? ` (${esc(g.localita)})` : ''}</div>` : '';
+      return `
+        <tr>
+          <td>
+            <b>${esc(g.categoria || 'N/D')}</b>
+            ${g.girone ? `<br><span style="font-size:12px;">Girone: ${esc(g.girone)}</span>` : ''}
+            ${g.giornata ? `<br><span style="font-size:11.5px; color:#555;">${esc(fmtGiornata(g.giornata))}</span>` : ''}
+          </td>
+          <td>
+            <b>${esc(g.dataGara || '-')}</b><br>
+            <span>${esc(g.oraGara || '')}</span>
+          </td>
+          <td style="text-transform:uppercase;">
+            <b>${esc(g.squadraCasa || '-')}</b> - <b>${esc(g.squadraOspite || '-')}</b>${ris}
+            ${numGara}
+            ${imp}
+          </td>
+          <td class="mid">
+            <div class="stato-cell">
+              <img class="semaforo" src="${st.icon}" alt="${esc(st.label)}">
+              <span class="stato-lbl ${st.code}">${esc(st.label)}</span>
+            </div>
+          </td>
+          <td class="mid">${azioniHtml(g)}</td>
+        </tr>`;
+    }).join('');
+  };
+
+  document.querySelectorAll('#rap-head th').forEach(th => th.addEventListener('click', () => {
+    const c = th.dataset.col;
+    sortState = { col: c, dir: sortState.col === c ? -sortState.dir : (c === 'data' ? -1 : 1) };
+    renderRapporti();
+  }));
+
+  // ---------- Popup Dettaglio ("i") ----------
+  window.apriDettaglio = (id) => {
+    const g = gareList.find(x => x.id === id);
+    if (!g) return;
+    const st = statoRefertoGara(g);
+    const r = g.referto || {};
+    const des = g.designazione || {};
+
+    let golCasa = 0, golFuori = 0;
+    (r.reti || []).forEach(x => { if (x.squadra === 'casa') golCasa++; else golFuori++; });
+
+    const retiHtml = (Array.isArray(r.reti) && r.reti.length)
+      ? `<ul style="margin:0; padding-left:18px;">` + r.reti.map(x =>
+          `<li><b>${x.squadra === 'casa' ? esc(g.squadraCasa) : esc(g.squadraOspite)}</b> - ${esc(x.tempo || '-')} al ${esc(x.minuto || '-')}°${x.rigore ? ' (Rigore)' : ''}</li>`
+        ).join('') + `</ul>`
+      : 'Nessuna rete registrata.';
+
+    const discHtml = (arr, labelSq) => {
+      if (!Array.isArray(arr) || !arr.length) return `<div><b>${esc(labelSq)}:</b> nessun provvedimento.</div>`;
+      return `<div style="margin-bottom:6px;"><b>${esc(labelSq)}:</b><ul style="margin:3px 0 0 18px;">` +
+        arr.map(x => `<li><b>${esc((x.tipo || '').toUpperCase())}</b>${x.soggetto ? ` (${esc(x.soggetto)})` : ''} - ${esc(x.tesserato || '-')} [${esc(x.tempo || '-')} ${esc(x.minuto || '-')}'] — ${esc(x.motivo || '')}${x.note ? ` — <i>${esc(x.note)}</i>` : ''}</li>`).join('') +
+        `</ul></div>`;
+    };
+
+    const listaHtml = (arr, labelSq) => {
+      const attivi = (Array.isArray(arr) ? arr : []).filter(s => s && (s.nome || s.personaId));
+      if (!attivi.length) return `<div><b>${esc(labelSq)}:</b> nessun tesserato inserito.</div>`;
+      return `<div style="margin-bottom:6px;"><b>${esc(labelSq)} (${attivi.length}):</b><ul style="margin:3px 0 0 18px;">` +
+        attivi.map(s => `<li>${s.numero ? `<b>#${esc(s.numero)}</b> ` : ''}<b>${esc(s.nome || s.personaId)}</b> (${esc(s.tipo || '')}${s.cap ? `, ${esc(s.cap)}` : ''}${s.ruolo ? `, ${esc(s.ruolo)}` : ''}) — Doc: ${esc(s.docTipo || '')} ${esc(s.docNumero || '')}</li>`).join('') +
+        `</ul></div>`;
+    };
+
+    const assStatus = r.assistentiStatus || {};
+    const assDati = r.assistentiDati || {};
+    const assRows = ['aa1', 'aa2', 'qu'].filter(k => des[k] || assStatus[k] || assDati[k]).map(k => {
+      const d = assDati[k] || {};
+      return `<tr><th>${k.toUpperCase()} (${esc(des[k] || '-')})</th><td>Stato: <b>${esc(assStatus[k] || 'non inviato')}</b> | Esito: ${esc(d.tipo || '-')} | Note: ${esc(d.note || '-')}</td></tr>`;
+    }).join('') || '<tr><th>Assistenti</th><td>Nessun rapporto assistente presente.</td></tr>';
+
+    $('modal-dettaglio-title').textContent = `Dettaglio Referto - ${g.squadraCasa || ''} vs ${g.squadraOspite || ''}`;
+    $('modal-dettaglio-body').innerHTML = `
+      <div class="pt">Dati Gara e Stato Referto</div>
+      <table>
+        <tr><th>Numero Gara / ID</th><td>N. <b>${esc(g.numeroGara || '-')}</b> — ID: ${esc(g.id)}</td></tr>
+        <tr><th>Categoria / Girone</th><td><b>${esc(g.categoria || '-')}</b> — Girone: ${esc(g.girone || '-')} — Giornata: ${esc(g.giornata || '-')}</td></tr>
+        <tr><th>Data / Ora / Impianto</th><td>${esc(g.dataGara || '-')} ore ${esc(g.oraGara || '-')} — ${esc(g.impianto || '-')} (${esc(g.localita || '-')})</td></tr>
+        <tr><th>Risultato / Omologazione</th><td><b>${esc(g.risultato || `${golCasa} - ${golFuori}`)}</b> — Stato Gara: <b>${esc(g.statoOmologazione || 'Non Omologata')}</b></td></tr>
+        <tr><th>Stato Referto</th><td><img src="${st.icon}" alt="" style="width:15px;height:15px;vertical-align:middle;"> <b>${esc(st.label)}</b></td></tr>
+        <tr><th>Ufficiali Designati</th><td>AE: <b>${esc(des.ae || '-')}</b> | AA1: <b>${esc(des.aa1 || '-')}</b> | AA2: <b>${esc(des.aa2 || '-')}</b> | QU: <b>${esc(des.qu || '-')}</b></td></tr>
+      </table>
+
+      <div class="pt">Svolgimento e Sicurezza</div>
+      <table>
+        <tr><th>Svolgimento</th><td><b>${esc(r.svolgimento || '-')}</b></td></tr>
+        <tr><th>Note Svolgimento</th><td><div class="note-box">${esc(r.noteSvolgimento || '-')}</div></td></tr>
+        <tr><th>Misure d'Ordine</th><td>${esc(ORDINE_LABEL[r.forzaPubblica] || r.forzaPubblica || '-')}</td></tr>
+        <tr><th>Ambulanza</th><td>${esc(AMBUL_LABEL[r.ambulanza] || r.ambulanza || '-')}</td></tr>
+        <tr><th>Note Sicurezza</th><td><div class="note-box">${esc(r.noteSicurezza || '-')}</div></td></tr>
+        <tr><th>Orario Fine</th><td>${esc(r.orarioFine || '-')}</td></tr>
+      </table>
+
+      <div class="pt">Reti</div>
+      <div class="note-box">${retiHtml}</div>
+
+      <div class="pt">Disciplina</div>
+      <div class="note-box">${discHtml(r.disciplinaCasa, g.squadraCasa || 'Casa')}${discHtml(r.disciplinaFuori, g.squadraOspite || 'Fuori')}</div>
+
+      <div class="pt">Liste Gara</div>
+      <div class="note-box">${listaHtml(r.listeCasa, g.squadraCasa || 'Casa')}${listaHtml(r.listeFuori, g.squadraOspite || 'Fuori')}</div>
+
+      <div class="pt">Rapporti Assistenti</div>
+      <table>${assRows}</table>
+
+      <div class="pt">Note Pubblico e Varie</div>
+      <table>
+        <tr><th>Note Pubblico</th><td><div class="note-box">${esc(r.notePubblico || '-')}</div></td></tr>
+        <tr><th>Note Varie</th><td><div class="note-box">${esc(r.noteVarie || '-')}</div></td></tr>
+      </table>
+    `;
+
+    $('modal-dettaglio-footer').innerHTML = `
+      ${r.consegnato ? `<button type="button" class="btn-success" onclick="chiudiModal('modal-dettaglio'); chiediRiapertura('${esc(g.id)}')">Riapri in Modifica</button>` : ''}
+      ${g.referto ? `<button type="button" class="btn-danger" onclick="chiudiModal('modal-dettaglio'); chiediEliminazione('${esc(g.id)}')">Elimina / Ripristina</button>` : ''}
+      <button type="button" class="btn-secondary" onclick="chiudiModal('modal-dettaglio')">Chiudi</button>
+    `;
+
+    $('modal-dettaglio').classList.add('active');
+  };
+
+  // ---------- Riapertura Referto Chiuso ("matita") ----------
+  window.chiediRiapertura = (id) => {
+    if (!isAdmin) return;
+    const g = gareList.find(x => x.id === id);
+    if (!g) return;
+    $('modal-conferma-title').textContent = 'Riapri Referto in Modifica';
+    $('modal-conferma-body').innerHTML = `
+      <div style="margin-bottom:10px;">
+        Vuoi riaprire il referto già consegnato della gara <b>${esc(g.squadraCasa || '')} - ${esc(g.squadraOspite || '')}</b> (${esc(g.dataGara || '')})?
+      </div>
+      <div class="yellow-bar" style="margin-bottom:8px;">
+        L'arbitro e gli assistenti potranno nuovamente modificare i dati e procedere a un nuovo invio al Giudice Sportivo.
+      </div>
+      <div style="font-size:12.5px; color:#333;">
+        Lo stato passerà da <b>Consegnato (Verde)</b> ad <b>Aperto / Non Consegnato (Giallo)</b>.
+      </div>
+    `;
+    const btn = $('btn-conferma-azione');
+    btn.className = 'btn-success';
+    btn.disabled = false;
+    btn.textContent = 'Conferma Riapertura';
+    btn.onclick = () => eseguiRiapertura(id);
+    $('modal-conferma').classList.add('active');
+  };
+
+  async function eseguiRiapertura(id) {
+    const btn = $('btn-conferma-azione');
+    const g = gareList.find(x => x.id === id);
+    if (!g) return;
+    try {
+      btn.disabled = true;
+      btn.textContent = 'Riapertura...';
+      await updateDoc(doc(db, "gare_programmate", id), {
+        "referto.consegnato": false,
+        "referto.aperto": true,
+        "referto.riapertoDaAdmin": currentUser?.email || currentUser?.uid || 'admin',
+        "referto.riapertoIl": serverTimestamp(),
+        statoOmologazione: "In Revisione"
+      });
+      if (!g.referto) g.referto = {};
+      g.referto.consegnato = false;
+      g.referto.aperto = true;
+      g.statoOmologazione = "In Revisione";
+
+      chiudiModal('modal-conferma');
+      renderRapporti();
+      showToast('Referto riaperto in modifica per arbitro e assistenti');
+    } catch (e) {
+      console.error("Errore riapertura:", e);
+      btn.disabled = false;
+      btn.textContent = 'Conferma Riapertura';
+      showMsg('Errore', 'Impossibile riaprire il referto: ' + esc(e.message));
+    }
+  }
+
+  // ---------- Eliminazione / Ripristino Referto ("x" / icon_del.png) ----------
+  window.chiediEliminazione = (id) => {
+    if (!isAdmin) return;
+    const g = gareList.find(x => x.id === id);
+    if (!g) return;
+    $('modal-conferma-title').textContent = 'Elimina e Ripristina Referto';
+    $('modal-conferma-body').innerHTML = `
+      <div style="margin-bottom:10px; color:#b00000;">
+        <b>ATTENZIONE:</b> Stai per eliminare <b>tutti i dati del referto</b> per la gara <b>${esc(g.squadraCasa || '')} - ${esc(g.squadraOspite || '')}</b> (${esc(g.dataGara || '')}).
+      </div>
+      <div style="font-size:13px; margin-bottom:8px;">
+        Il referto verrà ripulito e ripristinato come se non fosse mai stato aperto (pallino <b style="color:#b00000;">rosso</b>).
+      </div>
+      <div class="yellow-bar">Tutti i dati inseriti (svolgimento, liste, durata, reti, disciplina, sostituzioni, allegati e rapporti assistenti) verranno rimossi dalla gara.</div>
+    `;
+    const btn = $('btn-conferma-azione');
+    btn.className = 'btn-danger';
+    btn.disabled = false;
+    btn.textContent = 'Elimina e Ripristina';
+    btn.onclick = () => eseguiEliminazione(id);
+    $('modal-conferma').classList.add('active');
+  };
+
+  async function eseguiEliminazione(id) {
+    const btn = $('btn-conferma-azione');
+    const g = gareList.find(x => x.id === id);
+    if (!g) return;
+    try {
+      btn.disabled = true;
+      btn.textContent = 'Ripristino...';
+      await updateDoc(doc(db, "gare_programmate", id), {
+        referto: deleteField(),
+        risultato: deleteField(),
+        golCasa: deleteField(),
+        golFuori: deleteField(),
+        statoOmologazione: deleteField()
+      });
+      delete g.referto;
+      delete g.risultato;
+      delete g.golCasa;
+      delete g.golFuori;
+      delete g.statoOmologazione;
+
+      chiudiModal('modal-conferma');
+      renderRapporti();
+      showToast('Referto eliminato e ripristinato come mai aperto');
+    } catch (e) {
+      console.error("Errore eliminazione referto:", e);
+      btn.disabled = false;
+      btn.textContent = 'Elimina e Ripristina';
+      showMsg('Errore', 'Impossibile eliminare il referto: ' + esc(e.message));
+    }
+  }
+
+  // ---------- Chiusura modal msg con eventuale callback ----------
+  const origChiudiModal = window.chiudiModal;
+  window.chiudiModal = (id) => {
+    origChiudiModal(id);
+    if (id === 'modal-msg' && typeof window._msgCallback === 'function') {
+      const cb = window._msgCallback;
+      window._msgCallback = null;
+      cb();
+    }
+  };
+
+  $('logout-btn').addEventListener('click', async () => {
+    try { await signOut(auth); window.location.replace('index.html'); } catch (e) { console.error("Errore logout:", e); }
+  });
+
+  document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+    link.addEventListener('click', (e) => { e.preventDefault(); link.parentElement.classList.toggle('open'); });
+  });
+</script>
+</body>
+</html>

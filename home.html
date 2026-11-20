@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section,
+    #menu-ruolo li[style*="uppercase"] {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important;
+      padding: 3px 6px 3px 4px !important;
+      margin: 0 !important;
+      font-family: var(--font);
+      font-size: 20px !important;
+      font-weight: 700;
+      letter-spacing: .3px !important;
+      text-transform: none !important;
+      color: #000 !important;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon,
+    #menu-ruolo li[style*="uppercase"]::before {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav,
+    .sub-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+/* icona cartella (categoria / voce standard) */
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url("icon075.gif") center / contain no-repeat;
+      flex-shrink: 0;
+    }
+
+    /* icona cartella chiusa (categoria con sottomenu non aperta) */
+    .sidebar-nav li.cat:not(.open) > a::before {
+      background: url("icon074.gif") center / contain no-repeat;
+    }
+    /* icona globo (sottocategoria) */
+    .sidebar-nav li a.globe::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+    }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }  
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar .page-title { display: none; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email {
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+    .role-badge::after { content: " -"; }
+    .btn-logout {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: url("icon_system_logout.png") center / contain no-repeat;
+      box-shadow: none;
+      font-size: 0;
+      cursor: pointer;
+    }
+    .btn-logout::before,
+    .btn-logout::after {
+      content: none;
+    }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+    .welcome-title {
+      margin: 0 0 12px;
+      padding-bottom: 0;
+      border-bottom: 2px solid #f0a03a;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+
+    /* ----- box ----- */
+    .box {
+      background: #d1d5df;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 0 12px;
+    }
+    .box-head,
+    .profile-card h2 {
+      margin: 0;
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+      border-radius: 8px 8px 0 0;
+    }
+    .box-body { padding: 5px 13px 6px; font-size: 14.5px; line-height: 1.2; }
+    .news-body { padding: 24px 13px 32px; min-height: 120px; }
+    .news-body .empty { color: #333; text-align: center; }
+
+    /* ----- profilo ----- */
+    .profile-card { background: #d1d5df; border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .profile-card .box-sub { margin: 0; padding: 6px 13px 0; color: #222; font-size: 14px; }
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 14px;
+      padding: 8px 13px 13px;
+    }
+    .profile-item label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #222;
+      margin-bottom: 2px;
+    }
+    .profile-item span {
+      display: block;
+      min-height: 25px;
+      padding: 3px 7px;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      font-size: 14.5px;
+      color: #000;
+    }
+
+    /* ========== MODALE PRIMO ACCESSO ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.05) 6px 12px),
+        rgba(42, 80, 99, .85);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-card {
+      width: 100%;
+      background: #f2f2f2;
+      border: 1px solid #c9c9c9;
+      border-radius: 3px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.5);
+      overflow: hidden;
+      padding-bottom: 16px;
+    }
+    .modal-header {
+      background: linear-gradient(#f9ad3c, #f19a1d);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 8px 14px;
+      text-transform: uppercase;
+    }
+    .modal-card > p { padding: 14px 16px 0; margin-top: 0; line-height: 1.4; font-size: 14px !important; color: #111 !important; }
+    .modal-card form { padding: 0 16px; }
+    .form-group { margin-bottom: 8px; }
+    .form-group label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #222;
+    }
+    .form-group input {
+      width: 100%;
+      height: 26px;
+      margin-top: 3px;
+      padding: 0 6px;
+      font-family: var(--font);
+      font-size: 14px;
+      background: #ffffff;
+      border: 1px solid #222;
+      border-radius: 0;
+      outline: none;
+    }
+    .form-group input:focus { box-shadow: 0 0 0 2px rgba(40,80,106,.35); }
+    .btn-primary {
+      height: 28px;
+      background: var(--teal);
+      color: #ffffff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.35);
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: #1f4157; }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .profile-item[style] { grid-column: auto !important; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <!-- Header AIA -->
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li>
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li>
+             </ul>
+          </li>
+                    <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li>
+             </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav" id="menu-ruolo">
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>                    
+             </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li>                  
+             </ul>
+          </li>
+          </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <!-- Area Principale -->
+      <div class="main-content">
+        <header class="topbar">
+          <div class="page-title">
+            <strong>I miei Dati</strong>
+          </div>
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <h3 class="welcome-title">Benvenuto su Sinfonia4You</h3>
+
+          <div class="box">
+            <div class="box-head">Ultimo Accesso</div>
+            <div class="box-body">Il tuo ultimo accesso al sistema è stato il <span id="last-login">-</span>.</div>
+          </div>
+
+          <div class="profile-card">
+            <h2>Profilo Personale</h2>
+            <p class="box-sub">I tuoi dati anagrafici registrati nel sistema.</p>
+
+            <div class="profile-grid">
+              <div class="profile-item">
+                <label>Nome</label>
+                <span id="p-nome">-</span>
+              </div>
+              <div class="profile-item">
+                <label>Cognome</label>
+                <span id="p-cognome">-</span>
+              </div>
+              <div class="profile-item">
+                <label>Data di Nascita</label>
+                <span id="p-nascita">-</span>
+              </div>
+              <div class="profile-item">
+                <label>Sezione</label>
+                <span id="p-sezione">-</span>
+              </div>
+              <div class="profile-item" style="grid-column: span 2;">
+                <label>Comitato Regionale</label>
+                <span id="p-comitato">-</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="box">
+            <div class="box-head">Ultime Novità</div>
+            <div class="box-body news-body">
+              <div class="empty">Nessuna novità al momento.</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE CAMBIO PASSWORD OBBLIGATORIO (PRIMO ACCESSO) -->
+  <div id="first-access-modal" class="modal-overlay" style="z-index: 9999;">
+    <div class="modal-card" style="max-width: 450px;">
+      <div class="modal-header">Cambio Password Obbligatorio</div>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+        Questo è il tuo primo accesso al portale. Per motivi di sicurezza, devi impostare una nuova password personale prima di procedere.
+      </p>
+      <form id="first-access-form">
+        <div class="form-group">
+          <label for="new-pwd-1">Nuova Password</label>
+          <input type="password" id="new-pwd-1" placeholder="Inserisci nuova password" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="new-pwd-2">Conferma Nuova Password</label>
+          <input type="password" id="new-pwd-2" placeholder="Ripeti nuova password" required minlength="6">
+        </div>
+        <div class="modal-actions" style="margin-top: 25px;">
+          <button type="submit" class="btn-primary" style="width: 100%;">Aggiorna Password e Accedi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE02</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script type="module">
+          
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";      
+          
+    const logoutBtn = document.getElementById('logout-btn');
+    const menuRuolo = document.getElementById('menu-ruolo');
+    const firstAccessModal = document.getElementById('first-access-modal');
+    const firstAccessForm = document.getElementById('first-access-form');
+    const lastLoginSpan = document.getElementById('last-login');
+    const userCodMeccSpan = document.getElementById('user-codmecc');
+    const userFullNameSpan = document.getElementById('user-fullname');
+
+    // Guardia di autenticazione (Route Guard)
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      // Ultimo accesso (dai metadati di Firebase Auth)
+      if (user.metadata && user.metadata.lastSignInTime) {
+        const d = new Date(user.metadata.lastSignInTime);
+        lastLoginSpan.textContent = `${d.toLocaleDateString('it-IT')} alle ore ${d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`;
+      }
+
+      try {
+        const userDocRef = doc(db, "utenti", user.uid);
+        const userSnap = await getDoc(userDocRef);
+
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          const ruolo = data.ruolo || 'utente';
+
+          const codMecc = (data.codMecc || '').trim();
+          const nome = (data.nome || '').trim();
+          const cognome = (data.cognome || '').trim();
+          const nomeCompleto = [nome, cognome].filter(Boolean).join(' ') || '-';
+
+          userCodMeccSpan.textContent = codMecc || '-';
+          userFullNameSpan.textContent = nomeCompleto;
+
+          // Popola i dati anagrafici
+          document.getElementById('p-nome').textContent = data.nome || 'Non specificato';
+          document.getElementById('p-cognome').textContent = data.cognome || 'Non specificato';
+          document.getElementById('p-nascita').textContent = data.dataNascita || 'Non specificata';
+          document.getElementById('p-sezione').textContent = data.sezione || 'Non specificata';
+          document.getElementById('p-comitato').textContent = data.comitatoRegionale || 'Non specificato';
+
+          // Controlla se è richiesto il cambio password al primo accesso
+          if (data.mustChangePassword === true) {
+            firstAccessModal.classList.add('active');
+          }
+
+          // Se è amministratore, aggiungi la sezione dedicata nella sidebar
+          if (ruolo === 'admin') {
+            const adminMenuHTML = `
+              <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+              <li><a href="admin.html">Gestione Associati</a></li>
+            <li><a href="gestione-rapporti.html">Gestione Rapporti</a></li>
+              <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+            <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+              <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+              <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+              <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>
+            `;
+            menuRuolo.insertAdjacentHTML('beforeend', adminMenuHTML);
+          }
+        } else {
+          userCodMeccSpan.textContent = '-';
+          userFullNameSpan.textContent = '-';
+        }
+      } catch (e) {
+        console.error("Errore nel recupero del profilo:", e);
+      }
+
+      // Sblocca la visualizzazione della pagina
+      document.body.classList.remove('auth-loading');
+    });
+
+    // Gestione cambio password al primo accesso
+    firstAccessForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const p1 = document.getElementById('new-pwd-1').value;
+      const p2 = document.getElementById('new-pwd-2').value;
+
+      if (p1 !== p2) {
+        alert("Le password non coincidono.");
+        return;
+      }
+
+      try {
+        // Aggiorna la password direttamente su Firebase Auth
+        await updatePassword(auth.currentUser, p1);
+
+        // Rimuove il flag mustChangePassword su Firestore
+        const userRef = doc(db, "utenti", auth.currentUser.uid);
+        await updateDoc(userRef, { mustChangePassword: false });
+
+        // Chiude il modale
+        firstAccessModal.classList.remove('active');
+        alert("Password aggiornata con successo!");
+      } catch (error) {
+        console.error("Errore aggiornamento password:", error);
+        alert("Errore: " + error.message + ". Potrebbe essere necessario effettuare nuovamente il login per motivi di sicurezza.");
+      }
+    });
+
+    // Gestione Logout
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.replace('index.html');
+      } catch (error) {
+        console.error("Errore durante il logout:", error);
+      }
+    });
+
+    // Menu: apre/chiude le sottocategorie cliccando sulla cartella
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

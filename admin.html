@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+      --primary: #000000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section,
+    .sidebar li[style*="uppercase"],
+    #admin-menu-container li[style*="uppercase"] {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important;
+      padding: 3px 6px 3px 4px !important;
+      margin: 0 !important;
+      font-family: var(--font);
+      font-size: 20px !important;
+      font-weight: 700;
+      letter-spacing: .3px !important;
+      text-transform: none !important;
+      color: #000 !important;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon,
+    .sidebar li[style*="uppercase"]::before,
+    #admin-menu-container li[style*="uppercase"]::before {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav,
+    .sub-nav {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      background: url("icon075.gif") center / contain no-repeat;
+      flex-shrink: 0;
+    }
+    .sidebar-nav li.cat:not(.open) > a::before {
+      background: url("icon074.gif") center / contain no-repeat;
+    }
+    .sidebar-nav li a.globe::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+    }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar .page-title { display: none; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email {
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+    .role-badge::after { content: " -"; }
+    .btn-logout {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: url("icon_system_logout.png") center / contain no-repeat;
+      box-shadow: none;
+      font-size: 0;
+      cursor: pointer;
+    }
+    .btn-logout::before,
+    .btn-logout::after { content: none; }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+
+    /* ========== TITOLO PAGINA E BARRA FILTRI ========== */
+    .banca-dati-header {
+      margin: 0 0 12px;
+      border-bottom: 2px solid #f0a03a;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-bottom: 4px;
+    }
+    .banca-dati-header h3 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+    .search-and-btn {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .search-input {
+      font-family: var(--font);
+      font-size: 13.5px;
+      padding: 4px 8px;
+      border: 1px solid #8f97a6;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #111;
+      min-width: 270px;
+    }
+
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 12px; }
+    .elenco-title {
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+    }
+
+    /* ========== TABELLA ANAGRAFICHE ========== */
+    .table-container {
+      background: #d1d5df;
+      padding: 15px 13px 20px;
+      overflow-x: auto;
+    }
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font);
+      font-size: 14px;
+      color: #222;
+      background: #ffffff;
+    }
+    .styled-table thead th {
+      background: #eceff3;
+      border: 1px solid #aab0bc;
+      color: #000;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: left;
+      padding: 6px 7px 7px;
+      white-space: nowrap;
+    }
+    .styled-table thead th.c { text-align: center; }
+    .styled-table tbody td {
+      background: #ffffff;
+      border: 1px solid #b6bbc6;
+      padding: 5px 7px;
+      height: 37px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    .styled-table tbody td.c { text-align: center; }
+
+    /* Pallini Stato */
+    .status-dot-table {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      vertical-align: middle;
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .dot-green {
+      background-image: url("light_green.png");
+    }
+    .dot-gray {
+      background-image: url("light_gray.png");
+    }
+    .dot-red {
+      background-image: url("light_red.png");
+    }
+
+    /* Icone Azioni (icon_mod / icon_del) */
+    .action-group {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-icon-action {
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .btn-icon-action:hover {
+      transform: scale(1.08);
+      filter: brightness(1.08);
+    }
+    .btn-icon-action img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* ========== BOTTONI ========== */
+    .btn-secondary,
+    .btn-success,
+    .btn-danger-confirm {
+      font-family: var(--font);
+      font-size: 14.5px;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 6px 16px;
+    }
+    .btn-secondary {
+      background: #fff4cc;
+      color: #d98a0a;
+      border: 1px solid #f0c34a;
+      box-shadow: 0 1px 2px rgba(0,0,0,.12);
+    }
+    .btn-secondary:hover { background: #ffecaa; }
+    .btn-success {
+      background: #3f9a2a;
+      color: #ffffff;
+      border: 1px solid #2f7a1d;
+      box-shadow: 0 1px 2px rgba(0,0,0,.25);
+    }
+    .btn-success:hover { background: #378a24; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+    .btn-danger-confirm {
+      background: #b00000;
+      color: #ffffff;
+      border: 1px solid #820000;
+      box-shadow: 0 1px 2px rgba(0,0,0,.25);
+    }
+    .btn-danger-confirm:hover { background: #940000; }
+    .btn-danger-confirm:disabled { opacity: .6; cursor: default; }
+
+    /* ========== MODALI SINFONIA4YOU ========== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background:
+        repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px),
+        rgba(42, 80, 99, .72);
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 884px;
+      background: #f4f4f4;
+      border: 1px solid #cfcfcf;
+      border-radius: 5px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 32px);
+      padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f);
+      border: 1px solid #e58f14;
+      border-radius: 4px;
+      color: #ffffff;
+      padding: 7px 14px 7px 16px;
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .designation-header-bar button {
+      background: #ffffff;
+      border: 1px solid #d98a0a;
+      border-radius: 2px;
+      color: #e38e12;
+      font-size: 18px !important;
+      font-weight: 700;
+      cursor: pointer;
+      line-height: 1;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    .designation-body-content {
+      padding: 12px 14px;
+      overflow-y: auto;
+      background: #ffffff;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #111;
+    }
+    .designation-footer-bar {
+      padding: 10px 16px;
+      background: #f4f4f4;
+      border-top: 1px solid #dcdcdc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Sezioni scheda Dati Associativi / Dati Personali (stile immagine allegata) */
+    .aia-sheet-section {
+      background: #d1d5df;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border: 1px solid #b6bbc6;
+    }
+    .aia-sheet-section:last-child { margin-bottom: 0; }
+    .aia-sheet-title {
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 4px 10px;
+    }
+    .aia-sheet-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 16px;
+      padding: 10px 12px;
+    }
+    .aia-field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .aia-field-row label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111;
+      min-width: 138px;
+      flex-shrink: 0;
+    }
+    .aia-field-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+    }
+    .aia-field-control input,
+    .aia-field-control select {
+      width: 100%;
+      font-family: var(--font);
+      font-size: 13.5px;
+      color: #111;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      border-radius: 2px;
+      padding: 3px 6px;
+      height: 26px;
+    }
+    .aia-field-control input[disabled] {
+      background: #e9ecf2;
+      color: #333;
+    }
+    .field-dot {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      background: url("light_green.png") center / contain no-repeat;
+    }
+
+    /* Popup conferma eliminazione */
+    .confirm-card { max-width: 470px; }
+    .confirm-card .designation-body-content {
+      padding: 18px 20px;
+      font-size: 14px;
+    }
+
+    /* Tooltip */
+    .status-tip {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 4000;
+      background: #2f2f2f;
+      color: #ffffff;
+      font-size: 13px;
+      line-height: 1.3;
+      padding: 6px 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.4);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .12s;
+    }
+    .status-tip.show { opacity: 1; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 80px;
+      transform: translateX(-50%) translateY(20px);
+      background: #244658;
+      color: #fff;
+      font-size: 15px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 3000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .aia-sheet-grid { grid-template-columns: 1fr; }
+      .aia-field-row { flex-direction: column; align-items: stretch; gap: 3px; }
+      .search-input { min-width: 100%; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <!-- Header AIA -->
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav">
+              <li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul id="admin-menu-container" class="sidebar-nav">
+          <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+          <li><a href="admin.html">Gestione Associati</a></li>
+          <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+          <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+          <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+          <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+          <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <!-- Area Principale -->
+      <div class="main-content">
+        <header class="topbar">
+          <div class="page-title">
+            <strong>Gestione Anagrafiche & Associati</strong>
+          </div>
+          <div class="user-info">
+            <div class="names">
+              <span id="user-role" class="role-badge">ADMIN</span>
+              <span id="user-email" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header">
+            <h3>Gestione Anagrafiche & Associati</h3>
+            <div class="search-and-btn">
+              <input type="text" id="search-users-box" class="search-input" placeholder="Cerca per cognome, nome, email, sezione o cod. mecc...">
+              <button type="button" id="btn-open-new-user" class="btn-success">+ Nuovo Associato</button>
+            </div>
+          </div>
+
+          <div class="box-wrap">
+            <div class="elenco-title">Elenco Associati</div>
+
+            <div class="table-container">
+              <table class="styled-table">
+                <thead>
+                  <tr>
+                    <th>Codice Meccanografico</th>
+                    <th>Nome</th>
+                    <th>Cognome</th>
+                    <th>Sezione</th>
+                    <th class="c" style="width: 74px;">Stato</th>
+                    <th class="c" style="width: 84px;">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody id="users-table-body">
+                  <tr>
+                    <td colspan="6" style="text-align: center; color: var(--text-muted);">Caricamento anagrafiche...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE CREAZIONE NUOVO ASSOCIATO -->
+  <div id="new-user-modal" class="modal-overlay" style="z-index: 1500;">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>REGISTRA NUOVO ASSOCIATO</span>
+        <button type="button" id="new-user-close-x" title="Chiudi">&times;</button>
+      </div>
+      <form id="new-user-form" style="display: flex; flex-direction: column; overflow: hidden; flex: 1;">
+        <div class="designation-body-content">
+          <div style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px;">
+            Crea le credenziali di accesso e salva i dati anagrafici dell'associato nel database.
+          </div>
+
+          <div class="aia-sheet-section">
+            <div class="aia-sheet-title">Dati Associativi</div>
+            <div class="aia-sheet-grid">
+              <div class="aia-field-row">
+                <label for="new-codmecc">Codice Meccanografico *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-codmecc" placeholder="es. 76172004" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-sezione">Sezione A.I.A. *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-sezione" placeholder="es. SIENA" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-cra">C.R.A.</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-cra" placeholder="es. TOSCANA">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-organo-tecnico">Organo Tecnico</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-organo-tecnico" placeholder="es. OTR / OTS">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-qualifica">Qualifica</label>
+                <div class="aia-field-control">
+                  <select id="new-qualifica">
+                    <option value="AE">AE - Arbitro Effettivo</option>
+                    <option value="AA">AA - Assistente Arbitrale</option>
+                    <option value="OA">OA - Osservatore Arbitrale</option>
+                    <option value="OT">OT - Organo Tecnico</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-doppio-tesseramento">Doppio tesseramento</label>
+                <div class="aia-field-control">
+                  <select id="new-doppio-tesseramento">
+                    <option value="NO">NO</option>
+                    <option value="SI">SI</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-ruolo">Ruolo Piattaforma *</label>
+                <div class="aia-field-control">
+                  <select id="new-ruolo">
+                    <option value="utente">Utente Standard</option>
+                    <option value="admin">Amministratore (Admin)</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-stato">Stato Account</label>
+                <div class="aia-field-control">
+                  <select id="new-stato">
+                    <option value="attivo">Attivo</option>
+                    <option value="sospeso">Sospeso</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="aia-sheet-section">
+            <div class="aia-sheet-title">Dati Personali & Accesso</div>
+            <div class="aia-sheet-grid">
+              <div class="aia-field-row">
+                <label for="new-cognome">Cognome *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-cognome" placeholder="es. ROSSI" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-nome">Nome *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-nome" placeholder="es. MARIO" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-datanascita">Data di Nascita</label>
+                <div class="aia-field-control">
+                  <input type="date" id="new-datanascita">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-sesso">Sesso</label>
+                <div class="aia-field-control">
+                  <select id="new-sesso">
+                    <option value="MASCHILE">MASCHILE</option>
+                    <option value="FEMMINILE">FEMMINILE</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-luogonascita">Luogo di Nascita</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-luogonascita" placeholder="es. SIENA">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-provincianascita">Provincia di Nascita</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-provincianascita" maxlength="2" placeholder="es. SI">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-telefono">Numero di Telefono</label>
+                <div class="aia-field-control">
+                  <input type="text" id="new-telefono" placeholder="es. +39 333 1234567">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-email">Email di Accesso *</label>
+                <div class="aia-field-control">
+                  <input type="email" id="new-email" placeholder="nome@esempio.it" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="new-password">Password Iniziale *</label>
+                <div class="aia-field-control">
+                  <input type="password" id="new-password" minlength="6" placeholder="min. 6 caratteri" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="designation-footer-bar">
+          <button type="button" id="new-user-cancel" class="btn-secondary">Annulla</button>
+          <button type="submit" id="new-user-submit" class="btn-success">Crea Associato</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE MODIFICA ANAGRAFICA (STILE SCHEDA DATI ASSOCIATIVI / PERSONALI MODIFICABILE) -->
+  <div id="edit-user-modal" class="modal-overlay" style="z-index: 1550;">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span>MODIFICA ANAGRAFICA ASSOCIATO</span>
+        <button type="button" id="edit-user-close-x" title="Chiudi">&times;</button>
+      </div>
+      <form id="edit-user-form" style="display: flex; flex-direction: column; overflow: hidden; flex: 1;">
+        <div class="designation-body-content">
+          <input type="hidden" id="edit-uid">
+
+          <div class="aia-sheet-section">
+            <div class="aia-sheet-title">Dati Associativi</div>
+            <div class="aia-sheet-grid">
+              <div class="aia-field-row">
+                <label for="edit-codmecc">Codice Meccanografico *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-codmecc" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-sezione">Sezione A.I.A. *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-sezione" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-cra">C.R.A.</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-cra">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-organo-tecnico">Organo Tecnico</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-organo-tecnico">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-qualifica">Qualifica</label>
+                <div class="aia-field-control">
+                  <select id="edit-qualifica">
+                    <option value="AE">AE</option>
+                    <option value="AA">AA</option>
+                    <option value="OA">OA</option>
+                    <option value="OT">OT</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-doppio-tesseramento">Doppio tesseramento</label>
+                <div class="aia-field-control">
+                  <select id="edit-doppio-tesseramento">
+                    <option value="NO">NO</option>
+                    <option value="SI">SI</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-ruolo">Ruolo Piattaforma</label>
+                <div class="aia-field-control">
+                  <select id="edit-ruolo">
+                    <option value="utente">Utente Standard</option>
+                    <option value="admin">Amministratore (Admin)</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-stato">Stato Account</label>
+                <div class="aia-field-control">
+                  <select id="edit-stato">
+                    <option value="attivo">Attivo</option>
+                    <option value="sospeso">Sospeso</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="aia-sheet-section">
+            <div class="aia-sheet-title">Dati Personali</div>
+            <div class="aia-sheet-grid">
+              <div class="aia-field-row">
+                <label for="edit-cognome">Cognome *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-cognome" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-nome">Nome *</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-nome" required>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-datanascita">Data di Nascita</label>
+                <div class="aia-field-control">
+                  <input type="date" id="edit-datanascita">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-sesso">Sesso</label>
+                <div class="aia-field-control">
+                  <select id="edit-sesso">
+                    <option value="MASCHILE">MASCHILE</option>
+                    <option value="FEMMINILE">FEMMINILE</option>
+                  </select>
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-luogonascita">Luogo di Nascita</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-luogonascita">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-provincianascita">Provincia di Nascita</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-provincianascita" maxlength="2">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-telefono">Numero di Telefono</label>
+                <div class="aia-field-control">
+                  <input type="text" id="edit-telefono">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+              <div class="aia-field-row">
+                <label for="edit-email">Email</label>
+                <div class="aia-field-control">
+                  <input type="email" id="edit-email">
+                  <span class="field-dot"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="designation-footer-bar">
+          <button type="button" id="edit-user-cancel" class="btn-secondary">Annulla</button>
+          <button type="submit" id="edit-user-submit" class="btn-success">Salva Modifiche</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- POPUP CONFERMA ELIMINAZIONE IRREVERSIBILE -->
+  <div id="delete-user-modal" class="modal-overlay" style="z-index: 1600;">
+    <div class="designation-modal-card confirm-card">
+      <div class="designation-header-bar">
+        <span>CONFERMA ELIMINAZIONE</span>
+        <button type="button" id="delete-user-close-x" title="Chiudi">&times;</button>
+      </div>
+      <div class="designation-body-content" id="delete-user-text"></div>
+      <div class="designation-footer-bar">
+        <button type="button" id="delete-user-cancel" class="btn-secondary">Annulla</button>
+        <button type="button" id="btn-conferma-elimina-utente" class="btn-danger-confirm">Elimina Definitivamente</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="status-tip" class="status-tip"></div>
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <!-- Footer -->
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE02</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const userEmailSpan = document.getElementById('user-email');
+    const logoutBtn = document.getElementById('logout-btn');
+    const tableBody = document.getElementById('users-table-body');
+    const searchBox = document.getElementById('search-users-box');
+    const statusTip = document.getElementById('status-tip');
+    const toast = document.getElementById('toast');
+
+    const newUserModal = document.getElementById('new-user-modal');
+    const btnOpenNewUser = document.getElementById('btn-open-new-user');
+    const newUserCloseX = document.getElementById('new-user-close-x');
+    const newUserCancel = document.getElementById('new-user-cancel');
+    const newUserForm = document.getElementById('new-user-form');
+
+    const editUserModal = document.getElementById('edit-user-modal');
+    const editUserCloseX = document.getElementById('edit-user-close-x');
+    const editUserCancel = document.getElementById('edit-user-cancel');
+    const editUserForm = document.getElementById('edit-user-form');
+
+    const deleteUserModal = document.getElementById('delete-user-modal');
+    const deleteUserCloseX = document.getElementById('delete-user-close-x');
+    const deleteUserCancel = document.getElementById('delete-user-cancel');
+    const deleteUserText = document.getElementById('delete-user-text');
+    const btnConfermaEliminaUtente = document.getElementById('btn-conferma-elimina-utente');
+
+    let allUsers = [];
+    let currentAdminUid = null;
+    let utenteDaEliminare = null;
+
+    function escapeHtml(val) {
+      return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function toInputDate(raw) {
+      if (!raw) return '';
+      if (typeof raw.toDate === 'function') {
+        const d = raw.toDate();
+        return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+      }
+      const s = String(raw).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const mIt = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (mIt) {
+        return `${mIt[3]}-${mIt[2].padStart(2, '0')}-${mIt[1].padStart(2, '0')}`;
+      }
+      return '';
+    }
+
+    // App secondaria Firebase per creare nuovi utenti senza disconnettere l'admin loggato
+    function getSecondaryAuth() {
+      const existing = getApps().find(a => a.name === 'SecondaryApp');
+      const secApp = existing || initializeApp(auth.app.options, 'SecondaryApp');
+      return getAuth(secApp);
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+      currentAdminUid = user.uid;
+      userEmailSpan.textContent = user.email;
+
+      try {
+        const userSnap = await getDoc(doc(db, "utenti", user.uid));
+        if (!userSnap.exists() || userSnap.data().ruolo !== 'admin') {
+          alert("Accesso negato: Area riservata agli amministratori.");
+          window.location.replace('home.html');
+          return;
+        }
+      } catch (e) {
+        console.error("Errore verifica permessi:", e);
+        window.location.replace('home.html');
+        return;
+      }
+
+      await fetchUsers();
+      document.body.classList.remove('auth-loading');
+    });
+
+    async function fetchUsers() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "utenti"));
+        allUsers = [];
+        querySnapshot.forEach((docSnap) => {
+          allUsers.push({ uid: docSnap.id, ...docSnap.data() });
+        });
+        allUsers.sort((a, b) => (a.cognome || a.email || '').localeCompare(b.cognome || b.email || ''));
+        renderUsersTable(allUsers);
+      } catch (err) {
+        console.error("Errore caricamento utenti:", err);
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger);">Errore di caricamento anagrafiche dal database.</td></tr>`;
+      }
+    }
+
+    function renderUsersTable(users) {
+      if (users.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nessun associato trovato.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = users.map(u => {
+        const isSospeso = u.stato === 'sospeso';
+        const dotClass = isSospeso ? 'dot-gray' : 'dot-green';
+        const statusTip = isSospeso ? 'Account sospeso (clicca per riattivare)' : 'Account attivo (clicca per sospendere)';
+
+        return `
+          <tr>
+            <td><strong>${escapeHtml(u.codMecc || '-')}</strong></td>
+            <td>${escapeHtml(u.nome || '-')}</td>
+            <td><strong>${escapeHtml(u.cognome || '-')}</strong></td>
+            <td>${escapeHtml(u.sezione || '-')}</td>
+            <td class="c">
+              <button type="button" class="btn-icon-action" onclick="toggleUserStatus('${escapeHtml(u.uid)}', '${escapeHtml(u.stato || 'attivo')}')" data-tip="${escapeHtml(statusTip)}" title="${escapeHtml(statusTip)}">
+                <span class="status-dot-table ${dotClass}"></span>
+              </button>
+            </td>
+            <td class="c">
+              <div class="action-group">
+                <button type="button" class="btn-icon-action" onclick="openEditUser('${escapeHtml(u.uid)}')" data-tip="Modifica anagrafica" title="Modifica Anagrafica">
+                  <img src="icon_mod.png" alt="Modifica">
+                </button>
+                <button type="button" class="btn-icon-action" onclick="deleteUserRecord('${escapeHtml(u.uid)}', '${escapeHtml(u.email || '')}')" data-tip="Elimina associato" title="Elimina Associato">
+                  <img src="icon_del.png" alt="Elimina">
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    searchBox.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase();
+      const filtered = allUsers.filter(u =>
+        (u.cognome && u.cognome.toLowerCase().includes(term)) ||
+        (u.nome && u.nome.toLowerCase().includes(term)) ||
+        (u.email && u.email.toLowerCase().includes(term)) ||
+        (u.sezione && u.sezione.toLowerCase().includes(term)) ||
+        (u.codMecc && u.codMecc.toLowerCase().includes(term))
+      );
+      renderUsersTable(filtered);
+    });
+
+    // Creazione nuovo associato
+    function closeNewUserModal() { newUserModal.classList.remove('active'); }
+    btnOpenNewUser.addEventListener('click', () => {
+      newUserForm.reset();
+      newUserModal.classList.add('active');
+    });
+    newUserCloseX.addEventListener('click', closeNewUserModal);
+    newUserCancel.addEventListener('click', closeNewUserModal);
+
+    newUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('new-user-submit');
+      const email = document.getElementById('new-email').value.trim();
+      const password = document.getElementById('new-password').value;
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Creazione in corso...";
+
+        const secAuth = getSecondaryAuth();
+        const userCred = await createUserWithEmailAndPassword(secAuth, email, password);
+        const newUid = userCred.user.uid;
+        await signOut(secAuth);
+
+        await setDoc(doc(db, "utenti", newUid), {
+          cognome: document.getElementById('new-cognome').value.trim().toUpperCase(),
+          nome: document.getElementById('new-nome').value.trim().toUpperCase(),
+          dataNascita: document.getElementById('new-datanascita').value || '',
+          sesso: document.getElementById('new-sesso').value,
+          luogoNascita: document.getElementById('new-luogonascita').value.trim().toUpperCase(),
+          provinciaNascita: document.getElementById('new-provincianascita').value.trim().toUpperCase(),
+          codMecc: document.getElementById('new-codmecc').value.trim(),
+          sezione: document.getElementById('new-sezione').value.trim().toUpperCase(),
+          cra: document.getElementById('new-cra').value.trim().toUpperCase(),
+          organoTecnico: document.getElementById('new-organo-tecnico').value.trim().toUpperCase(),
+          qualifica: document.getElementById('new-qualifica').value,
+          doppioTesseramento: document.getElementById('new-doppio-tesseramento').value,
+          telefono: document.getElementById('new-telefono').value.trim(),
+          email: email,
+          ruolo: document.getElementById('new-ruolo').value,
+          stato: document.getElementById('new-stato').value,
+          creatoIl: serverTimestamp()
+        });
+
+        closeNewUserModal();
+        await fetchUsers();
+        showToast("Associato registrato con successo!");
+      } catch (err) {
+        console.error("Errore creazione utente:", err);
+        alert("Errore durante la creazione dell'associato: " + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Crea Associato";
+      }
+    });
+
+    // Modifica anagrafica esistente
+    window.openEditUser = (uid) => {
+      const u = allUsers.find(item => item.uid === uid);
+      if (!u) return;
+
+      document.getElementById('edit-uid').value = u.uid;
+      document.getElementById('edit-cognome').value = u.cognome || '';
+      document.getElementById('edit-nome').value = u.nome || '';
+      document.getElementById('edit-datanascita').value = toInputDate(u.dataNascita);
+      document.getElementById('edit-sesso').value = u.sesso || 'MASCHILE';
+      document.getElementById('edit-luogonascita').value = u.luogoNascita || '';
+      document.getElementById('edit-provincianascita').value = u.provinciaNascita || '';
+      document.getElementById('edit-codmecc').value = u.codMecc || '';
+      document.getElementById('edit-sezione').value = u.sezione || '';
+      document.getElementById('edit-cra').value = u.cra || '';
+      document.getElementById('edit-organo-tecnico').value = u.organoTecnico || '';
+      document.getElementById('edit-qualifica').value = u.qualifica || 'AE';
+      document.getElementById('edit-doppio-tesseramento').value = u.doppioTesseramento || 'NO';
+      document.getElementById('edit-telefono').value = u.telefono || '';
+      document.getElementById('edit-email').value = u.email || '';
+      document.getElementById('edit-ruolo').value = u.ruolo || 'utente';
+      document.getElementById('edit-stato').value = u.stato || 'attivo';
+
+      editUserModal.classList.add('active');
+    };
+
+    function closeEditUserModal() { editUserModal.classList.remove('active'); }
+    editUserCloseX.addEventListener('click', closeEditUserModal);
+    editUserCancel.addEventListener('click', closeEditUserModal);
+
+    editUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const uid = document.getElementById('edit-uid').value;
+      const submitBtn = document.getElementById('edit-user-submit');
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Salvataggio...";
+
+        await updateDoc(doc(db, "utenti", uid), {
+          cognome: document.getElementById('edit-cognome').value.trim().toUpperCase(),
+          nome: document.getElementById('edit-nome').value.trim().toUpperCase(),
+          dataNascita: document.getElementById('edit-datanascita').value || '',
+          sesso: document.getElementById('edit-sesso').value,
+          luogoNascita: document.getElementById('edit-luogonascita').value.trim().toUpperCase(),
+          provinciaNascita: document.getElementById('edit-provincianascita').value.trim().toUpperCase(),
+          codMecc: document.getElementById('edit-codmecc').value.trim(),
+          sezione: document.getElementById('edit-sezione').value.trim().toUpperCase(),
+          cra: document.getElementById('edit-cra').value.trim().toUpperCase(),
+          organoTecnico: document.getElementById('edit-organo-tecnico').value.trim().toUpperCase(),
+          qualifica: document.getElementById('edit-qualifica').value,
+          doppioTesseramento: document.getElementById('edit-doppio-tesseramento').value,
+          telefono: document.getElementById('edit-telefono').value.trim(),
+          email: document.getElementById('edit-email').value.trim(),
+          ruolo: document.getElementById('edit-ruolo').value,
+          stato: document.getElementById('edit-stato').value,
+          aggiornatoIl: serverTimestamp()
+        });
+
+        closeEditUserModal();
+        await fetchUsers();
+        showToast("Anagrafica aggiornata!");
+      } catch (err) {
+        console.error("Errore modifica anagrafica:", err);
+        alert("Errore durante il salvataggio: " + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Salva Modifiche";
+      }
+    });
+
+    // Sospensione / Riattivazione
+    window.toggleUserStatus = async (uid, currentStatus) => {
+      if (uid === currentAdminUid) {
+        alert("Non puoi sospendere il tuo stesso account amministratore.");
+        return;
+      }
+      const newStatus = currentStatus === 'sospeso' ? 'attivo' : 'sospeso';
+      try {
+        await updateDoc(doc(db, "utenti", uid), { stato: newStatus });
+        showToast(`Account aggiornato a: ${newStatus.toUpperCase()}`);
+        await fetchUsers();
+      } catch (err) {
+        console.error("Errore cambio stato:", err);
+        alert("Errore durante il cambio stato.");
+      }
+    };
+
+    // Eliminazione record anagrafico con popup di conferma irreversibile
+    window.deleteUserRecord = (uid, email) => {
+      if (uid === currentAdminUid) {
+        alert("Non puoi eliminare il tuo stesso account amministratore.");
+        return;
+      }
+      const u = allUsers.find(item => item.uid === uid);
+      const nominativo = [u?.cognome, u?.nome].filter(Boolean).join(' ') || email || uid;
+      utenteDaEliminare = { uid, email };
+
+      deleteUserText.innerHTML = `
+        <div style="margin-bottom: 10px;">
+          Sei sicuro di voler eliminare totalmente l'anagrafica di <b>${escapeHtml(nominativo)}</b>${email ? ` (${escapeHtml(email)})` : ''}?
+        </div>
+        <div style="color: var(--danger); font-weight: 700;">
+          Attenzione: l'azione è irreversibile.
+        </div>
+      `;
+      btnConfermaEliminaUtente.disabled = false;
+      btnConfermaEliminaUtente.textContent = 'Elimina Definitivamente';
+      deleteUserModal.classList.add('active');
+    };
+
+    function closeDeleteUserModal() {
+      deleteUserModal.classList.remove('active');
+      utenteDaEliminare = null;
+    }
+    deleteUserCloseX.addEventListener('click', closeDeleteUserModal);
+    deleteUserCancel.addEventListener('click', closeDeleteUserModal);
+    deleteUserModal.addEventListener('click', (e) => {
+      if (e.target === deleteUserModal) closeDeleteUserModal();
+    });
+
+    btnConfermaEliminaUtente.addEventListener('click', async () => {
+      if (!utenteDaEliminare) return;
+      const { uid } = utenteDaEliminare;
+      try {
+        btnConfermaEliminaUtente.disabled = true;
+        btnConfermaEliminaUtente.textContent = "Eliminazione...";
+        await deleteDoc(doc(db, "utenti", uid));
+        closeDeleteUserModal();
+        showToast("Anagrafica eliminata.");
+        await fetchUsers();
+      } catch (err) {
+        console.error("Errore eliminazione:", err);
+        alert("Errore durante l'eliminazione.");
+      } finally {
+        btnConfermaEliminaUtente.disabled = false;
+        btnConfermaEliminaUtente.textContent = 'Elimina Definitivamente';
+      }
+    });
+
+    // Tooltip
+    function positionTip(el) {
+      const r = el.getBoundingClientRect();
+      statusTip.style.left = '0px';
+      statusTip.style.top = '0px';
+      const tw = statusTip.offsetWidth;
+      const th = statusTip.offsetHeight;
+      let x = r.left + r.width / 2 - tw / 2;
+      x = Math.max(6, Math.min(x, window.innerWidth - tw - 6));
+      let y = r.top - th - 8;
+      if (y < 6) y = r.bottom + 8;
+      statusTip.style.left = x + 'px';
+      statusTip.style.top = y + 'px';
+    }
+    document.addEventListener('mouseover', (e) => {
+      const el = e.target.closest ? e.target.closest('[data-tip]') : null;
+      if (!el) return;
+      statusTip.textContent = el.dataset.tip;
+      positionTip(el);
+      statusTip.classList.add('show');
+    });
+    document.addEventListener('mouseout', (e) => {
+      const el = e.target.closest ? e.target.closest('[data-tip]') : null;
+      if (el) statusTip.classList.remove('show');
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.replace('index.html');
+    });
+
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>

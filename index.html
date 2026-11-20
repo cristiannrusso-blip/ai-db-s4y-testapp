@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --text-muted: #444444;
+      --border: #b9bfca;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative;
+      height: 77px;
+      background: #ffffff;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 18px 0 130px;
+      z-index: 5;
+    }
+    .aia-header img.aia-logo {
+      position: absolute;
+      left: 12px;
+      top: 2px;
+      height: 100px;
+      width: auto;
+    }
+    .aia-header .fig {
+      font-weight: 700;
+      font-size: 19px;
+      color: #d2b66f;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.15;
+    }
+    .aia-header .aia {
+      font-weight: 700;
+      font-size: 26px;
+      letter-spacing: -.5px;
+      color: #1d5fa6;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.3);
+      line-height: 1.1;
+    }
+
+    /* ========== LAYOUT ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 251px;
+      flex-shrink: 0;
+      background: #d1d5df;
+      border-radius: 8px 8px 10px 10px;
+      padding: 23px 0 42px;
+      overflow: hidden;
+    }
+    .side-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7);
+      padding: 3px 6px 3px 4px;
+      margin: 0;
+      font-family: var(--font);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      color: #000;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon {
+      content: "";
+      width: 21px;
+      height: 28px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5);
+      flex-shrink: 0;
+    }
+    .sidebar-nav {
+      list-style: none;
+      margin: 0;
+      padding: 1px 0 2px;
+      background: #ebecf3;
+    }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px 0 15px;
+      height: 22.5px;
+      font-size: 14.5px;
+      color: #0d0d0d;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .sidebar-nav li a::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      margin: 0 1px;
+      border: none;
+      border-radius: 0;
+      background: url("icon073.gif") center / contain no-repeat;
+      box-shadow: none;
+      flex-shrink: 0;
+    }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+
+    /* ========== MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #d1d5df;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 12px 0 13px;
+    }
+    .topbar h2 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 19px;
+      letter-spacing: -.3px;
+      color: #000;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+    }
+
+    .dashboard-body {
+      background: #ffffff;
+      border-radius: 0 0 8px 8px;
+      margin: 11px 0 0 3px;
+      padding: 7px 6px 18px;
+    }
+    .welcome-title {
+      margin: 0 0 12px;
+      padding-bottom: 0;
+      border-bottom: 2px solid #f0a03a;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.3px;
+      color: #f29a1c;
+      text-shadow: 1px 1px 2px rgba(0,0,0,.35);
+      line-height: 1.2;
+    }
+
+    /* ----- box ----- */
+    .box {
+      background: #d1d5df;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 0 12px;
+    }
+    .box-head {
+      margin: 0;
+      background: var(--teal);
+      color: #ffffff;
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -.2px;
+      padding: 3px 13px 4px;
+      border-radius: 8px 8px 0 0;
+    }
+
+    /* ===== FORM ===== */
+    #login-form {
+      width: 300px;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 12px 0 26px;
+    }
+    .form-group { margin: 0; }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #111;
+      text-transform: uppercase;
+      margin: 0;
+      padding-top: 2px;
+    }
+    .form-group input {
+      width: 100%;
+      height: 24px;
+      margin: 3px 0 6px;
+      padding: 0 6px;
+      font-family: var(--font);
+      font-size: 13.5px;
+      color: #000;
+      background: #ffffff;
+      border: 1px solid #8f97a6;
+      border-radius: 0;
+      outline: none;
+    }
+    .form-group input::placeholder { color: #000; opacity: 1; }
+    .form-group input:focus { box-shadow: 0 0 0 2px rgba(40,80,106,.35); }
+    .hint { font-size: 12px; color: #222; margin: 2px 0 10px; }
+    .btn-primary {
+      display: block;
+      width: 195px;
+      height: 28px;
+      margin: 0 auto;
+      background: var(--teal);
+      color: #ffffff;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 14.5px;
+      text-transform: uppercase;
+      text-shadow: 1px 1px 1px rgba(0,0,0,.35);
+      border: 0;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 0 10px;
+      line-height: 28px;
+    }
+    .btn-primary:hover { background: #1f4157; }
+    .btn-primary:disabled { opacity: .7; cursor: default; }
+
+    .error-msg {
+      display: none;
+      width: 300px;
+      max-width: 100%;
+      margin: 10px auto 0;
+      padding: 6px 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--danger);
+      background: #fbe3e3;
+      border: 1px solid #d98b8b;
+      border-radius: 4px;
+    }
+
+    .note-body {
+      padding: 10px 13px 12px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      color: #222;
+      text-align: justify;
+    }
+
+    /* ========== FOOTER ========== */
+    .aia-footer {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 1250px;
+      background: #333333;
+      border-radius: 9px 9px 0 0;
+      box-shadow: 0 -1px 5px rgba(0,0,0,.5);
+      padding: 7px 12px 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ffffff;
+      z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #f4f4f4;
+      color: #666;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 22px;
+      padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative;
+      display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      background: #4285f4;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 800px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="side-section"><span class="sec-icon"></span>Accesso Sistema</div>
+        <ul class="sidebar-nav">
+          <li><a href="index.html" class="active">Login</a></li>
+          <li><a href="#" class="todo" onclick="return false">Recupero Password</a></li>
+          <li><a href="#" class="todo" onclick="return false">Assistenza</a></li>
+          <li><a href="#" class="todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <h2>Inserisci le credenziali</h2>
+        </header>
+
+        <main class="dashboard-body">
+          <h3 class="welcome-title">Login Sinfonia4You</h3>
+
+          <div class="box">
+            <div class="box-head">Credenziali di Accesso</div>
+
+            <div id="error-box" class="error-msg"></div>
+
+            <form id="login-form">
+              <div class="form-group">
+                <label for="codmecc">UTENTE</label>
+                <input type="text" id="codmecc" placeholder="USERNAME" required autocomplete="username" inputmode="numeric">
+              </div>
+
+              <div class="form-group">
+                <label for="password">PASSWORD [*]</label>
+                <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+              </div>
+
+              <div class="hint">[* Il sistema distingue tra MAIUSCOLE e minuscole]</div>
+
+              <button type="submit" id="submit-btn" class="btn-primary">Accedi al Sistema</button>
+            </form>
+          </div>
+
+          <div class="box">
+            <div class="box-head">Nota Informativa</div>
+            <div class="note-body">
+              Il sistema è protetto da credenziali di accesso strettamente personali ad uso esclusivo dei tesserati dell'<b>Associazione Italiana Arbitri</b>. Qualunque tentativo di violazione del protocollo di sicurezza ed autenticazione da parte di soggetti terzi o comunque non autorizzati comporterà l'adozione di provvedimenti di tutela legale in osservanza alle normative vigenti nello Stato Italiano.
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE02</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, query, where, getDocs, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const loginForm = document.getElementById('login-form');
+    const errorBox = document.getElementById('error-box');
+    const submitBtn = document.getElementById('submit-btn');
+
+    let isLoggingIn = false;
+
+    function showLoginError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = 'block';
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user && !isLoggingIn) {
+        window.location.replace('home.html');
+      }
+    });
+
+    async function findUserByCodMecc(codMeccRaw) {
+      const trimmed = String(codMeccRaw || '').trim();
+      const candidates = [trimmed];
+      if (/^\d+$/.test(trimmed)) {
+        candidates.push(Number(trimmed));
+      }
+
+      for (const val of candidates) {
+        const q = query(
+          collection(db, 'utenti'),
+          where('codMecc', '==', val),
+          limit(1)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          return { uid: snap.docs[0].id, data: snap.docs[0].data() };
+        }
+      }
+
+      return null;
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const codMeccInput = document.getElementById('codmecc').value.trim();
+      const password = document.getElementById('password').value;
+
+      errorBox.style.display = 'none';
+
+      if (!codMeccInput || codMeccInput.toUpperCase() === 'USERNAME') {
+        showLoginError('Inserisci il Codice Meccanografico e la password.');
+        return;
+      }
+
+      isLoggingIn = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifica in corso...';
+
+      try {
+        let foundUser = null;
+        try {
+          foundUser = await findUserByCodMecc(codMeccInput);
+        } catch (lookupErr) {
+          console.error('Errore ricerca codice meccanografico in Firestore:', lookupErr);
+          if (lookupErr.code === 'permission-denied') {
+            throw new Error('FIRESTORE_PERMISSION_DENIED');
+          }
+          throw lookupErr;
+        }
+
+        if (!foundUser || !foundUser.data) {
+          throw new Error('INVALID_CREDENTIALS');
+        }
+
+        const profile = foundUser.data;
+        if (profile.stato === 'sospeso') {
+          throw new Error('ACCOUNT_SUSPENDED');
+        }
+
+        const resolvedEmail = String(profile.email || '').trim();
+        if (!resolvedEmail) {
+          throw new Error('MISSING_EMAIL');
+        }
+
+        const cred = await signInWithEmailAndPassword(auth, resolvedEmail, password);
+
+        const authDocSnap = await getDoc(doc(db, 'utenti', cred.user.uid));
+        if (authDocSnap.exists()) {
+          const authProfile = authDocSnap.data() || {};
+          if (authProfile.stato === 'sospeso') {
+            throw new Error('ACCOUNT_SUSPENDED');
+          }
+          const savedCodMecc = String(authProfile.codMecc || '').trim();
+          if (savedCodMecc && savedCodMecc !== codMeccInput) {
+            throw new Error('INVALID_CREDENTIALS');
+          }
+        }
+
+        isLoggingIn = false;
+        window.location.replace('home.html');
+      } catch (error) {
+        try {
+          if (auth.currentUser) {
+            await signOut(auth);
+          }
+        } catch (_) {}
+
+        isLoggingIn = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Accedi al Sistema';
+
+        if (error.message === 'ACCOUNT_SUSPENDED') {
+          showLoginError('Account sospeso. Contatta la tua sezione.');
+        } else if (error.message === 'FIRESTORE_PERMISSION_DENIED') {
+          showLoginError('Permessi Firestore insufficienti per verificare il codice meccanografico. Aggiorna le regole della collection "utenti".');
+        } else if (error.code === 'auth/too-many-requests') {
+          showLoginError('Troppi tentativi falliti. Riprova più tardi.');
+        } else {
+          showLoginError('Credenziali non valide. Controlla codice meccanografico e password.');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

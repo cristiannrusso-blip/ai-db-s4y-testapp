@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIA - Sinfonia4You</title>
+  <link rel="icon" type="image/png" href="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png">
+  <style>
+    :root {
+      --font: Tahoma, Verdana, "DejaVu Sans", Arial, sans-serif;
+      --teal: #28506a;
+      --blue: #2a8ac4;
+      --orange: #f29a1c;
+      --text-muted: #444444;
+      --danger: #b00000;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #2a5063;
+      font-family: var(--font);
+      font-size: 14.5px;
+      color: #111;
+      min-height: 100vh;
+      padding: 0 8px 80px;
+    }
+    body.auth-loading .page { visibility: hidden; }
+    .page { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+    /* ========== HEADER ========== */
+    .aia-header {
+      position: relative; height: 77px; background: #fff; border-radius: 0 0 10px 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.45); display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-end; padding: 0 18px 0 130px; z-index: 5;
+    }
+    .aia-header img.aia-logo { position: absolute; left: 12px; top: 2px; height: 100px; width: auto; }
+    .aia-header .fig { font-weight: 700; font-size: 19px; color: #d2b66f; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.15; }
+    .aia-header .aia { font-weight: 700; font-size: 26px; letter-spacing: -.5px; color: #1d5fa6; text-shadow: 1px 1px 2px rgba(0,0,0,.3); line-height: 1.1; }
+
+    /* ========== LAYOUT / SIDEBAR ========== */
+    .app-layout { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+    .sidebar { width: 251px; flex-shrink: 0; background: #d1d5df; border-radius: 8px 8px 10px 10px; padding: 23px 0 42px; overflow: hidden; }
+    .side-section, .sidebar li[style*="uppercase"] {
+      display: flex !important; align-items: center; gap: 8px;
+      background: linear-gradient(#f4f5f9, #dbdee7) !important; padding: 3px 6px 3px 4px !important; margin: 0 !important;
+      font-family: var(--font); font-size: 20px !important; font-weight: 700; letter-spacing: .3px !important;
+      text-transform: none !important; color: #000 !important; text-shadow: 1px 1px 1px rgba(0,0,0,.18);
+    }
+    .side-section .sec-icon, .sidebar li[style*="uppercase"]::before {
+      content: ""; width: 21px; height: 28px; border-radius: 3px; background: linear-gradient(135deg, #6c727a, #1d2125);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 2px 2px 0 rgba(120,170,200,.5); flex-shrink: 0;
+    }
+    .sidebar-nav, .sub-nav { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav { background: #ebecf3; padding: 1px 0 2px; }
+    .sidebar-nav li { list-style: none; margin: 0; padding: 0; }
+    .sidebar-nav li a { display: flex; align-items: center; gap: 4px; padding: 0 8px 0 15px; height: 22.5px; font-size: 14.5px; color: #0d0d0d; text-decoration: none; white-space: nowrap; }
+    .sidebar-nav li a:hover { background: rgba(255,255,255,.7); }
+    .sidebar-nav li a.active { font-weight: 700; }
+    .sidebar-nav li a.todo { cursor: default; }
+    .sidebar-nav li a::before { content: ""; width: 20px; height: 20px; background: url("icon075.gif") center / contain no-repeat; flex-shrink: 0; }
+    .sidebar-nav li.cat:not(.open) > a::before { background: url("icon074.gif") center / contain no-repeat; }
+    .sidebar-nav li a.globe::before { content: ""; width: 20px; height: 20px; margin: 0 1px; border: none; border-radius: 0; background: url("icon073.gif") center / contain no-repeat; box-shadow: none; }
+    .sub-nav { display: none; }
+    .cat.open > .sub-nav { display: block; }
+    .sub-nav li a { padding-left: 43px; }
+    #admin-menu-container:empty { display: none; }
+
+    /* ========== TOPBAR / MAIN ========== */
+    .main-content { flex: 1; min-width: 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; background: #d1d5df; border-radius: 8px; height: 50px; padding: 0 12px 0 13px; }
+    .user-info { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .user-info .names { display: flex; gap: 7px; align-items: center; }
+    .role-badge, .user-email { font-weight: 700; font-size: 19px; letter-spacing: -.3px; color: #000; text-shadow: 1px 1px 2px rgba(0,0,0,.35); }
+    .role-badge::after { content: " -"; }
+    .btn-logout { width: 28px; height: 28px; padding: 0; border: 0; background: url("icon_system_logout.png") center / contain no-repeat; font-size: 0; cursor: pointer; }
+    .dashboard-body { background: #fff; border-radius: 0 0 8px 8px; margin: 11px 0 0 3px; padding: 7px 6px 18px; }
+    .banca-dati-header { margin: 0 0 12px; border-bottom: 2px solid #f0a03a; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-bottom: 4px; }
+    .banca-dati-header h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.3px; color: var(--orange); text-shadow: 1px 1px 2px rgba(0,0,0,.35); line-height: 1.2; }
+    .box-wrap { border-radius: 8px; overflow: hidden; margin: 0 0 14px; }
+    .elenco-title { background: var(--teal); color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.2px; padding: 3px 13px 4px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+    /* ========== FILTRI / TABELLE / PULSANTI ========== */
+    .box-container { background: #d1d5df; padding: 12px 12px 15px; }
+    .filter-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #c4c4c4; margin-bottom: 10px; }
+    .filter-table td { border: 1px solid #c4c4c4; padding: 5px 8px; font-size: 13px; vertical-align: middle; }
+    .filter-table td.flbl { background: #e8eeee; font-weight: 700; white-space: nowrap; width: 155px; }
+    .filter-table input[type="text"],
+    .filter-table select {
+      font-family: var(--font); font-size: 13px; height: 24px; width: 100%;
+      border: 1px solid #666; padding: 2px 6px; color: #111; background: #fff;
+    }
+
+    .toolbar-row {
+      background: #fff; border: 1px solid #c4c4c4; padding: 7px 10px; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+      font-size: 13px;
+    }
+
+    .btn-s4y {
+      display: inline-block; padding: 4px 13px;
+      background: linear-gradient(#fdfdfd, #eef2f5); color: var(--blue);
+      border: 1px solid #c6d2dc; border-radius: 4px;
+      font-family: var(--font); font-weight: 700; font-size: 12.5px;
+      cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.1);
+    }
+    .btn-s4y:hover { background: #fff; }
+    .btn-s4y.primary { background: #3f9a2a; border-color: #2f7a1d; color: #fff; }
+    .btn-s4y.primary:hover { background: #46aa2f; }
+
+    .table-scroll { width: 100%; overflow-x: auto; background: #fff; border: 1px solid #c4c4c4; }
+    .s4y-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 12.5px; color: #111; }
+    .s4y-table th {
+      background: linear-gradient(#f5f6f9, #dce0e9);
+      border: 1px solid #c4c4c4;
+      padding: 5px 7px;
+      font-weight: 700;
+      text-align: left;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .s4y-table th.center-col { text-align: center; }
+    .s4y-table td {
+      border: 1px solid #c4c4c4;
+      padding: 4px 7px;
+      height: 29px;
+      vertical-align: middle;
+      font-size: 12.5px;
+    }
+    .s4y-table td.nowrap { white-space: nowrap; }
+    .s4y-table td.center-col { text-align: center; white-space: nowrap; }
+    .s4y-table tr:hover td { background: #f8fafc; }
+    .s4y-table tfoot td { background: #e8eeee; font-weight: 700; padding: 5px 8px; color: #111; }
+
+    .status-icon { width: 16px; height: 16px; vertical-align: middle; display: inline-block; }
+    .mini-btn {
+      font-family: var(--font); font-size: 11.5px; font-weight: 700;
+      padding: 2px 7px; border-radius: 3px; cursor: pointer; margin: 0 2px;
+      border: 1px solid #b5bcc8; background: linear-gradient(#fdfdfd, #e6e9ef); color: var(--blue);
+    }
+    .mini-btn:hover { background: #fff; }
+    .mini-btn.publish { background: #3f9a2a; border-color: #2f7a1d; color: #fff; }
+    .mini-btn.publish:hover { background: #46aa2f; }
+
+    .badge-stato {
+      display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; font-weight: 700;
+      border: 1px solid #c4c4c4; background: #f4f5f9; color: #222;
+    }
+    .badge-ok { background: #e6f6e4; border-color: #67b058; color: #1f6b12; }
+    .badge-wait { background: #fff4df; border-color: #e3a73b; color: #965b00; }
+    .badge-pub { background: #e6f2fa; border-color: #6da9d2; color: #1e5378; }
+
+    /* ========== POPUP / DIALOG ========== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; align-items: center; justify-content: center; padding: 16px;
+      background: repeating-linear-gradient(135deg, rgba(255,255,255,.05) 0 6px, rgba(0,0,0,.06) 6px 12px), rgba(42, 80, 99, .72);
+      z-index: 3600;
+    }
+    .modal-overlay.active { display: flex; }
+    .designation-modal-card {
+      position: relative; width: 100%; max-width: 600px; background: #f4f4f4; border: 1px solid #cfcfcf;
+      border-radius: 5px; box-shadow: 0 4px 16px rgba(0,0,0,.5); overflow: hidden; display: flex;
+      flex-direction: column; max-height: calc(100vh - 32px); padding: 3px 3px 0;
+    }
+    .designation-header-bar {
+      background: linear-gradient(#fbb548, #f39c1f); border: 1px solid #e58f14; border-radius: 4px;
+      color: #fff; padding: 7px 14px 7px 16px; font-weight: 700; font-size: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .designation-header-bar button {
+      background: none; border: none; color: #fff; font-size: 22px; font-weight: 700; cursor: pointer; line-height: 1; padding: 0;
+    }
+    .designation-body-content {
+      padding: 14px 16px; overflow-y: auto; background: linear-gradient(#fdfdfd, #f2f2f2);
+      font-size: 13.5px; line-height: 20px; color: #000;
+    }
+    .modal-form-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #c4c4c4; margin-top: 8px; }
+    .modal-form-table td { border: 1px solid #c4c4c4; padding: 6px 8px; font-size: 13px; vertical-align: middle; }
+    .modal-form-table td.mlbl { background: #e8eeee; font-weight: 700; white-space: nowrap; width: 170px; }
+    .modal-form-table select {
+      font-family: var(--font); font-size: 13px; height: 26px; width: 100%;
+      border: 1px solid #666; padding: 2px 6px; color: #111; background: #fff;
+    }
+    .info-box {
+      background: #e8eeee; border: 1px solid #c4c4c4; padding: 7px 10px; font-size: 12.5px; color: #111; margin-bottom: 8px;
+    }
+    .designation-footer-bar {
+      padding: 10px 16px; background: #f4f4f4; border-top: 1px solid #dcdcdc;
+      display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .btn-secondary, .btn-success {
+      font-family: var(--font); font-size: 14px; font-weight: 700; border-radius: 4px; cursor: pointer; padding: 6px 15px;
+    }
+    .btn-secondary { background: #fff; color: var(--blue); border: 1px solid #d3dbe3; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+    .btn-secondary:hover { background: #f1f7fb; }
+    .btn-success { background: #3f9a2a; color: #fff; border: 1px solid #2f7a1d; }
+    .btn-success:disabled { opacity: .6; cursor: default; }
+
+    /* ========== TOAST / FOOTER ========== */
+    .toast {
+      position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px);
+      background: #244658; color: #fff; font-size: 15px; padding: 10px 20px; border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 5000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .aia-footer {
+      position: fixed; left: 50%; bottom: 0; transform: translateX(-50%); width: calc(100% - 16px); max-width: 1250px;
+      background: #333; border-radius: 9px 9px 0 0; box-shadow: 0 -1px 5px rgba(0,0,0,.5); padding: 7px 12px 6px;
+      display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 10;
+    }
+    .aia-footer .l1 { font-weight: 700; font-size: 18px; letter-spacing: -.3px; text-shadow: 1px 1px 2px #000; line-height: 1.15; }
+    .aia-footer .l2 { font-weight: 700; font-size: 13.5px; color: #dcdcdc; }
+    .aia-footer .chrome-badge {
+      display: flex; align-items: center; gap: 4px; background: #f4f4f4; color: #666;
+      font-family: Arial, Helvetica, sans-serif; font-size: 22px; padding: 2px 8px 2px 4px;
+    }
+    .aia-footer .chrome-badge i {
+      width: 28px; height: 28px; border-radius: 50%; background: conic-gradient(#ea4335 0 33%, #fbbc05 0 66%, #34a853 0);
+      position: relative; display: inline-block;
+    }
+    .aia-footer .chrome-badge i::after {
+      content: ""; position: absolute; inset: 7px; background: #4285f4; border: 2px solid #fff; border-radius: 50%;
+    }
+
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .sidebar { width: 100%; padding-bottom: 14px; }
+      .aia-header { padding-left: 100px; }
+      .aia-header .fig { font-size: 12px; }
+      .aia-header .aia { font-size: 16px; }
+      .aia-header img.aia-logo { height: 80px; }
+      .aia-footer .l2 { display: none; }
+    }
+  </style>
+</head>
+<body class="auth-loading">
+
+  <div class="page">
+
+    <header class="aia-header">
+      <img class="aia-logo" src="https://servizi.aia-figc.it/sinfonia4you/system_img/system/logo_aia_home.png" alt="AIA">
+      <div class="fig">FEDERAZIONE ITALIANA GIUOCO CALCIO</div>
+      <div class="aia">ASSOCIAZIONE ITALIANA ARBITRI</div>
+    </header>
+
+    <div class="app-layout">
+      <aside class="sidebar">
+
+        <div class="side-section"><span class="sec-icon"></span>Dati Personali</div>
+        <ul class="sidebar-nav">
+          <li><a href="home.html" class="globe">Home Page</a></li>
+          <li class="cat">
+            <a href="#" class="cat-link">Anagrafica Personale</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Dati</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Foto</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Curriculum</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione IBAN</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Documenti</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Contabile</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Quote Associative</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Promozioni</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Convenzioni Aziendali</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Account Sistema</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Gestione Account</a></li></ul>
+          </li>
+        </ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Tecnica</div>
+        <ul class="sidebar-nav">
+          <li class="cat open">
+            <a href="#" class="cat-link">Gestione Gare</a>
+            <ul class="sub-nav">
+              <li><a href="accettazione-gare.html" class="globe">Accettazione Gare</a></li>
+              <li><a href="scheda-tecnica.html" class="globe">Scheda Tecnica</a></li>
+              <li><a href="gestione-referti.html" class="globe">Gestione Referti</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Gestione Relazioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Certificato Medico</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Rinnovo Certificato</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Certificati</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Indisponibilità</a>
+            <ul class="sub-nav">
+              <li><a href="richiesta-indisponibilita.html" class="globe">Richiesta Indisponibilità</a></li>
+              <li><a href="storico-indisponibilita.html" class="globe">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Congedi</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Richiesta Congedo</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Richieste</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Preclusioni</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Segnala Preclusione</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Preclusioni</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Domande</a>
+            <ul class="sub-nav">
+              <li><a href="#" class="globe todo" onclick="return false">Nuova Domanda</a></li>
+              <li><a href="#" class="globe todo" onclick="return false">Storico Domande</a></li>
+            </ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Eventi</a>
+            <ul class="sub-nav"><li><a href="elenco-eventi.html" class="globe">Elenco Eventi</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Comunicazioni</a>
+            <ul class="sub-nav"><li><a href="elenco-comunicazioni.html" class="globe">Elenco Comunicazioni</a></li></ul>
+          </li>
+          <li class="cat">
+            <a href="#" class="cat-link">Gestione Disciplina</a>
+            <ul class="sub-nav"><li><a href="#" class="globe todo" onclick="return false">Proc.Disciplinari</a></li></ul>
+          </li>
+        </ul>
+        <ul id="admin-menu-container" class="sidebar-nav"></ul>
+
+        <div class="side-section"><span class="sec-icon"></span>Area Assistenza</div>
+        <ul class="sidebar-nav">
+          <li><a href="#" class="globe todo" onclick="return false">Assistenza Tecnica</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">Manuale Utente</a></li>
+          <li><a href="#" class="globe todo" onclick="return false">FAQ</a></li>
+        </ul>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="user-info">
+            <div class="names">
+              <span id="user-codmecc" class="role-badge">-</span>
+              <span id="user-fullname" class="user-email">Caricamento...</span>
+            </div>
+            <button id="logout-btn" class="btn-logout" title="Esci">Esci</button>
+          </div>
+        </header>
+
+        <main class="dashboard-body">
+          <div class="banca-dati-header">
+            <h3>Gestione Designazioni</h3>
+          </div>
+
+          <div class="box-wrap">
+            <div class="elenco-title">
+              <span>Ricerca Gare, Categorie e Ufficiali Designati</span>
+              <button type="button" class="btn-s4y" onclick="ricaricaTutto()">Aggiorna</button>
+            </div>
+            <div class="box-container">
+
+              <table class="filter-table">
+                <tr>
+                  <td class="flbl">Categoria Gara</td>
+                  <td>
+                    <select id="filtro-categoria" onchange="applicaFiltriGare()">
+                      <option value="">Tutte le categorie</option>
+                    </select>
+                  </td>
+                  <td class="flbl">Arbitro / Assistente</td>
+                  <td>
+                    <select id="filtro-ufficiale" onchange="applicaFiltriGare()">
+                      <option value="">Tutti gli ufficiali</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="flbl">Ricerca Rapida</td>
+                  <td>
+                    <input type="text" id="search-designazioni" placeholder="Squadra casa/ospite, n° gara, data o ufficiale..." oninput="applicaFiltriGare()">
+                  </td>
+                  <td class="flbl">Stato Copertura</td>
+                  <td>
+                    <select id="filtro-stato" onchange="applicaFiltriGare()">
+                      <option value="">Tutti</option>
+                      <option value="scoperta">Scoperta (mancano ufficiali)</option>
+                      <option value="da_accettare">In attesa di accettazione</option>
+                      <option value="pubblicata">Pubblicata e accettata</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="text-align:right; padding:6px 8px;">
+                    <button type="button" class="btn-s4y" onclick="resetFiltriGare()">Pulisci Filtri</button>
+                  </td>
+                </tr>
+              </table>
+
+              <div id="ufficiale-impegni-box" class="info-box" style="display:none;"></div>
+
+              <div class="toolbar-row">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <input type="checkbox" id="select-all-checkbox" style="width:16px; height:16px; cursor:pointer;">
+                  <label for="select-all-checkbox" style="font-weight:700; cursor:pointer;">Seleziona tutte le gare visibili</label>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button type="button" id="btn-pubblica-multiple" class="btn-s4y primary">Pubblica Selezionate</button>
+                </div>
+              </div>
+
+              <div class="table-scroll">
+                <table class="s4y-table" id="designazioni-table">
+                  <thead>
+                    <tr>
+                      <th class="center-col" style="width:36px;"><input type="checkbox" id="th-select-all" style="cursor:pointer;"></th>
+                      <th class="center-col">Stato</th>
+                      <th>N° Gara / Data</th>
+                      <th>Categoria</th>
+                      <th>Incontro</th>
+                      <th>Modulo</th>
+                      <th>Ufficiali Designati &amp; Accettazione</th>
+                      <th class="center-col">Azioni</th>
+                    </tr>
+                  </thead>
+                  <tbody id="designazioni-table-body">
+                    <tr><td colspan="8" style="text-align:center; padding:12px;">Caricamento calendario gare...</td></tr>
+                  </tbody>
+                  <tfoot>
+                    <tr><td colspan="8" id="designazioni-totali-cell">GARE VISUALIZZATE : 0</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE ASSEGNAZIONE / PUBBLICAZIONE -->
+  <div id="assign-modal" class="modal-overlay">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span id="assign-modal-title">ASSEGNAZIONE UFFICIALI</span>
+        <button type="button" onclick="chiudiAssignModal()">&times;</button>
+      </div>
+      <div class="designation-body-content">
+        <div id="assign-modal-subtitle" style="font-weight:700; margin-bottom:6px;"></div>
+        <div class="info-box">
+          Vengono mostrati per ciascun ruolo <b>solo gli associati disponibili</b> nella data della gara (non indisponibili).<br>
+          Modificando o inserendo un solo ufficiale, gli altri membri già confermati mantengono il loro stato e <b>solo il nuovo/modificato dovrà accettare</b>.
+        </div>
+
+        <form id="assign-form">
+          <input type="hidden" id="assign-gara-id">
+          <table class="modal-form-table">
+            <tr>
+              <td class="mlbl">Arbitro Effettivo (AE) *</td>
+              <td>
+                <select id="sel-ae" required>
+                  <option value="">-- Seleziona AE --</option>
+                </select>
+              </td>
+            </tr>
+            <tr id="row-aa1" style="display:none;">
+              <td class="mlbl">1° Assistente (AA1)</td>
+              <td>
+                <select id="sel-aa1">
+                  <option value="">-- Seleziona AA1 --</option>
+                </select>
+              </td>
+            </tr>
+            <tr id="row-aa2" style="display:none;">
+              <td class="mlbl">2° Assistente (AA2)</td>
+              <td>
+                <select id="sel-aa2">
+                  <option value="">-- Seleziona AA2 --</option>
+                </select>
+              </td>
+            </tr>
+            <tr id="row-qu" style="display:none;">
+              <td class="mlbl">Quarto Ufficiale (QU)</td>
+              <td>
+                <select id="sel-qu">
+                  <option value="">-- Seleziona QU --</option>
+                </select>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiAssignModal()">Annulla</button>
+        <button type="button" class="btn-secondary" id="btn-conferma-sola" onclick="salvaDesignazione(false)">Conferma</button>
+        <button type="button" class="btn-success" id="btn-conferma-pubblica" onclick="salvaDesignazione(true)">Conferma e Pubblica</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE MESSAGGIO -->
+  <div id="modal-msg" class="modal-overlay" style="z-index:3700;">
+    <div class="designation-modal-card">
+      <div class="designation-header-bar">
+        <span id="msg-title">Informazione</span>
+        <button type="button" onclick="chiudiModal('modal-msg')">&times;</button>
+      </div>
+      <div class="designation-body-content" id="msg-text" style="min-height:60px;"></div>
+      <div class="designation-footer-bar">
+        <button type="button" class="btn-secondary" onclick="chiudiModal('modal-msg')">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Operazione completata</div>
+
+  <footer class="aia-footer">
+    <div>
+      <div class="l1">Sinfonia4You - PROD - AIAPRDASFE01</div>
+      <div class="l2">A cura del Servizio Informatico e Statistico dell'A.I.A.</div>
+    </div>
+    <div class="chrome-badge"><i></i>chrome</div>
+  </footer>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    let allGare = [];
+    let allAssociati = [];
+    let allIndisp = [];
+    let filteredGare = [];
+
+    function showToast(msg) {
+      const t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    window.chiudiModal = (id) => $(id).classList.remove('active');
+    window.chiudiAssignModal = () => $('assign-modal').classList.remove('active');
+
+    function showMsg(titolo, html) {
+      $('msg-title').textContent = titolo;
+      $('msg-text').innerHTML = html;
+      $('modal-msg').classList.add('active');
+    }
+
+    function parseDateToDayMs(dateStr) {
+      if (!dateStr) return null;
+      const s = String(dateStr).trim();
+      let m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+      if (m) {
+        const d = new Date(+m[3], +m[2] - 1, +m[1]);
+        if (d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1]) {
+          return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+        return null;
+      }
+      m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (m) {
+        const d = new Date(+m[1], +m[2] - 1, +m[3]);
+        if (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) {
+          return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+      }
+      return null;
+    }
+
+    function getCategoryPriority(cat) {
+      if (!cat) return 0;
+      const c = String(cat).toUpperCase();
+      if (c.includes("JUNIORES NAZIONALI") || c.includes("ECCELLENZA")) return 100;
+      if (c.includes("PROMOZIONE")) return 80;
+      if (c.includes("PRIMA CATEGORIA")) return 60;
+      if (c.includes("SECONDA CATEGORIA")) return 40;
+      if (c.includes("TERZA CATEGORIA") || c.includes("UNDER")) return 20;
+      return 50;
+    }
+
+    function formatAssociatoLabel(u) {
+      const cognome = (u.cognome || '').trim();
+      const nome = (u.nome || '').trim();
+      const sez = (u.sezione || u.sezioneProvenienza || 'Siena').trim();
+      const full = `${cognome} ${nome}`.trim() || u.email || u.uid;
+      return `${full} (${sez})`;
+    }
+
+    function isAssociatoIndisponibileInData(u, garaDayMs) {
+      if (garaDayMs === null) return false;
+      const uKeys = new Set([u.uid, u.id, (u.codMecc || '').trim(), formatAssociatoLabel(u)].filter(Boolean));
+
+      return allIndisp.some(ind => {
+        const st = String(ind.stato || '').trim().toLowerCase();
+        if (st === 'annullata' || st === 'annullato' || st === 'rifiutata' || st === 'rifiutato' || st === 'non_approvato' || st === 'red') {
+          return false;
+        }
+        const matchUser =
+          (ind.uid && uKeys.has(ind.uid)) ||
+          (ind.codMecc && uKeys.has(String(ind.codMecc).trim())) ||
+          (ind.nomeAssociato && formatAssociatoLabel(u).toLowerCase().includes(String(ind.nomeAssociato).trim().toLowerCase()));
+
+        if (!matchUser) return false;
+
+        const iniMs = parseDateToDayMs(ind.dataInizio);
+        const finMs = parseDateToDayMs(ind.dataFine) ?? iniMs;
+        if (iniMs === null) return false;
+        return garaDayMs >= iniMs && garaDayMs <= finMs;
+      });
+    }
+
+    function isAssociatoCompatibileRuolo(u, ruoloKey) {
+      const qual = String(u.qualifica || u.ruoloTecnico || u.organico || '').toUpperCase();
+      if (!qual) return true;
+      if (ruoloKey === 'ae') {
+        return qual.includes('AE') || qual.includes('ARBITRO') || (!qual.includes('AA') && !qual.includes('ASSISTENTE'));
+      }
+      if (ruoloKey === 'aa1' || ruoloKey === 'aa2') {
+        return qual.includes('AA') || qual.includes('ASSISTENTE') || qual.includes('AE') || qual.includes('ARBITRO');
+      }
+      return true;
+    }
+
+    function popolaOptionsRuolo(selectEl, ruoloKey, garaDayMs, currentVal) {
+      const disponibili = allAssociati.filter(u =>
+        isAssociatoCompatibileRuolo(u, ruoloKey) && !isAssociatoIndisponibileInData(u, garaDayMs)
+      );
+
+      const labels = disponibili.map(formatAssociatoLabel);
+      if (currentVal && !labels.includes(currentVal)) {
+        labels.unshift(currentVal);
+      }
+
+      selectEl.innerHTML = `<option value="">-- Seleziona --</option>` +
+        labels.map(lbl => `<option value="${esc(lbl)}" ${lbl === currentVal ? 'selected' : ''}>${esc(lbl)}</option>`).join('');
+    }
+
+    function isGaraCoperta(g) {
+      const des = g.designazione || {};
+      const modulo = g.tipoUfficiali || '(AE)';
+      if (!des.ae) return false;
+      if (modulo.includes('AA1') && !des.aa1) return false;
+      if (modulo.includes('AA2') && !des.aa2) return false;
+      if (modulo.includes('QU') && !des.qu) return false;
+      return true;
+    }
+
+    function getAccettazioniMap(g) {
+      const des = g.designazione || {};
+      const acc = (des.accettazioni && typeof des.accettazioni === 'object') ? { ...des.accettazioni } : {};
+      // Retrocompatibilità con vecchio campo booleano accettata
+      if (des.accettata === true) {
+        ['ae', 'aa1', 'aa2', 'qu'].forEach(r => {
+          if (des[r] && acc[r] === undefined) acc[r] = true;
+        });
+      }
+      return acc;
+    }
+
+    function getGaraStatusInfo(g) {
+      const des = g.designazione || {};
+      const acc = getAccettazioniMap(g);
+      const roles = ['ae', 'aa1', 'aa2', 'qu'].filter(r => Boolean(des[r]));
+
+      if (!des.ae) {
+        return { code: 'scoperta', icon: 'light_red.png', title: 'GARA SCOPERTA' };
+      }
+      const allAccepted = roles.length > 0 && roles.every(r => acc[r] === true);
+      if (des.pubblicata && allAccepted) {
+        return { code: 'pubblicata', icon: 'light_green.png', title: 'PUBBLICATA E ACCETTATA' };
+      }
+      return { code: 'da_accettare', icon: 'light_yellow.png', title: des.pubblicata ? 'IN ATTESA DI ACCETTAZIONE' : 'CONFERMATA DA PUBBLICARE' };
+    }
+
+    function popolaFiltri() {
+      const catSel = $('filtro-categoria');
+      const uffSel = $('filtro-ufficiale');
+      const prevCat = catSel.value;
+      const prevUff = uffSel.value;
+
+      const cats = new Set(allGare.map(g => (g.categoria || '').trim()).filter(Boolean));
+      catSel.innerHTML = '<option value="">Tutte le categorie</option>' +
+        [...cats].sort((a, b) => a.localeCompare(b, 'it')).map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+
+      const uffSet = new Set(allAssociati.map(formatAssociatoLabel));
+      allGare.forEach(g => {
+        const d = g.designazione || {};
+        ['ae', 'aa1', 'aa2', 'qu'].forEach(r => {
+          if (d[r]) uffSet.add(String(d[r]).trim());
+        });
+      });
+
+      uffSel.innerHTML = '<option value="">Tutti gli ufficiali</option>' +
+        [...uffSet].sort((a, b) => a.localeCompare(b, 'it')).map(u => `<option value="${esc(u)}">${esc(u)}</option>`).join('');
+
+      if ([...cats].includes(prevCat)) catSel.value = prevCat;
+      if ([...uffSet].includes(prevUff)) uffSel.value = prevUff;
+    }
+
+    function aggiornaRiepilogoUfficiale(uffNome) {
+      const box = $('ufficiale-impegni-box');
+      if (!uffNome) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+      }
+
+      const target = uffNome.toLowerCase();
+      const impegni = allGare.filter(g => {
+        const d = g.designazione || {};
+        return ['ae', 'aa1', 'aa2', 'qu'].some(r => String(d[r] || '').toLowerCase() === target);
+      });
+
+      if (impegni.length === 0) {
+        box.style.display = 'block';
+        box.innerHTML = `<b>Ufficiale selezionato:</b> ${esc(uffNome)} — Nessuna gara attualmente assegnata.`;
+        return;
+      }
+
+      const lista = impegni.map(g => {
+        const d = g.designazione || {};
+        const ruoli = ['ae', 'aa1', 'aa2', 'qu']
+          .filter(r => String(d[r] || '').toLowerCase() === target)
+          .map(r => r.toUpperCase())
+          .join(', ');
+        return `<b>Gara ${esc(g.numeroGara || '-')}</b> (${esc(g.dataGara || '')} - ${esc(g.squadraCasa)} vs ${esc(g.squadraOspite)} [${ruoli}])`;
+      }).join(' &bull; ');
+
+      box.style.display = 'block';
+      box.innerHTML = `<b>Impegni di ${esc(uffNome)} (${impegni.length}):</b> ${lista}`;
+    }
+
+    window.applicaFiltriGare = () => {
+      const catF = $('filtro-categoria').value.trim().toLowerCase();
+      const uffF = $('filtro-ufficiale').value.trim().toLowerCase();
+      const statoF = $('filtro-stato').value.trim();
+      const qF = $('search-designazioni').value.trim().toLowerCase();
+
+      aggiornaRiepilogoUfficiale($('filtro-ufficiale').value.trim());
+
+      filteredGare = allGare.filter(g => {
+        const d = g.designazione || {};
+        const uffAssigned = [d.ae, d.aa1, d.aa2, d.qu].filter(Boolean).join(' ').toLowerCase();
+        const stInfo = getGaraStatusInfo(g);
+
+        if (catF && String(g.categoria || '').trim().toLowerCase() !== catF) return false;
+        if (uffF && ![d.ae, d.aa1, d.aa2, d.qu].some(v => String(v || '').toLowerCase() === uffF)) return false;
+        if (statoF && stInfo.code !== statoF) return false;
+
+        if (qF) {
+          const hay = `${g.numeroGara || ''} ${g.dataGara || ''} ${g.categoria || ''} ${g.squadraCasa || ''} ${g.squadraOspite || ''} ${uffAssigned}`.toLowerCase();
+          if (!hay.includes(qF)) return false;
+        }
+        return true;
+      });
+
+      renderGareTable(filteredGare);
+    };
+
+    window.resetFiltriGare = () => {
+      $('filtro-categoria').value = '';
+      $('filtro-ufficiale').value = '';
+      $('filtro-stato').value = '';
+      $('search-designazioni').value = '';
+      applicaFiltriGare();
+    };
+
+    function renderGareTable(list) {
+      const tbody = $('designazioni-table-body');
+      $('designazioni-totali-cell').textContent = `GARE VISUALIZZATE : ${list.length}`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px;">Nessuna gara trovata con i filtri impostati.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(g => {
+        const st = getGaraStatusInfo(g);
+        const des = g.designazione || {};
+        const acc = getAccettazioniMap(g);
+
+        const roleEntries = [
+          { key: 'ae', label: 'AE' },
+          { key: 'aa1', label: 'AA1' },
+          { key: 'aa2', label: 'AA2' },
+          { key: 'qu', label: 'QU' }
+        ].filter(x => Boolean(des[x.key]));
+
+        const uffHtml = roleEntries.length > 0
+          ? roleEntries.map(x => {
+              const isAcc = acc[x.key] === true;
+              const badge = isAcc
+                ? `<span class="badge-stato badge-ok">Accettato</span>`
+                : `<span class="badge-stato badge-wait">Da accettare</span>`;
+              return `<div style="margin-bottom:2px;"><b>${x.label}:</b> ${esc(des[x.key])} ${badge}</div>`;
+            }).join('')
+          : `<span style="color:#b00000; font-weight:700;">Nessun ufficiale assegnato</span>`;
+
+        const pubBadge = des.pubblicata
+          ? `<span class="badge-stato badge-pub" style="margin-top:3px;">Pubblicata</span>`
+          : `<span class="badge-stato badge-wait" style="margin-top:3px;">Non pubblicata</span>`;
+
+        return `
+          <tr>
+            <td class="center-col">
+              <input type="checkbox" class="gara-checkbox" value="${esc(g.id)}" style="cursor:pointer;">
+            </td>
+            <td class="center-col">
+              <img src="${st.icon}" alt="${esc(st.title)}" title="${esc(st.title)}" class="status-icon">
+            </td>
+            <td class="nowrap"><b>${esc(g.numeroGara || '-')}</b><br><span style="color:#444;">${esc(g.dataGara || '')}</span></td>
+            <td>${esc(g.categoria || '-')}</td>
+            <td><b>${esc(g.squadraCasa || '')}</b> - <b>${esc(g.squadraOspite || '')}</b></td>
+            <td class="nowrap">${esc(g.tipoUfficiali || '(AE)')}</td>
+            <td>${uffHtml}${pubBadge}</td>
+            <td class="center-col">
+              <button type="button" class="mini-btn" onclick="openAssignModal('${esc(g.id)}')">Assegna</button>
+              ${des.ae && !des.pubblicata ? `<button type="button" class="mini-btn publish" onclick="pubblicaSingola('${esc(g.id)}')">Pubblica</button>` : ''}
+            </td>
+          </tr>`;
+      }).join('');
+
+      syncSelectAllCheckboxes();
+    }
+
+    function syncSelectAllCheckboxes() {
+      const cbs = [...document.querySelectorAll('.gara-checkbox')];
+      const allChecked = cbs.length > 0 && cbs.every(cb => cb.checked);
+      $('select-all-checkbox').checked = allChecked;
+      $('th-select-all').checked = allChecked;
+    }
+
+    function toggleAllVisible(checked) {
+      document.querySelectorAll('.gara-checkbox').forEach(cb => { cb.checked = checked; });
+      syncSelectAllCheckboxes();
+    }
+
+    $('select-all-checkbox').addEventListener('change', (e) => toggleAllVisible(e.target.checked));
+    $('th-select-all').addEventListener('change', (e) => toggleAllVisible(e.target.checked));
+    $('designazioni-table-body').addEventListener('change', (e) => {
+      if (e.target.classList.contains('gara-checkbox')) syncSelectAllCheckboxes();
+    });
+
+    window.openAssignModal = (id) => {
+      const g = allGare.find(item => item.id === id);
+      if (!g) return;
+
+      $('assign-gara-id').value = g.id;
+      $('assign-modal-title').textContent = `DESIGNAZIONE GARA N. ${g.numeroGara || '-'}`;
+      $('assign-modal-subtitle').textContent = `${g.squadraCasa || ''} vs ${g.squadraOspite || ''} — ${g.categoria || ''} (${g.dataGara || ''})`;
+
+      const modulo = g.tipoUfficiali || '(AE)';
+      $('row-aa1').style.display = modulo.includes('AA1') ? '' : 'none';
+      $('row-aa2').style.display = modulo.includes('AA2') ? '' : 'none';
+      $('row-qu').style.display = modulo.includes('QU') ? '' : 'none';
+
+      const des = g.designazione || {};
+      const garaDayMs = parseDateToDayMs(g.dataGara);
+
+      popolaOptionsRuolo($('sel-ae'), 'ae', garaDayMs, des.ae || '');
+      if (modulo.includes('AA1')) popolaOptionsRuolo($('sel-aa1'), 'aa1', garaDayMs, des.aa1 || '');
+      if (modulo.includes('AA2')) popolaOptionsRuolo($('sel-aa2'), 'aa2', garaDayMs, des.aa2 || '');
+      if (modulo.includes('QU')) popolaOptionsRuolo($('sel-qu'), 'qu', garaDayMs, des.qu || '');
+
+      $('btn-conferma-sola').disabled = false;
+      $('btn-conferma-pubblica').disabled = false;
+      $('assign-modal').classList.add('active');
+    };
+
+    window.salvaDesignazione = async (pubblica) => {
+      const id = $('assign-gara-id').value;
+      const g = allGare.find(item => item.id === id);
+      if (!g) return;
+
+      const modulo = g.tipoUfficiali || '(AE)';
+      const newAe = $('sel-ae').value.trim();
+      const newAa1 = modulo.includes('AA1') ? $('sel-aa1').value.trim() : '';
+      const newAa2 = modulo.includes('AA2') ? $('sel-aa2').value.trim() : '';
+      const newQu = modulo.includes('QU') ? $('sel-qu').value.trim() : '';
+
+      if (!newAe) {
+        showMsg('ATTENZIONE', "Seleziona almeno l'<b>Arbitro Effettivo (AE)</b>.");
+        return;
+      }
+
+      const prevDes = g.designazione || {};
+      const prevAcc = getAccettazioniMap(g);
+
+      // Solo il membro modificato o appena inserito deve ri-accettare:
+      // chi rimane invariato conserva il proprio stato di accettazione.
+      const nextAcc = {
+        ae: (prevDes.ae === newAe && newAe) ? (prevAcc.ae === true) : false,
+        aa1: (prevDes.aa1 === newAa1 && newAa1) ? (prevAcc.aa1 === true) : false,
+        aa2: (prevDes.aa2 === newAa2 && newAa2) ? (prevAcc.aa2 === true) : false,
+        qu: (prevDes.qu === newQu && newQu) ? (prevAcc.qu === true) : false
+      };
+
+      const isPubblicata = pubblica === true || prevDes.pubblicata === true;
+      const allRolesAccepted = ['ae', 'aa1', 'aa2', 'qu']
+        .filter(r => Boolean({ ae: newAe, aa1: newAa1, aa2: newAa2, qu: newQu }[r]))
+        .every(r => nextAcc[r] === true);
+
+      const desData = {
+        ae: newAe,
+        aa1: newAa1,
+        aa2: newAa2,
+        qu: newQu,
+        accettazioni: nextAcc,
+        pubblicata: isPubblicata,
+        accettata: allRolesAccepted,
+        variazioneDaAccettare: false,
+        aggiornatoIl: serverTimestamp()
+      };
+
+      try {
+        $('btn-conferma-sola').disabled = true;
+        $('btn-conferma-pubblica').disabled = true;
+        await updateDoc(doc(db, 'gare_programmate', id), { designazione: desData });
+        chiudiAssignModal();
+        await ricaricaTutto();
+        showToast(pubblica ? 'Designazione confermata e pubblicata!' : 'Designazione confermata!');
+      } catch (err) {
+        console.error('Errore salvataggio designazione:', err);
+        $('btn-conferma-sola').disabled = false;
+        $('btn-conferma-pubblica').disabled = false;
+        showMsg('ATTENZIONE', 'Impossibile salvare la designazione: ' + esc(err.message));
+      }
+    };
+
+    window.pubblicaSingola = async (id) => {
+      const g = allGare.find(item => item.id === id);
+      if (!g || !g.designazione || !g.designazione.ae) return;
+
+      const des = {
+        ...g.designazione,
+        accettazioni: getAccettazioniMap(g),
+        pubblicata: true,
+        aggiornatoIl: serverTimestamp()
+      };
+
+      try {
+        await updateDoc(doc(db, 'gare_programmate', id), { designazione: des });
+        await ricaricaTutto();
+        showToast('Designazione pubblicata!');
+      } catch (err) {
+        console.error('Errore pubblicazione singola:', err);
+        showMsg('ATTENZIONE', 'Errore durante la pubblicazione: ' + esc(err.message));
+      }
+    };
+
+    $('btn-pubblica-multiple').addEventListener('click', async () => {
+      const checked = [...document.querySelectorAll('.gara-checkbox:checked')].map(cb => cb.value);
+      if (checked.length === 0) {
+        showMsg('ATTENZIONE', 'Seleziona almeno una gara dalla tabella.');
+        return;
+      }
+
+      let pubblicateCount = 0;
+      try {
+        for (const gId of checked) {
+          const g = allGare.find(item => item.id === gId);
+          if (g && g.designazione && g.designazione.ae) {
+            const des = {
+              ...g.designazione,
+              accettazioni: getAccettazioniMap(g),
+              pubblicata: true,
+              aggiornatoIl: serverTimestamp()
+            };
+            await updateDoc(doc(db, 'gare_programmate', gId), { designazione: des });
+            pubblicateCount++;
+          }
+        }
+        await ricaricaTutto();
+        showToast(pubblicateCount > 0 ? `Pubblicate ${pubblicateCount} designazioni!` : 'Nessuna gara selezionata con AE assegnato.');
+      } catch (err) {
+        console.error('Errore pubblicazione multipla:', err);
+        showMsg('ATTENZIONE', 'Errore durante la pubblicazione multipla: ' + esc(err.message));
+      }
+    });
+
+    async function fetchGare() {
+      const snap = await getDocs(collection(db, 'gare_programmate'));
+      allGare = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      allGare.sort((a, b) => {
+        const aCop = isGaraCoperta(a);
+        const bCop = isGaraCoperta(b);
+        if (aCop !== bCop) return aCop ? 1 : -1;
+        const da = parseDateToDayMs(a.dataGara) ?? Number.MAX_SAFE_INTEGER;
+        const dbMs = parseDateToDayMs(b.dataGara) ?? Number.MAX_SAFE_INTEGER;
+        if (da !== dbMs) return da - dbMs;
+        return getCategoryPriority(b.categoria) - getCategoryPriority(a.categoria);
+      });
+    }
+
+    async function fetchAssociati() {
+      const snap = await getDocs(collection(db, 'utenti'));
+      allAssociati = snap.docs.map(d => ({ uid: d.id, id: d.id, ...d.data() }));
+      allAssociati.sort((a, b) => (a.cognome || '').localeCompare(b.cognome || '', 'it'));
+    }
+
+    async function fetchIndisponibilita() {
+      const snap = await getDocs(collection(db, 'richieste_indisponibilita'));
+      allIndisp = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+
+    window.ricaricaTutto = async () => {
+      try {
+        await Promise.all([fetchGare(), fetchAssociati(), fetchIndisponibilita()]);
+        popolaFiltri();
+        applicaFiltriGare();
+      } catch (err) {
+        console.error('Errore caricamento gestione designazioni:', err);
+        $('designazioni-table-body').innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px; color:#b00000;">Errore durante il caricamento dei dati.</td></tr>`;
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.replace('index.html');
+        return;
+      }
+      try {
+        const snap = await getDoc(doc(db, 'utenti', user.uid));
+        if (!snap.exists() || snap.data().ruolo !== 'admin') {
+          window.location.replace('home.html');
+          return;
+        }
+        const profile = snap.data();
+        $('user-codmecc').textContent = (profile.codMecc || '').trim() || '-';
+        $('user-fullname').textContent = [profile.nome, profile.cognome].filter(Boolean).join(' ').toUpperCase() || '-';
+        $('admin-menu-container').innerHTML = `
+          <li style="margin-top: 20px; font-size: 0.75rem; text-transform: uppercase; color: rgba(255,255,255,0.5); letter-spacing: 1px; padding-left: 15px;">Area Amministratori</li>
+          <li><a href="admin.html">Gestione Associati</a></li>
+          <li><a href="gestione-comunicazioni.html">Gestione Comunicazioni</a></li>
+          <li><a href="gestione-eventi.html">Gestione Eventi</a></li>
+          <li><a href="gestione-gare.html">Gestione Archivi</a></li>
+          <li><a href="gestione-designazioni.html">Gestione Gare</a></li>
+          <li><a href="gestione-indisponibilita.html">Gestione Indisponibilità</a></li>`;
+      } catch (e) {
+        console.error('Errore profilo utente:', e);
+        window.location.replace('home.html');
+        return;
+      } finally {
+        document.body.classList.remove('auth-loading');
+        await ricaricaTutto();
+      }
+    });
+
+    $('logout-btn').addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.replace('index.html');
+      } catch (e) {
+        console.error('Errore durante il logout:', e);
+      }
+    });
+
+    document.querySelectorAll('.sidebar .cat-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>
